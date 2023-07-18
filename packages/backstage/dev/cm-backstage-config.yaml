@@ -18,7 +18,7 @@ data:
       # auth:
       #   keys:
       #     - secret: ${BACKEND_SECRET}
-      baseUrl: ${BACKSTAGE_BACKEND_URL}
+      baseUrl: ${BACKSTAGE_FRONTEND_URL}
       listen:
         port: 7007
         # Uncomment the following host directive to bind to specific interfaces
@@ -83,9 +83,9 @@ data:
       providers:
         keycloak-oidc:
           development:
-            metadataUrl: https://keycloak.a1.mccloman.people.aws.dev/realms/canoe/.well-known/openid-configuration
-            clientId: eks
-            clientSecret: 7gH1Aje3H8gUtFe014Mr0e84Cod5ybgu
+            metadataUrl: ${KEYCLOAK_NAME_METADATA}
+            clientId: backstage
+            clientSecret: ${KEYCLOAK_CLIENT_SECRET}
             scope: 'openid profile email groups'
             prompt: auto
 

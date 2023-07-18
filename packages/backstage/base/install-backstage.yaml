@@ -32,9 +32,6 @@ spec:
   selector:
     app: backstage
   ports:
-    - name: frontend
-      port: 3000
-      targetPort: 3000
-    - name: backend
+    - name: http
       port: 7007
-      targetPort: 7007
+      targetPort: http

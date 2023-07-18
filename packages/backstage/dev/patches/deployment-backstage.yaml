@@ -9,13 +9,18 @@ spec:
       serviceAccountName: backstage
       volumes:
         - name: backstage-config
-          secret:
-            secretName: backstage-config
-            items:
-              - key: github-integration.yaml
-                path: github-integration.yaml
-              - key: app-config.yaml
-                path: app-config.yaml
+          projected:
+            sources:
+              - secret:
+                  name: integrations
+                  items:
+                    - key: github-integration.yaml
+                      path: github-integration.yaml
+              - configMap:
+                  name: backstage-config
+                  items:
+                    - key: app-config.yaml
+                      path: app-config.yaml
       containers:
         - name: backstage
           image: 833162080385.dkr.ecr.us-west-2.amazonaws.com/canoe:backstage-v0.0.4
@@ -24,10 +29,10 @@ spec:
             - packages/backend
             - --config
             - config/app-config.yaml
-          env:
-            - name: POSTGRES_HOST
-              value: postgresql.backstage.svc.cluster.local
           volumeMounts:
             - name: backstage-config
               mountPath: "/app/config"
               readOnly: true
+          envFrom:
+            - secretRef:
+                name: backstage-env-vars
