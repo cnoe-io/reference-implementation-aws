@@ -33,3 +33,5 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: crossplane-system
       server: https://kubernetes.default.svc
+    - namespace: backstage
+      server: https://kubernetes.default.svc

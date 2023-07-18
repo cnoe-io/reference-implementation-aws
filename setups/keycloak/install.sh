@@ -54,16 +54,6 @@ curl -sS -H "Content-Type: application/json" \
   -X POST --data @config-payloads/realm-payload.json \
   localhost:8080/admin/realms
 
-# Create scope mapper
-CLIENT_SCOPE_GROUPS_ID=$(curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X GET  localhost:8080/admin/realms/cnoe/client-scopes | jq -e -r  '.[] | select(.name == "groups") | .id')
-
-curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X PUT  localhost:8080/admin/realms/cnoe/clients/${CLIENT_ID}/default-client-scopes/${CLIENT_SCOPE_GROUPS_ID}
-
-curl -sS -H "Content-Type: application/json" \
-  -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-  -X POST --data @config-payloads/group-mapper-payload.json \
-  localhost:8080/admin/realms/cnoe/client-scopes/${CLIENT_SCOPE_GROUPS_ID}/protocol-mappers/models
-
 curl -sS -H "Content-Type: application/json" \
   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
   -X POST --data @config-payloads/client-scope-groups-payload.json \
@@ -78,6 +68,15 @@ curl -sS -H "Content-Type: application/json" \
   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
   -X POST --data @config-payloads/group-base-user-payload.json \
   localhost:8080/admin/realms/cnoe/groups
+
+# Create scope mapper
+echo 'adding group claim to tokens'
+CLIENT_SCOPE_GROUPS_ID=$(curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X GET  localhost:8080/admin/realms/cnoe/client-scopes | jq -e -r  '.[] | select(.name == "groups") | .id')
+
+curl -sS -H "Content-Type: application/json" \
+  -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+  -X POST --data @config-payloads/group-mapper-payload.json \
+  localhost:8080/admin/realms/cnoe/client-scopes/${CLIENT_SCOPE_GROUPS_ID}/protocol-mappers/models
 
 echo "creating test users"
 curl -sS -H "Content-Type: application/json" \
@@ -104,6 +103,14 @@ curl -sS -H "Content-Type: application/json" \
   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
   -X PUT --data @config-payloads/user-password-to-be-applied.json \
   localhost:8080/admin/realms/cnoe/users/${USER2ID}/reset-password
+
+# If TLS secret is available in /private, use it. Could be empty...
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+if ls ${REPO_ROOT}/private/keycloak-tls-backup-* 1> /dev/null 2>&1; then
+    TLS_FILE=$(ls -t ${REPO_ROOT}/private/keycloak-tls-backup-* | head -n1)
+    kubectl apply -f ${TLS_FILE}
+fi
 
 envsubst < ingress.yaml | kubectl apply -f -
 
