@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cnoe
+  namespace: argocd
+  # Finalizer that ensures that project is not deleted until it is not referenced by any application
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: For the CNOE project
+  sourceRepos:
+    - '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  # Only permit applications to deploy to the guestbook namespace in the same cluster
+  destinations:
+    - namespace: cert-manager
+      server: https://kubernetes.default.svc
+    - namespace: ingress-nginx
+      server: https://kubernetes.default.svc
+    - namespace: aws-load-balancer-controller
+      server: https://kubernetes.default.svc
+    - namespace: external-dns
+      server: https://kubernetes.default.svc
+    - namespace: keycloak
+      server: https://kubernetes.default.svc
+    - namespace: argo
+      server: https://kubernetes.default.svc
+    - namespace: cnoe-workflows 
+      server: https://kubernetes.default.svc
+    - namespace: spark-operator
+      server: https://kubernetes.default.svc
+    - namespace: crossplane-system
+      server: https://kubernetes.default.svc

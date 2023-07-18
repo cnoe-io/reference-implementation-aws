@@ -1,0 +1,24 @@
+workflow:
+  serviceAccount:
+    create: false
+  rbac:
+    create: false
+server:
+  sso:
+    enabled: true
+    clientId:
+      name: keycloak-oidc
+      key: client-id
+    clientSecret:
+      name: keycloak-oidc
+      key: secret-key
+    scopes:
+      - openid
+      - profile
+      - email
+      - groups
+    rbac:
+      enabled: true
+  extraArgs:
+    - --auth-mode=client
+    - --auth-mode=sso

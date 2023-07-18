@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      volumes:
+        - name: keycloak-config
+          configMap:
+            name: keycloak-config
+      containers:
+        - name: keycloak
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: 'cnoe-admin'
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-config
+                  key: POSTGRES_PASSWORD
+          envFrom:
+            - secretRef:
+                name: keycloak-config
+          args:
+            - start
+          volumeMounts:
+            - name: keycloak-config
+              mountPath: "/opt/keycloak/conf"
+              readOnly: true

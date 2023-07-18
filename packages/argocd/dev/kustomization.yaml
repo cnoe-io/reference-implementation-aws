@@ -1,0 +1,12 @@
+namespace: argocd
+resources:
+  - ../base/
+  - service-argogrpc.yaml
+  - appproject-cnoe.yaml
+patchesStrategicMerge:
+  - cm-argocd-cm.yaml
+  - argocd-cmd-params-cm.yaml
+  - cm-argocd-rbac-cm.yaml
+images:
+  - name: quay.io/argoproj/argocd:v2.7.6
+    newTag: v2.7.6

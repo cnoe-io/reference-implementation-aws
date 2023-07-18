@@ -1,0 +1,18 @@
+resources:
+  - ../base
+  - secret-oauth2-proxy.yaml
+  - secret-backstage-config.yaml
+  - sa-backstage.yaml
+  - user-rbac.yaml
+patchesStrategicMerge:
+  - deployment-backstage.yaml
+  - service-backstage.yaml
+patchesJson6902:
+  - target:
+      version: v1
+      kind: Service
+      group: ""
+      name: backstage
+    patch: |-
+      - op: remove
+        path: /spec/ports/1

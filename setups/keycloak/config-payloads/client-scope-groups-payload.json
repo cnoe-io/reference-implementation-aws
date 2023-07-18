@@ -1,0 +1,12 @@
+{
+    "name": "groups",
+    "description": "groups a user belongs to",
+    "attributes": {
+        "consent.screen.text": "Access to groups a user belongs to.",
+        "display.on.consent.screen": "true",
+        "include.in.token.scope": "true",
+        "gui.order": ""
+    },
+    "type": "default",
+    "protocol": "openid-connect"
+}

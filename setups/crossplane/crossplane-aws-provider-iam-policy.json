@@ -1,0 +1,107 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListAllMyBuckets"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:CreateBucket",
+          "s3:DeleteBucket",
+          "s3:GetBucketLocation",
+          "s3:GetBucketTagging",
+          "s3:GetBucketLogging",
+          "s3:GetBucketPolicy",
+          "s3:GetBucketNotification",
+          "s3:GetBucketPolicyStatus",
+          "s3:GetLifecycleConfiguration",
+          "s3:GetReplicationConfiguration",
+          "s3:GetAnalyticsConfiguration",
+          "s3:GetInventoryConfiguration",
+          "s3:GetMetricsConfiguration",
+          "s3:PutBucketTagging",
+          "s3:PutBucketLogging",
+          "s3:PutBucketPolicy",
+          "s3:PutBucketNotification",
+          "s3:PutLifecycleConfiguration",
+          "s3:PutReplicationConfiguration",
+          "s3:PutAnalyticsConfiguration",
+          "s3:PutInventoryConfiguration",
+          "s3:PutMetricsConfiguration",
+          "s3:DeleteBucketTagging",
+          "s3:DeleteBucketPolicy",
+          "s3:DeleteBucketLifecycle",
+          "s3:DeleteBucketReplication",
+          "s3:DeleteBucketAnalytics",
+          "s3:DeleteBucketInventory",
+          "s3:DeleteBucketMetrics"
+        ],
+        "Resource": "arn:aws:s3:::*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "dynamodb:ListTables",
+          "dynamodb:DescribeTable",
+          "dynamodb:CreateTable",
+          "dynamodb:UpdateTable",
+          "dynamodb:DeleteTable",
+          "dynamodb:TagResource",
+          "dynamodb:UntagResource",
+          "dynamodb:ListTagsOfResource",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:DescribeContributorInsights",
+          "dynamodb:DescribeGlobalTable",
+          "dynamodb:DescribeGlobalTableSettings",
+          "dynamodb:DescribeLimits",
+          "dynamodb:DescribeTimeToLive",
+          "dynamodb:DisableKinesisStreamingDestination",
+          "dynamodb:EnableKinesisStreamingDestination",
+          "dynamodb:ExportTableToPointInTime",
+          "dynamodb:RestoreTableToPointInTime",
+          "dynamodb:CreateGlobalTable",
+          "dynamodb:UpdateContinuousBackups",
+          "dynamodb:UpdateContributorInsights",
+          "dynamodb:UpdateTimeToLive",
+          "dynamodb:DescribeBackup",
+          "dynamodb:DeleteBackup"
+        ],
+        "Resource": "arn:aws:dynamodb:${REGION}:${ACCOUNT_ID}:table/*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "iam:ListPolicies",
+          "iam:CreatePolicy",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions",
+          "iam:DeletePolicy",
+          "iam:ListPolicyTags",
+          "iam:TagPolicy",
+          "iam:UntagPolicy",
+          "iam:GetRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:ListRoles",
+          "iam:GetRole",
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:ListRoleTags",
+          "iam:TagRole",
+          "iam:UntagRole"
+        ],
+        "Resource": [
+          "arn:aws:dynamodb:${REGION}:${ACCOUNT_ID}:role/*",
+          "arn:aws:dynamodb:${REGION}:${ACCOUNT_ID}:policy/*"
+        ]
+      }
+    ]
+  }
+  

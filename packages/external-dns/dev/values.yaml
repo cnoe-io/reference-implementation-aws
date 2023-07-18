@@ -1,0 +1,10 @@
+sources:
+  - ingress
+provider: aws
+txtOwnerId: cnoe-external-dns
+registry: txt
+interval: 2m
+policy: sync
+extraArgs:
+  - --aws-zone-type=public
+  - --aws-zones-cache-duration=1h
