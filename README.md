@@ -15,12 +15,12 @@ We could use sealed secrets too.
 
 ## Requirements
 
-Github ORGANIZATION
-An existing k8s cluster
-AWS CLI
-Kubectl CLI
-jq
-npx
+- Github ORGANIZATION
+- An existing k8s cluster
+- AWS CLI
+- Kubectl CLI
+- jq
+- npx
 
 ## Things created outside of the cluster with install scripts.
 
@@ -59,3 +59,14 @@ The rest of the installation process assumes the GitHub app credentials are avai
 
 If you don't want to delete the app, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
 
+## Creation Order
+
+If using keycloak SSO, it must be:
+
+1. aws-load-balancer-controller
+2. ingress-nginx
+3. cert-manager 
+4. external-dns
+5. The rest of stuff
+
+If no SSO, no particular installation order. Eventual consistency works.
