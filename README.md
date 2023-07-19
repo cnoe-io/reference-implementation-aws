@@ -3,18 +3,17 @@
 
 
 ## Notes
+- INSTALL SCRIPTS MUST BE RAN AGAINST AN EKS CLUSTER. We use IRSA to talk to AWS services.
+- Components are installed as ArgoCD Applications.
+- Files under the `/packages` directory are meant to be suable without any modifications. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD's Helm parameters.
 
-Trying to make anything under the /packages directory usable as is. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD helm params.
-This is because I don't want to require end users to fork this repository and push commits many times.
-
-We could probably deploy everything as a ArgoCD's app of apps with syc wave and what not.
+We could probably deploy everything as a ArgoCD's app of apps with sync wave and what not. TODOooo
 
 ## Secret handling. 
 
-Currently handled outside of repository and set via bash script. 
+Currently handled outside of repository and set via bash script. Secrets such as GitHub token and TLS private keys are stored in the `/private` directory.
 
-We could use sealed secrets too.
-
+May use sealed secrets with full GitOps approach in the future. TODO
 
 ## Requirements
 

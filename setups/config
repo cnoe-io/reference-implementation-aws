@@ -1,0 +1,8 @@
+GITHUB_URL=https://github.com/manabuOrg/ref-impl
+DOMAIN_NAME=a2.mccloman.people.aws.dev
+# SSO config
+BACKSTAGE_SSO_ENABLED=true
+ARGO_SSO_ENABLED=true
+# AWS related config
+CLUSTER_NAME=cnoe-ref-impl
+REGION=us-west-2
