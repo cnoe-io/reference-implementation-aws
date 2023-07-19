@@ -22,7 +22,7 @@ We could use sealed secrets too.
 - jq
 - npx
 
-## Things created outside of the cluster with install scripts.
+## Things created outside of the cluster with SSO enabled.
 
 - Route53 records. Route53 hosted zones are not created. You must also register it if you want to be able to access through public DNS. These are managed by the external DNS controller.
 
@@ -30,6 +30,7 @@ We could use sealed secrets too.
 
 - TLS Certificates issued by Let's Encrypt. These are managed by cert-manager based on values in Ingress. They use the production issuer which means we must be very careful with how many and often we request certificates from them. The uninstall scripts backup certificates to the `private` directory to avoid re-issuing certificates.
 
+These resources are controlled by Kubernetes controllers and thus should be deleted using controllers.
 
 ### AWS permissions
 Must be able to create roles and policies.
@@ -57,16 +58,24 @@ The file created above contains credentials. Handle it with care.
 
 The rest of the installation process assumes the GitHub app credentials are available at `private/github-integration.yaml`
 
-If you don't want to delete the app, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
+If you want to delete the GitHUb application, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
 
 ## Creation Order
 
-If using keycloak SSO, it must be:
+If using keycloak SSO with fully automated DNS and certificate management, it must be:
 
 1. aws-load-balancer-controller
 2. ingress-nginx
 3. cert-manager 
 4. external-dns
 5. The rest of stuff
+
+If using keycloak SSO but manage DNS records and certificates manually. 
+
+1. aws-load-balancer-controller
+2. ingress-nginx
+3. The rest of stuff minus cert-manager and external-dns
+
+In this case, you can issue your own certs and provide them as TLS secrets as specified in the `spec.tls[0].secretName` field of Ingress objects.
 
 If no SSO, no particular installation order. Eventual consistency works.

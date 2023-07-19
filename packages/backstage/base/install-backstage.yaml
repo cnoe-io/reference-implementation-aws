@@ -35,3 +35,8 @@ spec:
     - name: http
       port: 7007
       targetPort: http
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backstage
