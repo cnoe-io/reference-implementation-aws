@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e -o pipefail
 
-REPO_ROOT=$(git rev-parse --show-toplevel)
-NAMESPACE="argo"
+RREPO_ROOT=$(git rev-parse --show-toplevel)
+NAMESPACE="backstage"
 LABEL_SELECTOR="controller.cert-manager.io/fao=true"
-NAME=argo-workflows
-
+NAME=backstage
 
 echo "backing up TLS secrets to ${REPO_ROOT}/private"
 
@@ -16,10 +15,14 @@ if [[ ! -z "${secrets}" ]]; then
     kubectl get secrets -n ${NAMESPACE} -l ${LABEL_SELECTOR} -o yaml > ${REPO_ROOT}/private/${NAME}-tls-backup-$(date +%s).yaml
 fi
 
-kubectl get secrets -n argo -l ${LABEL_SELECTOR} -o yaml > ${REPO_ROOT}/private/argo-workflows-tls-backup-$(date +%s).yaml
-
 kubectl delete -f ingress.yaml || true
 kubectl delete -f argo-app.yaml || true
+
+kubectl delete -f secret-postgres.yaml || true
+kubectl delete -f secret-env-var.yaml || true
+kubectl delete -f secret-env-var-no-sso.yaml || true
+kubectl delete -f secret-integrations.yaml || true
+
 
 ADMIN_PASSWORD=$(kubectl get secret -n keycloak keycloak-config -o go-template='{{index .data "KEYCLOAK_ADMIN_PASSWORD" | base64decode}}')
 kubectl port-forward -n keycloak svc/keycloak 8080:8080 > /dev/null 2>&1 &
@@ -43,8 +46,8 @@ KEYCLOAK_TOKEN=$(curl -sS  --fail-with-body -X POST -H "Content-Type: applicatio
 
 CLIENT_ID=$(curl -sS -H "Content-Type: application/json" \
   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-  -X GET localhost:8080/admin/realms/cnoe/clients | jq -e -r  '.[] | select(.clientId == "argo-workflows") | .id')
+  -X GET localhost:8080/admin/realms/cnoe/clients | jq -e -r  '.[] | select(.clientId == "backstage") | .id')
 
-curl -sS -H "Content-Type: application/json" \
+curl -sS --fail-with-body -H "Content-Type: application/json" \
   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
   -X DELETE localhost:8080/admin/realms/cnoe/clients/${CLIENT_ID}

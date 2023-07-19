@@ -17,13 +17,18 @@ if [[ -z "${GITHUB_URL}" ]]; then
     export GITHUB_URL
 fi
 
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+export POSTGRES_PASSWORD=$(LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 48 | head -n 1)
+export GITHUB_APP_YAML=$(cat ${REPO_ROOT}/private/github-integration.yaml | base64)
+
 if [[ "${BACKSTAGE_SSO_ENABLED}" == "true" ]]; then
   if [[ -z "${DOMAIN_NAME}" ]]; then
     read -p "Enter base domain name. For example, entering cnoe.io will set hostname to be keycloak.cnoe.io : " DOMAIN_NAME
   fi
   export BACKSTAGE_DOMAIN_NAME="idp.${DOMAIN_NAME}"
-  export BACKSTAGE_API_DOMAIN_NAME="idp-api.${DOMAIN_NAME}"
   export KEYCLOAK_DOMAIN_NAME="keycloak.${DOMAIN_NAME}"
+  export ARGO_WORKFLOWS_DOMAIN_NAME="argo.${DOMAIN_NAME}"
 
   echo "Creating keycloak client for Backstage"
 
@@ -62,9 +67,15 @@ if [[ "${BACKSTAGE_SSO_ENABLED}" == "true" ]]; then
   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
   -X GET localhost:8080/admin/realms/cnoe/clients/${CLIENT_ID} | jq -e -r '.secret')
 
+  CLIENT_SCOPE_GROUPS_ID=$(curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X GET  localhost:8080/admin/realms/cnoe/client-scopes | jq -e -r  '.[] | select(.name == "groups") | .id')
+
+  curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X PUT  localhost:8080/admin/realms/cnoe/clients/${CLIENT_ID}/default-client-scopes/${CLIENT_SCOPE_GROUPS_ID}
+
   echo 'storing client secrets to backstage namespace'
   kubectl create ns backstage || true
-  envsubst < secret-sso.yaml | kubectl apply -f -
+  envsubst < secret-postgres.yaml | kubectl apply -f -
+  envsubst < secret-env-var.yaml | kubectl apply -f -
+  envsubst < secret-integrations.yaml | kubectl apply -f -
 
   echo 'creating argo CD application for Backstage'
   envsubst '$GITHUB_URL $KEYCLOAK_DOMAIN_NAME $BACKSTAGE_DOMAIN_NAME' < argo-app.yaml | kubectl apply -f -
@@ -72,16 +83,23 @@ if [[ "${BACKSTAGE_SSO_ENABLED}" == "true" ]]; then
   echo "waiting for backstage to be ready. may take a few minutes"
   kubectl wait --for=jsonpath=.status.health.status=Healthy  --timeout=600s -f argo-app.yaml
 
+  #If TLS secret is available in /private, use it. Could be empty...
+  REPO_ROOT=$(git rev-parse --show-toplevel)
+
+  if ls ${REPO_ROOT}/private/backstage-tls-backup-* 1> /dev/null 2>&1; then
+      TLS_FILE=$(ls -t ${REPO_ROOT}/private/backstage-tls-backup-* | head -n1)
+      kubectl apply -f ${TLS_FILE}
+  fi
+
   echo 'creating ingresses for Backstage'
-  envsubst < ingress-frontend.yaml | kubectl apply -f -
-  envsubst < ingress-backend.yaml | kubectl apply -f -
-  echo 'create service accounts for SSO configurations'
-  envsubst '$GITHUB_URL' < argo-app-sso-config.yaml | kubectl apply -f -
+  envsubst < ingress.yaml 
   exit 0
 fi
 
-
 echo 'creating argo CD application for Backstage'
 kubectl create ns backstage || true
+envsubst < secret-postgres.yaml | kubectl apply -f -
+envsubst < secret-env-var-no-sso.yaml | kubectl apply -f -
+envsubst < secret-integrations.yaml | kubectl apply -f -
 
 envsubst '$GITHUB_URL' < argo-app.yaml | kubectl apply -f -
