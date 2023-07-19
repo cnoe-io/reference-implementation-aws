@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -o pipefail
 
-RREPO_ROOT=$(git rev-parse --show-toplevel)
+REPO_ROOT=$(git rev-parse --show-toplevel)
 NAMESPACE="backstage"
 LABEL_SELECTOR="controller.cert-manager.io/fao=true"
 NAME=backstage

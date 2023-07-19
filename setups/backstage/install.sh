@@ -92,7 +92,7 @@ if [[ "${BACKSTAGE_SSO_ENABLED}" == "true" ]]; then
   fi
 
   echo 'creating ingresses for Backstage'
-  envsubst < ingress.yaml 
+  envsubst < ingress.yaml | kubectl apply -f -
   exit 0
 fi
 

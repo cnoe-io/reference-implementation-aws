@@ -1,4 +1,7 @@
 
+![overview](docs/images/overview.png)
+
+
 ## Notes
 
 Trying to make anything under the /packages directory usable as is. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD helm params.
@@ -62,6 +65,8 @@ If you want to delete the GitHUb application, follow [these steps](https://docs.
 
 ## Creation Order
 
+### Keycloak SSO with DNS and TLS certificates
+
 If using keycloak SSO with fully automated DNS and certificate management, it must be:
 
 1. aws-load-balancer-controller
@@ -70,6 +75,9 @@ If using keycloak SSO with fully automated DNS and certificate management, it mu
 4. external-dns
 5. The rest of stuff
 
+
+### Keycloak SSO with manual DNS and TLS Certificates
+
 If using keycloak SSO but manage DNS records and certificates manually. 
 
 1. aws-load-balancer-controller
@@ -77,5 +85,15 @@ If using keycloak SSO but manage DNS records and certificates manually.
 3. The rest of stuff minus cert-manager and external-dns
 
 In this case, you can issue your own certs and provide them as TLS secrets as specified in the `spec.tls[0].secretName` field of Ingress objects.
+You can also let NLB or ALB terminate TLS instead using the LB controller. This is not covered currently, but possible.
+
+### No SSO
 
 If no SSO, no particular installation order. Eventual consistency works.
+
+
+## Possible issues
+
+### Cert-manager
+- by default it uses http-01 challenge. If you'd prefer using dns-01, you can update the ingress files. TODO AUTOMATE THIS
+- You may get events like `Get "http://<DOMAIN>/.well-known/acme-challenge/09yldI6tVRvtWVPyMfwCwsYdOCEGGVWhmb1PWzXwhXI": dial tcp: lookup <DOMAIN> on 10.100.0.10:53: no such host`. This is due to DNS propagation delay. It may take ~10 minutes.

@@ -19,7 +19,7 @@
     "rootUrl": "",
     "baseUrl": "",
     "redirectUris": [
-      "https://${BACKSTAGE_DOMAIN_NAME}/oauth2/callback"
+      "https://${BACKSTAGE_DOMAIN_NAME}/api/auth/keycloak-oidc/handler/frame"
     ],
     "webOrigins": [
       "/*"
