@@ -2,7 +2,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: postgresql
-  namespace: keycloak
+  namespace: backstage
   labels:
     app: postgresql
 spec:
@@ -18,7 +18,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgresql
-  namespace: keycloak
+  namespace: backstage
   labels:
     app: postgresql
 spec:
@@ -60,7 +60,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql
-  namespace: keycloak
+  namespace: backstage
   labels:
     app: postgresql
 spec:
