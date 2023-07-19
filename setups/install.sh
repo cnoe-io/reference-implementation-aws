@@ -61,4 +61,10 @@ echo -e "${GREEN}installing with the following options \n ${NC}"
 for env_var in "${env_vars[@]}"; do
   echo -e "${env_var}: ${!env_var}"
 done
-cd - 
+echo -e "${GREEN}Are you sure you want to continue?${NC}"
+read -p '(yes/no): ' response
+if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
+  echo 'exiting.'
+  exit 0
+fi
+
