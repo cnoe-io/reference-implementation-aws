@@ -86,8 +86,41 @@ github_pat_ABCDEDFEINDK....
 3. Update the [`setups/config`](setups/config) file with your own values.
 4. Run `setups/install.sh` and follow the prompts.
 
+#### What was created? 
+
+If full installation is done, you should have these DNS entries available. They all point to the Network Load Balancer.
+
+- `idp.<DOMAIN_NAME>` 
+- `argo.<DOMAIN_NAME>`
+- `keycloak.<DOMAIN_NAME>`
+
+You can confirm these by querying at a register.
+
+```bash
+dig A `idp.<DOMAIN_NAME>` @1.1.1.1
+
+kubeclt get svc -n ingress-nginx
+```
+
+HTTPS endpoints are also created with valid certificates.
+
+```bash
+openssl s_client -showcerts -servername id.<DOMAIN_NAME> -connect id.<DOMAIN_NAME>:443 <<< "Q"
+curl https://idp.id.<DOMAIN_NAME>
+```
+
+When you open a browser window and go to `https://idp.<DOMAIN_NAME>`, you should be prompted to login.
+Two users are created during the installation process. `user1` and `user2`. Their password is available in the keycloak namespace.
+
+```bash
+k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+```
+
 ## Uninstall
 1. Run `setups/uninstall.sh` and follow the prompts.
+
+## What can you do in Backstage? 
+TODOOOO
 
 ## Things created outside of the cluster with Keycloak SSO enabled.
 
@@ -111,7 +144,7 @@ If using keycloak SSO with fully automated DNS and certificate management, it mu
 2. ingress-nginx
 3. cert-manager
 4. external-dns
-5  keycloak
+5.  keycloak
 6. The rest of stuff
 
 
