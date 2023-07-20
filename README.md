@@ -32,7 +32,7 @@ May use sealed secrets with full GitOps approach in the future. TODO
 
 ## Create GitHub Apps for your GitHub Organization
 
-We strongly encourage you to create a dedicated GitHub organization. If you don't have an organization for this purpose, please follow [this link](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/creating-a-new-organization-from-scratch) to create one.
+We strongly encourage you to create a **dedicated GitHub organization**. If you don't have an organization for this purpose, please follow [this link](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/creating-a-new-organization-from-scratch) to create one.
 
 There are two ways to create GitHub integration with Backstage. You can use the Backstage CLI, or create it manually. See [this page](https://backstage.io/docs/integrations/github/github-apps) for more information on creating one manually. Once the app is created, place it under the private directory with the name `github-integration.yaml`. 
 
@@ -76,7 +76,7 @@ github_pat_ABCDEDFEINDK....
 ```
 ## Install
 1. Create GitHub apps and GitHub token as described above.
-2. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). 
+2. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). We **strongly encourage creating a dedicated sub domain** for this.
 3. Get the host zone id and put it in the config file. e.g.
     ```bash
     aws route53 list-hosted-zones-by-name --dns-name <YOUR_DOMAIN_NAME> --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
@@ -90,7 +90,47 @@ github_pat_ABCDEDFEINDK....
     k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
 
-#### What was created? 
+### If you installed it without automatic DNS configuration.
+
+If you set `MANAGED_DNS=false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
+- `idp.<DOMAIN_NAME>`
+- `keycloak.<DOMAIN_NAME>`
+- `argo.<DOMAIN_NAME>`
+- `argocd.<DOMAIN_NAME>`
+
+Point these records to the value returned by the following command.
+```bash
+k get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+```
+
+### If you installed it without Cert Manager.
+
+If you set `MANAGED_CERT=false`, you are responsible for updating DNS records, thus cert-manager is not installed. You must [create TLS secrets accordingly](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).
+
+Run the following command to find where to create secrets.
+
+```bash
+output=$(kubectl get ingress --all-namespaces -o json | jq -r '.items[] | "\(.metadata.namespace) \(.spec.rules[].host) \(.spec.tls[].secretName)"')
+echo -e "Namespace \t Hostname \t TLS Secret Name"
+echo -e "$output"
+```
+
+Secret format should be something like:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: idp.<DOMAIN>
+  namespace: backstage
+data:
+  tls.crt: <base64 encoded cert>
+  tls.key: <base64 encoded key>
+type: kubernetes.io/tls
+
+```
+
+## What was created? 
 
 If full installation is done, you should have these DNS entries available. They all point to the Network Load Balancer.
 
@@ -120,45 +160,7 @@ Two users are created during the installation process. `user1` and `user2`. Thei
 k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
 ```
 
-#### If you installed it without automatic DNS configuration.
 
-If you set `MANAGED_DNS=false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
-- `idp.<DOMAIN_NAME>`
-- `keycloak.<DOMAIN_NAME>`
-- `argo.<DOMAIN_NAME>`
-- `argocd.<DOMAIN_NAME>`
-
-Point these records to the value returned by the following command.
-```bash
-k get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-```
-
-#### If you installed it without Cert Manager.
-
-If you set `MANAGED_CERT=false`, you are responsible for updating DNS records, thus cert-manager is not installed. You must [create TLS secrets accordingly](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).
-
-Run the following command to find where to create secrets.
-
-```bash
-output=$(kubectl get ingress --all-namespaces -o json | jq -r '.items[] | "\(.metadata.namespace) \(.spec.rules[].host) \(.spec.tls[].secretName)"')
-echo -e "Namespace \t Hostname \t TLS Secret Name"
-echo -e "$output"
-```
-
-Secret format should be something like:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: idp.<DOMAIN>
-  namespace: backstage
-data:
-  tls.crt: <base64 encoded cert>
-  tls.key: <base64 encoded key>
-type: kubernetes.io/tls
-
-```
 
 ## Uninstall
 1. Run `setups/uninstall.sh` and follow the prompts.
