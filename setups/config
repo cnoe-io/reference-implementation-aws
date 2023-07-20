@@ -6,3 +6,6 @@ ARGO_SSO_ENABLED=true
 # AWS related config
 CLUSTER_NAME=cnoe-ref-impl
 REGION=us-west-2
+HOSTEDZONE_ID=Z0202147IFM0KVTW2P35
+# Do you want to install external-dns and cert-manager?
+MANAGED_CERT_DNS=true

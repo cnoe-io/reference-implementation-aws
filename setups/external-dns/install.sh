@@ -10,9 +10,20 @@ if [[ -z "${GITHUB_URL}" ]]; then
     export GITHUB_URL
 fi
 
-export HOSTEDZONE_ID
-export REGION
-export CLUSTER_NAME
+if [[ -z "${CLUSTER_NAME}" ]]; then
+    read -p "Enter your EKS Cluster Name: " CLUSTER_NAME
+    export CLUSTER_NAME
+fi
+
+if [[ -z "${REGION}" ]]; then
+    read -p "Enter your AWS Region: " REGION
+    export REGION
+fi
+
+if [[ -z "${HOSTEDZONE_ID}" ]]; then
+    read -p "Enter your AWS Region: " HOSTEDZONE_ID
+    export HOSTEDZONE_ID
+fi
 
 export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 export OIDC_URL=$(aws eks describe-cluster --name $CLUSTER_NAME --query "cluster.identity.oidc.issuer" --output text --region $REGION | sed -e "s/^https:\/\///")

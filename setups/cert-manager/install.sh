@@ -11,7 +11,7 @@ echo 'creating Argo CD application for cert-manager'
 envsubst '$GITHUB_URL' < argo-app.yaml | kubectl apply -f -
 
 echo 'waiting for ArgoCD application to be ready'
-kubectl wait --for=jsonpath=.status.health.status=Healthy --timeout=600s -f argo-app.yaml
+kubectl wait --for=jsonpath=.status.health.status=Healthy --timeout=300s -f argo-app.yaml
 
 echo "creating lets encrypt ClusterIssuers"
 envsubst < letsencrypt-prod.yaml | kubectl apply -f -

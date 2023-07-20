@@ -21,8 +21,8 @@ envsubst < secrets.yaml | kubectl apply -f -
 envsubst < argo-app.yaml | kubectl apply -f -
 
 echo "waiting for keycloak to be ready. may take a few minutes"
-kubectl wait --for=jsonpath=.status.health.status=Healthy  --timeout=600s -f argo-app.yaml
-kubectl wait --for=condition=ready pod -l app=keycloak -n keycloak  --timeout=120s
+kubectl wait --for=jsonpath=.status.health.status=Healthy  --timeout=300s -f argo-app.yaml
+kubectl wait --for=condition=ready pod -l app=keycloak -n keycloak  --timeout=30s
 
 # Configure keycloak. Might be better to just import
 kubectl port-forward -n keycloak svc/keycloak 8080:8080 > /dev/null 2>&1 &

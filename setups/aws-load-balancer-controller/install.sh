@@ -1,12 +1,15 @@
 #!/bin/bash
 set -e -o pipefail
 
+if [[ -z "${CLUSTER_NAME}" ]]; then
+    read -p "Enter your EKS Cluster Name: " CLUSTER_NAME
+    export CLUSTER_NAME
+fi
 
-read -p "Enter your EKS Cluster Name: " CLUSTER_NAME
-read -p "Enter your AWS Region: " REGION
-
-export CLUSTER_NAME
-export REGION
+if [[ -z "${REGION}" ]]; then
+    read -p "Enter your AWS Region: " REGION
+    export REGION
+fi
 
 export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 export OIDC_URL=$(aws eks describe-cluster --name $CLUSTER_NAME --query "cluster.identity.oidc.issuer" --output text --region $REGION | sed -e "s/^https:\/\///")
@@ -26,5 +29,5 @@ export ROLE_ARN=$(echo $ROLE_OUTPUT | jq -r '.Role.Arn')
 aws iam attach-role-policy --role-name aws-load-balancer-controller --policy-arn ${POLICY_ARN}
 
 envsubst < argo-app.yaml | kubectl apply -f -
-
 rm trust-policy-to-be-applied.json
+kubectl wait --for=jsonpath=.status.health.status=Healthy  --timeout=300s -f argo-app.yaml

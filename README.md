@@ -2,6 +2,8 @@
 ![overview](docs/images/overview.png)
 
 
+> **_NOTE:_**  Applications deployed in this repository are not meant or configured for production.
+
 ## Notes
 - INSTALL SCRIPTS MUST BE RAN AGAINST AN EKS CLUSTER. We use IRSA to talk to AWS services.
 - Components are installed as ArgoCD Applications.
@@ -23,6 +25,7 @@ May use sealed secrets with full GitOps approach in the future. TODO
 - Kubectl CLI
 - jq
 - npx
+- kustomize
 
 ## Things created outside of the cluster with SSO enabled.
 
@@ -70,9 +73,10 @@ If using keycloak SSO with fully automated DNS and certificate management, it mu
 
 1. aws-load-balancer-controller
 2. ingress-nginx
-3. cert-manager 
+3. cert-manager
 4. external-dns
-5. The rest of stuff
+5  keycloak
+6. The rest of stuff
 
 
 ### Keycloak SSO with manual DNS and TLS Certificates
