@@ -3,6 +3,20 @@ set -e -o pipefail
 
 source ./utils.sh
 
+full_apps=("aws-load-balancer-controller" "ingress-nginx" "cert-manager" "external-dns" "keycloak" "argo-workflows" "backstage" "crossplane" "spark-operator")
+
+apps_to_install=()
+
+filter_apps() {
+  for i in "${full_apps[@]}"; do
+    skip=
+    for j in "${filtered_apps[@]}"; do
+        [[ $i == $j ]] && { skip=1; break; }
+    done
+    [[ -n $skip ]] || apps_to_install+=("$i")
+  done
+}
+
 REPO_ROOT=$(git rev-parse --show-toplevel)
 cd ${REPO_ROOT}/setups
 env_file=${REPO_ROOT}/setups/config
@@ -20,7 +34,7 @@ if [[ ! -z "${DOMAIN_NAME}" ]]; then
     export DOMAIN_NAME=$(get_cleaned_domain_name "${DOMAIN_NAME}")
 fi
 
-env_vars=("GITHUB_URL" "DOMAIN_NAME" "BACKSTAGE_SSO_ENABLED" "ARGO_SSO_ENABLED" "CLUSTER_NAME" "REGION" "MANAGED_CERT_DNS" "HOSTEDZONE_ID")
+env_vars=("GITHUB_URL" "DOMAIN_NAME" "BACKSTAGE_SSO_ENABLED" "ARGO_SSO_ENABLED" "CLUSTER_NAME" "REGION" "MANAGED_DNS" "MANAGED_CERT" "HOSTEDZONE_ID")
 
 echo -e "${GREEN}Installing with the following options: ${NC}"
 for env_var in "${env_vars[@]}"; do
@@ -39,7 +53,23 @@ if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
   exit 0
 fi
 
-if [[ "${MANAGED_CERT_DNS}" == "true" ]]; then
-  ./full-install.sh
+
+if [[ "${MANAGED_CERT}" == "true" && "${MANAGED_DNS}" == "true" ]]; then
+  install_apps "${full_apps[@]}"
   exit
 fi
+
+filtered_apps=()
+
+if [[ "${MANAGED_DNS}" == "false" ]];
+then
+  filtered_apps+=("external-dns")
+fi
+
+if [[ "${MANAGED_CERT}" == "false" ]];
+then
+  filtered_apps+=("cert-manager")
+fi
+
+filter_apps
+install_apps "${apps_to_install[@]}"

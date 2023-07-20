@@ -10,6 +10,9 @@ ARGO_SSO_ENABLED=true
 # The name of the EKS cluster you are installing this under.
 CLUSTER_NAME=cnoe-ref-impl
 REGION=us-west-2
-# Do you want to install external-dns and cert-manager?
-MANAGED_CERT_DNS=true
+# Do you want to use cert-manager to automatically issue certs for you?
+MANAGED_CERT=true
+# DNS options.
+# Set this to false if you want to manage DNS somewhere else. e.g. manually.
+MANAGED_DNS=true
 HOSTEDZONE_ID=Z0202147IFM0KVTW2P35

@@ -25,8 +25,32 @@ strip_trailing_slash() {
   echo "$cleaned_input"
 }
 
+install_apps() {
+  local apps=("$@")
+  SETUP_DIR="$(git rev-parse --show-toplevel)/setups"
+
+  cd "${SETUP_DIR}/argocd/"
+  ./install.sh
+  cd -
+
+  for app in "${apps[@]}"; do
+    set +e
+    exists=$(kubectl get -f "${SETUP_DIR}/${app}/argo-app.yaml")
+    if [[ ! -z "${exists}" ]]; then
+      echo -e "ArgoCD Application for ${GREEN}${app}${NC} already exists. Will not re-install."
+      continue
+    fi
+    set -e
+    echo -e "${GREEN}Installing ${app}${NC}"
+    cd "${SETUP_DIR}/${app}/"
+    ./install.sh
+    cd -
+    echo "------------"
+  done
+}
+
 # Validation
-clis=("aws" "kubectl" "jq" "npx" "kustomize")
+clis=("aws" "kubectl" "jq" "kustomize")
 for cli in "${clis[@]}"; do
   if check_command "$cli"; then
     continue

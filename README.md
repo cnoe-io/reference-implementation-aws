@@ -85,7 +85,7 @@ github_pat_ABCDEDFEINDK....
     ```
 4. Update the [`setups/config`](setups/config) file with your own values.
 5. Run `setups/install.sh` and follow the prompts.
-6. Once installation completes, navigate to `idp.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret.
+6. Once installation completes, navigate to `idp.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
     ```bash
     k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
@@ -118,6 +118,46 @@ Two users are created during the installation process. `user1` and `user2`. Thei
 
 ```bash
 k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+```
+
+#### If you installed it without automatic DNS configuration.
+
+If you set `MANAGED_DNS=false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
+- `idp.<DOMAIN_NAME>`
+- `keycloak.<DOMAIN_NAME>`
+- `argo.<DOMAIN_NAME>`
+- `argocd.<DOMAIN_NAME>`
+
+Point these records to the value returned by the following command.
+```bash
+k get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+```
+
+#### If you installed it without Cert Manager.
+
+If you set `MANAGED_CERT=false`, you are responsible for updating DNS records, thus cert-manager is not installed. You must [create TLS secrets accordingly](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).
+
+Run the following command to find where to create secrets.
+
+```bash
+output=$(kubectl get ingress --all-namespaces -o json | jq -r '.items[] | "\(.metadata.namespace) \(.spec.rules[].host) \(.spec.tls[].secretName)"')
+echo -e "Namespace \t Hostname \t TLS Secret Name"
+echo -e "$output"
+```
+
+Secret format should be something like:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: idp.<DOMAIN>
+  namespace: backstage
+data:
+  tls.crt: <base64 encoded cert>
+  tls.key: <base64 encoded key>
+type: kubernetes.io/tls
+
 ```
 
 ## Uninstall

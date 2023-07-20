@@ -27,6 +27,25 @@ Error: Get "https://<DOMAIN>/realms/cnoe/.well-known/openid-configuration": dial
 
 This is due to DNS propagation delay in the cluster. Once DNS entries are propagated (may take ~10 min), pods should start running.
 
+## Backstage
+
+### Backstage pod stuck in crash loop
+
+You may see error message like:
+
+```
+Error: getaddrinfo ENOTFOUND keycloak.a2.mccloman.people.aws.dev
+    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'keycloak.<DOMAIN>'
+
+}
+```
+This is due to DNS propagation delay in the cluster. Once DNS entries are propagated (may take ~10 min), pods should start running.
+
+
 ## Certificates
 
 General steps are [outlined here](https://cert-manager.io/docs/troubleshooting/). 
