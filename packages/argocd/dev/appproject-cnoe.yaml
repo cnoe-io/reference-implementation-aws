@@ -13,7 +13,6 @@ spec:
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'
-  # Only permit applications to deploy to the guestbook namespace in the same cluster
   destinations:
     - namespace: cert-manager
       server: https://kubernetes.default.svc
