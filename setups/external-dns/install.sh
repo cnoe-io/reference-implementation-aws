@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e -o pipefail
 
-read -p "Enter your Route53 hosted zone ID: " HOSTEDZONE_ID
-read -p "Enter your AWS Region: " REGION
-read -p "Enter your EKS Cluster Name: " CLUSTER_NAME
-
 if [[ -z "${GITHUB_URL}" ]]; then
     read -p "Enter GitHub repository URL e.g. https://github.com/cnoe-io/reference-implementation-aws : " GITHUB_URL
     export GITHUB_URL
@@ -21,7 +17,7 @@ if [[ -z "${REGION}" ]]; then
 fi
 
 if [[ -z "${HOSTEDZONE_ID}" ]]; then
-    read -p "Enter your AWS Region: " HOSTEDZONE_ID
+    read -p "Enter your Route53 hosted zone ID: " HOSTEDZONE_ID
     export HOSTEDZONE_ID
 fi
 

@@ -28,7 +28,7 @@ for env_var in "${env_vars[@]}"; do
 done
 
 echo -e "${PURPLE}\nTargets:${NC}"
-echo "Selected Kubernetes cluster: $(kubectl config current-context)"
+echo "Kubernetes cluster: $(kubectl config current-context)"
 echo "AWS profile (if set): ${AWS_PROFILE}"
 echo "AWS account number: $(aws sts get-caller-identity --query "Account" --output text)"
 

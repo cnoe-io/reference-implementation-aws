@@ -72,8 +72,8 @@ if [[ "${ARGO_SSO_ENABLED}" == "true" ]]; then
   envsubst '$GITHUB_URL $KEYCLOAK_DOMAIN_NAME $ARGO_WORKFLOWS_DOMAIN_NAME' < argo-app.yaml | kubectl apply -f -
 
   echo "waiting for argo workflows to be ready. may take a few minutes"
-  kubectl wait --for=jsonpath=.status.health.status=Healthy  --timeout=300s -f argo-app.yaml
-
+  sleep 15
+  kubectl -n argo rollout status deployment/argo-workflows-workflow-controller --timeout=300s
   #If TLS secret is available in /private, use it. Could be empty...
   REPO_ROOT=$(git rev-parse --show-toplevel)
 

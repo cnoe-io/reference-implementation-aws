@@ -16,8 +16,6 @@ if [[ ! -z "${secrets}" ]]; then
     kubectl get secrets -n ${NAMESPACE} -l ${LABEL_SELECTOR} -o yaml > ${REPO_ROOT}/private/${NAME}-tls-backup-$(date +%s).yaml
 fi
 
-kubectl get secrets -n argo -l ${LABEL_SELECTOR} -o yaml > ${REPO_ROOT}/private/argo-workflows-tls-backup-$(date +%s).yaml
-
 kubectl delete -f ingress.yaml || true
 kubectl delete -f argo-app.yaml || true
 kubectl delete -f argo-app-sso-config.yaml || true

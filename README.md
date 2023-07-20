@@ -132,6 +132,16 @@ TODOOOO
 
 These resources are controlled by Kubernetes controllers and thus should be deleted using controllers.
 
+## Possible issues
+
+### Cert-manager
+- by default it uses http-01 challenge. If you'd prefer using dns-01, you can update the ingress files. TODO AUTOMATE THIS
+- You may get events like `Get "http://<DOMAIN>/.well-known/acme-challenge/09yldI6tVRvtWVPyMfwCwsYdOCEGGVWhmb1PWzXwhXI": dial tcp: lookup <DOMAIN> on 10.100.0.10:53: no such host`. This is due to DNS propagation delay. It may take ~10 minutes.
+
+## Troubleshooting
+
+See [the troubleshooting doc](TROUBLESHOOTING.md) for more information.
+
 ## Creation Order notes
 <details>
     <summary>Click to expand</summary>
@@ -164,9 +174,3 @@ You can also let NLB or ALB terminate TLS instead using the LB controller. This 
 If no SSO, no particular installation order. Eventual consistency works.
 
 </details>
-
-## Possible issues
-
-### Cert-manager
-- by default it uses http-01 challenge. If you'd prefer using dns-01, you can update the ingress files. TODO AUTOMATE THIS
-- You may get events like `Get "http://<DOMAIN>/.well-known/acme-challenge/09yldI6tVRvtWVPyMfwCwsYdOCEGGVWhmb1PWzXwhXI": dial tcp: lookup <DOMAIN> on 10.100.0.10:53: no such host`. This is due to DNS propagation delay. It may take ~10 minutes.
