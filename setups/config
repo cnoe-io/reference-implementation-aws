@@ -1,11 +1,15 @@
+# This is the GITHUB URL where Kubernetes manifests are stored.
+# If you forked this repo, you will need to update this.
 GITHUB_URL=https://github.com/manabuOrg/ref-impl
+# This is the domain name under which resources are created.
+# For example, backstage will be available at idp.<DOMAIN_NAME>
 DOMAIN_NAME=a2.mccloman.people.aws.dev
 # SSO config
 BACKSTAGE_SSO_ENABLED=true
 ARGO_SSO_ENABLED=true
-# AWS related config
+# The name of the EKS cluster you are installing this under.
 CLUSTER_NAME=cnoe-ref-impl
 REGION=us-west-2
-HOSTEDZONE_ID=Z0202147IFM0KVTW2P35
 # Do you want to install external-dns and cert-manager?
 MANAGED_CERT_DNS=true
+HOSTEDZONE_ID=Z0202147IFM0KVTW2P35

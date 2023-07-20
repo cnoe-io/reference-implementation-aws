@@ -21,8 +21,10 @@ kubectl get secrets -n argo -l ${LABEL_SELECTOR} -o yaml > ${REPO_ROOT}/private/
 kubectl delete -f ingress.yaml || true
 kubectl delete -f argo-app.yaml || true
 kubectl delete -f argo-app-sso-config.yaml || true
+kubectl delete -f secret-sso.yaml || true
 
 ADMIN_PASSWORD=$(kubectl get secret -n keycloak keycloak-config -o go-template='{{index .data "KEYCLOAK_ADMIN_PASSWORD" | base64decode}}')
+
 kubectl port-forward -n keycloak svc/keycloak 8080:8080 > /dev/null 2>&1 &
 pid=$!
 trap '{

@@ -17,6 +17,8 @@ Currently handled outside of repository and set via bash script. Secrets such as
 
 May use sealed secrets with full GitOps approach in the future. TODO
 
+# Installation
+
 ## Requirements
 
 - Github ORGANIZATION
@@ -27,20 +29,8 @@ May use sealed secrets with full GitOps approach in the future. TODO
 - npx
 - kustomize
 
-## Things created outside of the cluster with SSO enabled.
 
-- Route53 records. Route53 hosted zones are not created. You must also register it if you want to be able to access through public DNS. These are managed by the external DNS controller.
-
-- AWS Network Load Balancer. This is just the entrance to the Kubernetes cluster. This points to the default installation of Ingress Nginx and is managed by AWS Load Balancer Controller.
-
-- TLS Certificates issued by Let's Encrypt. These are managed by cert-manager based on values in Ingress. They use the production issuer which means we must be very careful with how many and often we request certificates from them. The uninstall scripts backup certificates to the `private` directory to avoid re-issuing certificates.
-
-These resources are controlled by Kubernetes controllers and thus should be deleted using controllers.
-
-### AWS permissions
-Must be able to create roles and policies.
-
-## Creating GitHub Apps for your GitHub Organization
+## Create GitHub Apps for your GitHub Organization
 
 We strongly encourage you to create a dedicated GitHub organization. If you don't have an organization for this purpose, please follow [this link](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/creating-a-new-organization-from-scratch) to create one.
 
@@ -65,7 +55,53 @@ The rest of the installation process assumes the GitHub app credentials are avai
 
 If you want to delete the GitHUb application, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
 
-## Creation Order
+## Create GitHub token
+
+A GitHub token is needed by ArgoCD to get information about repositories under your Organization. 
+
+The following permissions are needed: 
+  - Repository access for all repositories
+  - Read-only access to: Administration, Contents, and Metadata.
+Get your GitHub personal access token from: https://github.com/settings/tokens?type=beta
+
+Once you have your token, save it under the private directory with the name `github-token`. For example:
+
+```bash
+# From the root of this repository.
+$ mkdir -p private
+$ vim private/github-token # paste your token
+# example output
+$ cat private/github-token
+github_pat_ABCDEDFEINDK....
+```
+## Install
+1. Create GitHub apps and GitHub token as described above.
+2. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). 
+3. Get the host zone id and put it in the config file. e.g.
+    ```bash
+    aws route53 list-hosted-zones-by-name --dns-name <YOUR_DOMAIN_NAME> --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
+    # in the setups/config file, update the zone id.
+    HOSTEDZONE_ID=ZO020111111
+    ```
+3. Update the [`setups/config`](setups/config) file with your own values.
+4. Run `setups/install.sh` and follow the prompts.
+
+## Uninstall
+1. Run `setups/uninstall.sh` and follow the prompts.
+
+## Things created outside of the cluster with Keycloak SSO enabled.
+
+- Route53 records. Route53 hosted zones are not created. You must also register it if you want to be able to access through public DNS. These are managed by the external DNS controller.
+
+- AWS Network Load Balancer. This is just the entrance to the Kubernetes cluster. This points to the default installation of Ingress Nginx and is managed by AWS Load Balancer Controller.
+
+- TLS Certificates issued by Let's Encrypt. These are managed by cert-manager based on values in Ingress. They use the production issuer which means we must be very careful with how many and often we request certificates from them. The uninstall scripts backup certificates to the `private` directory to avoid re-issuing certificates.
+
+These resources are controlled by Kubernetes controllers and thus should be deleted using controllers.
+
+## Creation Order notes
+<details>
+    <summary>Click to expand</summary>
 
 ### Keycloak SSO with DNS and TLS certificates
 
@@ -94,6 +130,7 @@ You can also let NLB or ALB terminate TLS instead using the LB controller. This 
 
 If no SSO, no particular installation order. Eventual consistency works.
 
+</details>
 
 ## Possible issues
 

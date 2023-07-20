@@ -1,12 +1,17 @@
 #!/bin/bash
 set -e -o pipefail
 
-echo 'To get started grant the following permissions: 
+if [ -f "private/github-token" ]; then
+  GITHUB_TOKEN=$(cat private/github-token | tr -d '\n')
+else
+  echo 'To get started grant the following permissions: 
   - Repository access for all repositories
   - Read-only access to: Administration, Contents, and Metadata.
-Get your GitHub personal access token from: https://github.com/settings/tokens?type=beta'
-echo "Enter your token. e.g. github_pat_abcde: "
-read -s GITHUB_TOKEN
+  Get your GitHub personal access token from: https://github.com/settings/tokens?type=beta'
+  echo "Enter your token. e.g. github_pat_abcde: "
+  read -s GITHUB_TOKEN
+fi
+
 
 if [[ -z "${GITHUB_URL}" ]]; then
     read -p "Enter GitHub repository URL e.g. https://github.com/cnoe-io/reference-implementation-aws : " GITHUB_URL

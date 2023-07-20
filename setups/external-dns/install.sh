@@ -33,17 +33,21 @@ envsubst < trust-policy.json > trust-policy-to-be-applied.json
 
 envsubst < external-dns-policy.json > external-dns-policy-to-be-applied.json
 
+echo 'creating AWS IAM policies and roles'
+ROLE_NAME='cnoe-external-dns'
+POLICY_NAME='cnoe-external-dns'
+
 POLICY_OUTPUT=$(aws iam create-policy \
-    --policy-name cnoeExternalDNS \
+    --policy-name ${POLICY_NAME} \
     --policy-document file://external-dns-policy-to-be-applied.json)
 
 POLICY_ARN=$(echo $POLICY_OUTPUT | jq -r '.Policy.Arn')
 
-ROLE_OUTPUT=$(aws iam create-role --role-name cnoe-external-dns --assume-role-policy-document file://trust-policy-to-be-applied.json --description "For use with AWS Load Balancer Controller")
+ROLE_OUTPUT=$(aws iam create-role --role-name ${ROLE_NAME} --assume-role-policy-document file://trust-policy-to-be-applied.json --description "For use with AWS Load Balancer Controller")
 
 export ROLE_ARN=$(echo $ROLE_OUTPUT | jq -r '.Role.Arn')
 
-aws iam attach-role-policy --role-name cnoe-external-dns --policy-arn ${POLICY_ARN}
+aws iam attach-role-policy --role-name ${ROLE_NAME} --policy-arn ${POLICY_ARN}
 
 envsubst '$GITHUB_URL $ROLE_ARN $DOMAIN_NAME'  < argo-app.yaml | kubectl apply -f -
 

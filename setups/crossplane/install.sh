@@ -29,18 +29,20 @@ envsubst < trust-policy.json > trust-policy-to-be-applied.json
 envsubst < crossplane-aws-provider-iam-policy.json > crossplane-aws-provider-iam-policy-to-be-applied.json
 
 echo 'creating AWS IAM policies and roles'
+ROLE_NAME='cnoe-crossplane-provider-aws'
+POLICY_NAME='cnoe-crossplane-provider-aws'
 
 POLICY_OUTPUT=$(aws iam create-policy \
-    --policy-name CrossplaneProviderAWS \
+    --policy-name ${POLICY_NAME} \
     --policy-document file://crossplane-aws-provider-iam-policy-to-be-applied.json)
 
 POLICY_ARN=$(echo $POLICY_OUTPUT | jq -r '.Policy.Arn')
 
-ROLE_OUTPUT=$(aws iam create-role --role-name crossplane-aws-provider-role --assume-role-policy-document file://trust-policy-to-be-applied.json --description "For use Crossplane AWS providers")
+ROLE_OUTPUT=$(aws iam create-role --role-name ${ROLE_NAME} --assume-role-policy-document file://trust-policy-to-be-applied.json --description "For use Crossplane AWS providers")
 
 export ROLE_ARN=$(echo $ROLE_OUTPUT | jq -r '.Role.Arn')
 
-aws iam attach-role-policy --role-name crossplane-aws-provider-role --policy-arn ${POLICY_ARN}
+aws iam attach-role-policy --role-name ${ROLE_NAME} --policy-arn ${POLICY_ARN}
 
 echo 'creating Crossplane in your cluster...'
 envsubst '$GITHUB_URL' < argo-app.yaml | kubectl apply -f -
