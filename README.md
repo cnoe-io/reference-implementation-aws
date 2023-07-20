@@ -55,7 +55,7 @@ The rest of the installation process assumes the GitHub app credentials are avai
 
 If you want to delete the GitHUb application, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
 
-## Create GitHub token
+## Create a GitHub token
 
 A GitHub token is needed by ArgoCD to get information about repositories under your Organization. 
 
@@ -83,8 +83,12 @@ github_pat_ABCDEDFEINDK....
     # in the setups/config file, update the zone id.
     HOSTEDZONE_ID=ZO020111111
     ```
-3. Update the [`setups/config`](setups/config) file with your own values.
-4. Run `setups/install.sh` and follow the prompts.
+4. Update the [`setups/config`](setups/config) file with your own values.
+5. Run `setups/install.sh` and follow the prompts.
+6. Once installation completes, navigate to `idp.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret.
+    ```bash
+    k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+    ```
 
 #### What was created? 
 
