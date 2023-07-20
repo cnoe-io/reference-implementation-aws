@@ -39,7 +39,7 @@ if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
   exit 0
 fi
 
-apps=(crossplane backstage spark-operator argo-workflows keycloak external-dns cert-manager ingress-nginx aws-load-balancer-controller argocd)
+apps=(crossplane backstage spark-operator argo-workflows keycloak  cert-manager ingress-nginx external-dns aws-load-balancer-controller argocd)
 
 SETUP_DIR="$(git rev-parse --show-toplevel)/setups"
 
