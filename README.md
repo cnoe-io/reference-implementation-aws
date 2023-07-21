@@ -84,6 +84,7 @@ github_pat_ABCDEDFEINDK....
 3. Add a new remote `git remote add github-org <GITHUB_URL>` For example:
      ```git remote add github-org git@github.com:manabuOrg/reference-implementation-aws-user-friendly.git```
 4. Push it to the new remote. `git push github-org`
+5. Update the `GITHUB_URL` value in the [config file](./setups/config).
 
 
 ## FOR AWS EMPLOYEES
@@ -233,16 +234,6 @@ Currently resources created by applications are not deleted. For example, if you
 ## What can you do in Backstage? 
 TODOOOO
 
-## Things created outside of the cluster with Keycloak SSO enabled.
-
-- Route53 records. Route53 hosted zones are not created. You must also register it if you want to be able to access through public DNS. These are managed by the external DNS controller.
-
-- AWS Network Load Balancer. This is just the entrance to the Kubernetes cluster. This points to the default installation of Ingress Nginx and is managed by AWS Load Balancer Controller.
-
-- TLS Certificates issued by Let's Encrypt. These are managed by cert-manager based on values in Ingress. They use the production issuer which means we must be very careful with how many and often we request certificates from them. The uninstall scripts backup certificates to the `private` directory to avoid re-issuing certificates.
-
-These resources are controlled by Kubernetes controllers and thus should be deleted using controllers.
-
 ## Possible issues
 
 ### Cert-manager
@@ -256,6 +247,16 @@ See [the troubleshooting doc](TROUBLESHOOTING.md) for more information.
 ## Creation Order notes
 <details>
     <summary>Click to expand</summary>
+
+## Things created outside of the cluster with Keycloak SSO enabled.
+
+- Route53 records. Route53 hosted zones are not created. You must also register it if you want to be able to access through public DNS. These are managed by the external DNS controller.
+
+- AWS Network Load Balancer. This is just the entrance to the Kubernetes cluster. This points to the default installation of Ingress Nginx and is managed by AWS Load Balancer Controller.
+
+- TLS Certificates issued by Let's Encrypt. These are managed by cert-manager based on values in Ingress. They use the production issuer which means we must be very careful with how many and often we request certificates from them. The uninstall scripts backup certificates to the `private` directory to avoid re-issuing certificates.
+
+These resources are controlled by Kubernetes controllers and thus should be deleted using controllers.
 
 ### Keycloak SSO with DNS and TLS certificates
 
