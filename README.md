@@ -107,7 +107,7 @@ github_pat_ABCDEDFEINDK....
     HOSTEDZONE_ID=ZO020111111
     ```
 5. Update the [`setups/config`](setups/config) file with your own values.
-6. Run `setups/install.sh` and follow the prompts.
+6. Run `setups/install.sh` and follow the prompts. See the section below about monitoring installation progress.
 7. Once installation completes, navigate to `idp.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
     ```bash
     kubectl get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
