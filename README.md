@@ -74,20 +74,43 @@ $ vim private/github-token # paste your token
 $ cat private/github-token
 github_pat_ABCDEDFEINDK....
 ```
+
+# DELETE AND PURGE THIS BEFORE RELEASE
+## Before you install  (Because this repo isn't public yet)
+
+1. Clone this repo locally. E.g. `git clone git@github.com:cnoe-io/reference-implementation-aws-user-friendly.git`
+2. Create a new repo under your newly created GitHub organization.
+3. Add a new remote `git remote add github-org <GITHUB_URL>` For example:
+     ```git remote add github-org git@github.com:manabuOrg/reference-implementation-aws-user-friendly.git```
+4. Push it to the new remote. `git push github-org`
+
+
+## FOR AWS EMPLOYEES
+
+**IF YOU DON'T HAVE A DOMAIN**
+
+1. Create a domain in Supernova. Choose `people` as the organization. Read the Supernova wiki for more information.
+2. Create a new SUB domain for this purpose and delegate it to a Route53 zone. Read the wiki.
+3. Use the Route53 zone id for the rest of the process.
+
 ## Install
+**READ THE SECTION ABOVE.**
 1. Create GitHub apps and GitHub token as described above.
-2. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). We **strongly encourage creating a dedicated sub domain** for this.
-3. Get the host zone id and put it in the config file. e.g.
+2. Create a new EKS cluster. You can use an existing cluster but we cannot guarantee any existing resources will work with the script. You can create a new basic cluster with the included [`eksctl.yaml`](./eksctl.yaml) file:
+    ```eksctl create -f eksctl.yaml```
+    You can get eksctl from [this link](https://eksctl.io/).
+3. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). We **strongly encourage creating a dedicated sub domain** for this. If you'd prefer managing DNS somewhere else, set `MANAGED_DNS=false`
+4. Get the host zone id and put it in the config file. e.g.
     ```bash
     aws route53 list-hosted-zones-by-name --dns-name <YOUR_DOMAIN_NAME> --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
     # in the setups/config file, update the zone id.
     HOSTEDZONE_ID=ZO020111111
     ```
-4. Update the [`setups/config`](setups/config) file with your own values.
-5. Run `setups/install.sh` and follow the prompts.
-6. Once installation completes, navigate to `idp.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
+5. Update the [`setups/config`](setups/config) file with your own values.
+6. Run `setups/install.sh` and follow the prompts.
+7. Once installation completes, navigate to `idp.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
     ```bash
-    k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+    kubectl get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
 
 ### Monitoring installation progress
@@ -144,7 +167,22 @@ type: kubernetes.io/tls
 
 ```
 
-## What was created? 
+## What was created?
+
+The following components are installed if you chose the full installation option.
+
+- argo-workflows
+- argocd
+- aws-load-balancer-controller
+- backstage
+- cert-manager
+- crossplane
+- external-dns
+- ingress-nginx
+- keycloak
+- spark-operator
+
+### Things created outside of the cluster
 
 If full installation is done, you should have these DNS entries available. They all point to the Network Load Balancer.
 
