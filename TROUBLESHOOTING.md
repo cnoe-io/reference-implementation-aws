@@ -9,7 +9,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 # Port forward to 8081. 8080 could be in-use by the install / uninstall scripts.
 kubectl port-forward svc/argocd-server -n argocd 8081:80
 
-Go to http://localhost:8080 
+Go to http://localhost:8081
 ```
 
 

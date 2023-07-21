@@ -90,6 +90,20 @@ github_pat_ABCDEDFEINDK....
     k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
 
+### Monitoring installation progress
+
+Components are installed as ArgoCD Applications. You can monitor installation progress by going to ArgoCD UI. 
+
+```bash
+# Get the admin password 
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+kubectl port-forward svc/argocd-server -n argocd 8081:80
+```
+
+Go to [`http://localhost:8081`](http://localhost:8081) and login with the username `admin` and password obtained above. In the UI you can look at resources created, their logs, and events.
+
+
 ### If you installed it without automatic DNS configuration.
 
 If you set `MANAGED_DNS=false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
