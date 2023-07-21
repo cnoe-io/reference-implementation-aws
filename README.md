@@ -144,7 +144,7 @@ k get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBa
 
 ### If you installed it without Cert Manager.
 
-If you set `MANAGED_CERT=false`, you are responsible for updating DNS records, thus cert-manager is not installed. You must [create TLS secrets accordingly](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).
+If you set `MANAGED_CERT=false`, you are responsible for managing TLS certs, thus cert-manager is not installed. You must [create TLS secrets accordingly](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).
 
 Run the following command to find where to create secrets.
 
