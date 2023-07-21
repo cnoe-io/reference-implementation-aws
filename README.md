@@ -26,9 +26,10 @@ May use sealed secrets with full GitOps approach in the future. TODO
 - AWS CLI
 - Kubectl CLI
 - jq
-- npx
+- git
+- curl
 - kustomize
-
+- node + npm (if you choose to create GitHub App via CLI)
 
 ## Create GitHub Apps for your GitHub Organization
 
@@ -216,6 +217,9 @@ k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := 
 
 ## Uninstall
 1. Run `setups/uninstall.sh` and follow the prompts.
+2. Remove GitHub app from your Organization by following [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app).
+3. Remove token from your GitHub Organization by following [these steps](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/reviewing-and-revoking-personal-access-tokens-in-your-organization).
+4. Remove the created GitHub Organization.
 
 ## What can you do in Backstage? 
 TODOOOO
