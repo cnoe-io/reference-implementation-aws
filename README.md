@@ -79,7 +79,7 @@ github_pat_ABCDEDFEINDK....
 ## Before you install  (Because this repo isn't public yet)
 
 1. Clone this repo locally. E.g. `git clone git@github.com:cnoe-io/reference-implementation-aws-user-friendly.git`
-2. Create a new repo under your newly created GitHub organization.
+2. Create a new **PRIVATE** repo under your newly created GitHub organization.
 3. Add a new remote `git remote add github-org <GITHUB_URL>` For example:
      ```git remote add github-org git@github.com:manabuOrg/reference-implementation-aws-user-friendly.git```
 4. Push it to the new remote. `git push github-org`
