@@ -207,7 +207,7 @@ curl https://idp.id.<DOMAIN_NAME>
 ```
 
 When you open a browser window and go to `https://idp.<DOMAIN_NAME>`, you should be prompted to login.
-Two users are created during the installation process. `user1` and `user2`. Their password is available in the keycloak namespace.
+Two users are created during the installation process: `user1` and `user2`. Their passwords are available in the keycloak namespace.
 
 ```bash
 k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
@@ -220,6 +220,15 @@ k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := 
 2. Remove GitHub app from your Organization by following [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app).
 3. Remove token from your GitHub Organization by following [these steps](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/reviewing-and-revoking-personal-access-tokens-in-your-organization).
 4. Remove the created GitHub Organization.
+
+<details>
+    <summary>Uninstall details</summary>
+
+### Resources deleted
+
+Currently resources created by applications are not deleted. For example, if you have Spark Jobs running, they are not deleted and may block deletion of the spark-operator app. 
+
+</details>
 
 ## What can you do in Backstage? 
 TODOOOO

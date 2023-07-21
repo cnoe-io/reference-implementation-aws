@@ -42,8 +42,9 @@ while [ $retry_count -le $max_retries ]; do
   ((retry_count++))
 done
 
-if [ $? -eq 0 ]; then
+if [ $? -ne 0 ]; then
   echo 'could not install argocd in your cluster'
+  exit 1
 fi
 
 set -e

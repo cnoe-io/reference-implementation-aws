@@ -50,7 +50,7 @@ install_apps() {
 }
 
 # Validation
-clis=("aws" "kubectl" "jq" "kustomize")
+clis=("aws" "kubectl" "jq" "kustomize" "curl")
 for cli in "${clis[@]}"; do
   if check_command "$cli"; then
     continue
@@ -63,7 +63,6 @@ done
 
 kubectl cluster-info > /dev/null
 if [ $? -ne 0 ]; then
-  echo "An error occurred. Exiting..."
-  # Add cleanup code here if needed
+  echo "Could not get cluster info. Ensure kubectl is configured correctly"
   exit 1
 fi

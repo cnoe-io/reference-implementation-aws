@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e -o pipefail
 
-source utils.sh
-
 REPO_ROOT=$(git rev-parse --show-toplevel)
+
+source ${REPO_ROOT}/setups/utils.sh
+
 cd ${REPO_ROOT}/setups
 env_file=${REPO_ROOT}/setups/config
 

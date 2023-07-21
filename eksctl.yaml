@@ -25,3 +25,9 @@ addons:
   version: "v1.20.0-eksbuild.1"
   attachPolicyARNs:
   - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+# iamIdentityMappings:
+#   - arn: arn:aws:iam::000000000000:role/Admin
+#     groups:
+#       - system:masters
+#     username: admin
+#     noDuplicateARNs: true # prevents shadowing of ARNs

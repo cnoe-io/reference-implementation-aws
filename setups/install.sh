@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e -o pipefail
+REPO_ROOT=$(git rev-parse --show-toplevel)
 
-source ./utils.sh
+source ${REPO_ROOT}/setups/utils.sh
 
 full_apps=("aws-load-balancer-controller" "ingress-nginx" "cert-manager" "external-dns" "keycloak" "argo-workflows" "backstage" "crossplane" "spark-operator")
 
@@ -17,7 +18,6 @@ filter_apps() {
   done
 }
 
-REPO_ROOT=$(git rev-parse --show-toplevel)
 cd ${REPO_ROOT}/setups
 env_file=${REPO_ROOT}/setups/config
 
