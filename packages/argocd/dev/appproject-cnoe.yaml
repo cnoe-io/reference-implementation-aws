@@ -22,6 +22,8 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: external-dns
       server: https://kubernetes.default.svc
+    - namespace: external-secrets
+      server: https://kubernetes.default.svc
     - namespace: keycloak
       server: https://kubernetes.default.svc
     - namespace: argo

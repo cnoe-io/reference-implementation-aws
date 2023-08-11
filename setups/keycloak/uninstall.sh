@@ -16,5 +16,9 @@ if [[ ! -z "${secrets}" ]]; then
     kubectl get secrets -n ${NAMESPACE} -l ${LABEL_SELECTOR} -o yaml > ${REPO_ROOT}/private/${NAME}-tls-backup-$(date +%s).yaml
 fi
 
+cd external-secrets
+./uninstall.sh
+cd -
 kubectl delete -f secrets.yaml || true
+
 kubectl delete -f argo-app.yaml || true

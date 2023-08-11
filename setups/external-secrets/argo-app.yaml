@@ -16,7 +16,7 @@ spec:
       helm:
         releaseName: external-secrets
         valueFiles:
-          - $values/packages/spark-operator/dev/values.yaml
+          - $values/packages/external-secrets/dev/values.yaml
     - repoURL: ${GITHUB_URL}
       targetRevision: HEAD
       ref: values

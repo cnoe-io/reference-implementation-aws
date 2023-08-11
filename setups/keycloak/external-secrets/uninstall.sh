@@ -1,6 +1,4 @@
 #!/bin/bash
-set -e -o pipefail
-
 
 export APP_NAME=keycloak
 export NAMESPACE=keycloak
@@ -20,5 +18,5 @@ aws iam detach-role-policy --role-name ${ROLE_NAME} --policy-arn arn:aws:iam::${
 aws iam delete-policy --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/${POLICY_NAME}
 aws iam delete-role --role-name ${ROLE_NAME}
 
-echo 'deleting secrets manager secret'
+echo 'deleting secrets in Secrets Manager'
 aws secretsmanager delete-secret --secret-id cnoe/keycloak/config --force-delete-without-recovery

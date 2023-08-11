@@ -16,21 +16,11 @@ if [[ -z "${REGION}" ]]; then
     export REGION
 fi
 
-if [[ -z "${HOSTEDZONE_ID}" ]]; then
-    read -p "Enter your Route53 hosted zone ID: " HOSTEDZONE_ID
-    export HOSTEDZONE_ID
-fi
 
-export APP_NAME=keycloak
-export NAMESPACE=keycloak
-export SECRET_STORE_NAME=keycloak
-export SA_NAME=external-secret-keycloak
-export ROLE_NAME=cnoe-external-secret-keycloak
-export POLICY_NAME=cnoe-external-secret-keycloak
+echo 'installing external secrets store'
 
 export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 export OIDC_URL=$(aws eks describe-cluster --name $CLUSTER_NAME --query "cluster.identity.oidc.issuer" --output text --region $REGION | sed -e "s/^https:\/\///")
-export DOMAIN_NAME=$(aws route53 get-hosted-zone --id ${HOSTEDZONE_ID} | jq -r '.HostedZone.Name')
 
 envsubst < trust-policy.json > trust-policy-to-be-applied.json
 
@@ -43,7 +33,7 @@ POLICY_OUTPUT=$(aws iam create-policy \
 
 POLICY_ARN=$(echo $POLICY_OUTPUT | jq -r '.Policy.Arn')
 
-ROLE_OUTPUT=$(aws iam create-role --role-name ${ROLE_NAME} --assume-role-policy-document file://trust-policy-to-be-applied.json --description "For use with AWS Load Balancer Controller")
+ROLE_OUTPUT=$(aws iam create-role --role-name ${ROLE_NAME} --assume-role-policy-document file://trust-policy-to-be-applied.json --description "For use with external secrets in keycloak namespace")
 
 export ROLE_ARN=$(echo $ROLE_OUTPUT | jq -r '.Role.Arn')
 
@@ -51,7 +41,7 @@ aws iam attach-role-policy --role-name ${ROLE_NAME} --policy-arn ${POLICY_ARN}
 
 INPUT_STRING=$(envsubst < secrets-manager-input.json)
 
-aws secretsmanager create-secret --name cnoe/keycloak/config --secret-string ${INPUT_STRING}
+aws secretsmanager create-secret --name cnoe/keycloak/config --secret-string "${INPUT_STRING}"
 
 envsubst < secret-store.yaml | kubectl apply -f -
 echo 'waiting for external secrets to sync'
