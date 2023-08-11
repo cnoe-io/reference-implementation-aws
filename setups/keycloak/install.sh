@@ -26,8 +26,9 @@ then
   export SA_NAME=external-secret-keycloak
   export ROLE_NAME=cnoe-external-secret-keycloak
   export POLICY_NAME=cnoe-external-secret-keycloak
-  cd external-secrets
-  ./install.sh
+  export SM_INPUT_FILE=${PWD}/secrets-manager-input.json
+  cd ../external-secrets-configs/
+  ./install.sh 
   cd -
   envsubst < argo-app-external-secrets.yaml | kubectl apply -f -
 else
@@ -36,6 +37,7 @@ else
 fi
 
 echo "waiting for keycloak to be ready. may take a few minutes"
+kubectl wait --for=jsonpath=.status.health.status=Healthy --timeout=300s -f argo-app.yaml
 kubectl wait --for=condition=ready pod -l app=keycloak -n keycloak  --timeout=30s
 
 # Configure keycloak. Might be better to just import

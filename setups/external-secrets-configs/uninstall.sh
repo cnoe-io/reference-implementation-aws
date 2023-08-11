@@ -1,11 +1,8 @@
 #!/bin/bash
 
-export APP_NAME=keycloak
-export NAMESPACE=keycloak
-export SECRET_STORE_NAME=keycloak
-export SA_NAME=external-secret-keycloak
-ROLE_NAME=cnoe-external-secret-keycloak
-POLICY_NAME=cnoe-external-secret-keycloak
+ROLE_NAME=cnoe-external-secret-${APP_NAME}
+POLICY_NAME=cnoe-external-secret-${APP_NAME}
+SECRET_NAME=cnoe/${APP_NAME}/config 
 
 ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
@@ -19,4 +16,4 @@ aws iam delete-policy --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/${POLICY_NA
 aws iam delete-role --role-name ${ROLE_NAME}
 
 echo 'deleting secrets in Secrets Manager'
-aws secretsmanager delete-secret --secret-id cnoe/keycloak/config --force-delete-without-recovery
+aws secretsmanager delete-secret --secret-id ${SECRET_NAME}  --force-delete-without-recovery
