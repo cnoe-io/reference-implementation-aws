@@ -16,3 +16,4 @@ MANAGED_CERT=true
 # Set this to false if you want to manage DNS somewhere else. e.g. manually.
 MANAGED_DNS=true
 HOSTEDZONE_ID=Z0202147IFM0KVTW2P35
+EXTERNAL_SECRETS=true

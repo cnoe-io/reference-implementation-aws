@@ -1,5 +1,1 @@
 installCRDs: true
-# webhook:
-#   prometheus:
-#     service:
-#       port: 8081

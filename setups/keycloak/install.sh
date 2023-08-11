@@ -15,13 +15,27 @@ export ADMIN_PASSWORD=$(LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 48 
 export POSTGRES_PASSWORD=$(LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 48 | head -n 1)
 export USER1_PASSWORD=$(LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 48 | head -n 1)
 
-kubectl create ns keycloak || true
-envsubst < secrets.yaml | kubectl apply -f -
 
-envsubst < argo-app.yaml | kubectl apply -f -
+kubectl create ns keycloak || true
+
+if [[ "${EXTERNAL_SECRETS}" == "true" ]];
+then
+  export APP_NAME=keycloak
+  export NAMESPACE=keycloak
+  export SECRET_STORE_NAME=keycloak
+  export SA_NAME=external-secret-keycloak
+  export ROLE_NAME=cnoe-external-secret-keycloak
+  export POLICY_NAME=cnoe-external-secret-keycloak
+  cd external-secrets
+  ./install.sh
+  cd -
+  envsubst < argo-app-external-secrets.yaml | kubectl apply -f -
+else
+  envsubst < secrets.yaml | kubectl apply -f -
+  envsubst < argo-app.yaml | kubectl apply -f -
+fi
 
 echo "waiting for keycloak to be ready. may take a few minutes"
-kubectl wait --for=jsonpath=.status.health.status=Healthy  --timeout=300s -f argo-app.yaml
 kubectl wait --for=condition=ready pod -l app=keycloak -n keycloak  --timeout=30s
 
 # Configure keycloak. Might be better to just import
