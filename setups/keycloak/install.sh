@@ -29,14 +29,13 @@ then
   cd external-secrets
   ./install.sh
   cd -
+  envsubst < argo-app-external-secrets.yaml | kubectl apply -f -
 else
   envsubst < secrets.yaml | kubectl apply -f -
+  envsubst < argo-app.yaml | kubectl apply -f -
 fi
 
-envsubst < argo-app.yaml | kubectl apply -f -
-
 echo "waiting for keycloak to be ready. may take a few minutes"
-kubectl wait --for=jsonpath=.status.health.status=Healthy  --timeout=300s -f argo-app.yaml
 kubectl wait --for=condition=ready pod -l app=keycloak -n keycloak  --timeout=30s
 
 # Configure keycloak. Might be better to just import

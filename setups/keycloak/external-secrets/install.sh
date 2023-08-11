@@ -16,7 +16,6 @@ if [[ -z "${REGION}" ]]; then
     export REGION
 fi
 
-
 echo 'installing external secrets store'
 
 export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
