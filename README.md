@@ -183,6 +183,7 @@ The following components are installed if you chose the full installation option
 - ingress-nginx
 - keycloak
 - spark-operator
+- external-secrets
 
 ### Things created outside of the cluster
 

@@ -16,4 +16,5 @@ MANAGED_CERT=true
 # Set this to false if you want to manage DNS somewhere else. e.g. manually.
 MANAGED_DNS=true
 HOSTEDZONE_ID=Z0202147IFM0KVTW2P35
+# If set to true, we will store secrets to AWS Secrets Manager, then sync it to the cluster using External Secrets Operator.
 EXTERNAL_SECRETS=true
