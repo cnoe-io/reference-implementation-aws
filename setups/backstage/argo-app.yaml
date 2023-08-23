@@ -8,6 +8,11 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: k8s-config
+      namespace: backstage
   project: cnoe
   sources:
     - repoURL: ${GITHUB_URL}
