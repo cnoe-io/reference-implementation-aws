@@ -111,14 +111,4 @@ data:
       serviceLocatorMethod:
         type: 'multiTenant'
       clusterLocatorMethods:
-        - type: 'config'
-          clusters:
-            - url: https://kubernetes.default.svc.cluster.local
-              name: local
-              authProvider: 'serviceAccount'
-              skipTLSVerify: true # Needed by the proxy apparently
-              skipMetricsLookup: true
-              serviceAccountToken: 
-                $file: /var/run/secrets/kubernetes.io/serviceaccount/token
-              caData: 
-                $file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        - $include: k8s-config.yaml
