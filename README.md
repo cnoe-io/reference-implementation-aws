@@ -41,7 +41,7 @@ To create one with the CLI, follow the steps below.
 
 ```bash
 npx '@backstage/cli' create-github-app ${GITHUB_ORG_NAME}
-# If prompted, select all for permissions.
+# If prompted, select all for permissions or select permissions listed in this page https://backstage.io/docs/integrations/github/github-apps#app-permissions
 # In the browser window, allow access to all repositories then install the app.
 
 # move it to a "private" location. 
