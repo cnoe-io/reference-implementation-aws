@@ -99,9 +99,9 @@ data:
       rules:
         - allow: [Component, System, API, Resource, Location, Template]
       locations:
-        # Local example data, file locations are relative to the backend process, typically `packages/backend`
+        # Examples from a public GitHub repository.
         - type: url
-          target: https://github.com/manabuOrg/backstage-templates-pub/blob/main/catalog-info.yaml
+          target: https://github.com/manabuOrg/backstage-templates-public/blob/main/catalog-info.yaml
         ## Uncomment these lines to add an example org
         # - type: url
         #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
@@ -112,3 +112,5 @@ data:
         type: 'multiTenant'
       clusterLocatorMethods:
         - $include: k8s-config.yaml
+    argoWorkflows:
+        baseUrl: ${ARGO_WORKFLOWS_URL}
