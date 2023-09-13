@@ -17,6 +17,26 @@ if [[ -z "${GITHUB_URL}" ]]; then
     export GITHUB_URL
 fi
 
+
+export NAMESPACE=argo
+export SA_NAME=data-on-eks
+export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+export OIDC_URL=$(aws eks describe-cluster --name $CLUSTER_NAME --query "cluster.identity.oidc.issuer" --output text --region $REGION | sed -e "s/^https:\/\///")
+ROLE_NAME=cnoe-data-on-eks
+
+envsubst < trust-policy.json > trust-policy-to-be-applied.json
+
+ROLE_OUTPUT=$(aws iam create-role --role-name ${ROLE_NAME}--assume-role-policy-document file://trust-policy-to-be-applied.json --description "For use with data on eks blueprints in ${NAMESPACE} namespace")
+
+aws iam attach-role-policy --role-name ${ROLE_NAME} --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+
+export ROLE_ARN=$(echo $ROLE_OUTPUT | jq -r '.Role.Arn')
+
+rm trust-policy-to-be-applied.json
+
+kubectl create ns argo || true
+envsubst < sa-data-on-eks.yaml | kubectl apply -f -
+
 if [[ "${ARGO_SSO_ENABLED}" == "true" ]]; then
   if [[ -z "${DOMAIN_NAME}" ]]; then
     read -p "Enter base domain name. For example, entering cnoe.io will set hostname to be keycloak.cnoe.io : " DOMAIN_NAME
@@ -65,7 +85,7 @@ if [[ "${ARGO_SSO_ENABLED}" == "true" ]]; then
   curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X PUT  localhost:8080/admin/realms/cnoe/clients/${CLIENT_ID}/default-client-scopes/${CLIENT_SCOPE_GROUPS_ID}
 
   echo 'storing client secrets to argo namespace'
-  kubectl create ns argo || true
+
   envsubst < secret-sso.yaml | kubectl apply -f -
 
   echo 'creating argo cd application'

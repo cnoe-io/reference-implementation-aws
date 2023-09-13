@@ -49,3 +49,10 @@ CLIENT_ID=$(curl -sS -H "Content-Type: application/json" \
 curl -sS -H "Content-Type: application/json" \
   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
   -X DELETE localhost:8080/admin/realms/cnoe/clients/${CLIENT_ID}
+
+echo 'deleting IAM Roles and Policies'
+ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+
+aws iam detach-role-policy --role-name cnoe-data-on-eks --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+
+aws iam delete-role --role-name cnoe-data-on-eks
