@@ -48,3 +48,4 @@ spec:
     automated: {}
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
