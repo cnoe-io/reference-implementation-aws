@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  annotations:
+    workflows.argoproj.io/description: Runs Data on EKS Blueprints.
+  name: terraform-data-on-eks
+spec:
+  activeDeadlineSeconds: 3600
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+    secondsAfterSuccess: 43200
+    secondsAfterFailure: 86400
+  serviceAccountName: data-on-eks
+  entrypoint: main
+  arguments:
+    parameters:
+    - name: backstage-entity-name
+    - name: script-location
+    - name: admin-role
+  templates:
+    - name: main
+      steps:
+        - - name: run
+            template: run
+        - - name: restart-backstage
+            template: restart-backstage
+        - - name: cleanup
+            template: cleanup
+    - name: run
+      inputs:
+        artifacts:
+        - name: data-on-eks
+          path: /src/data-on-eks
+          git:
+            repo: https://github.com/awslabs/data-on-eks.git
+            revision: main
+      volumes:
+        - name: tf-cm
+          configMap:
+            name: "{{workflow.parameters.backstage-entity-name}}-tf-cm"
+      container:
+        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.14
+        tty: true
+        stdin: true
+        volumeMounts:
+          - mountPath: /var/run/tf
+            name: tf-cm
+        env:
+          - name: BACKSTAGE_ENT_NAME
+            value: "{{workflow.parameters.backstage-entity-name}}"
+          - name: SCRIPT_LOCATION
+            value: "/src/data-on-eks/{{workflow.parameters.script-location}}"
+          - name: ADMIN_ROLE
+            value: "{{workflow.parameters.admin-role}}"
+          - name: TFVAR_LOCATION
+            value: /var/run/tf/terraform.tfvars.json
+    - name: restart-backstage
+      script:
+        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.13
+        command:
+          - bash
+        source: |
+          kubectl -n backstage rollout restart deployment backstage
+    - name: cleanup
+      resource:
+        action: delete
+        manifest: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: "{{workflow.parameters.backstage-entity-name}}-tf-cm"
+            namespace: "{{workflow.namespace}}"

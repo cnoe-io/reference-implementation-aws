@@ -1,0 +1,119 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  annotations:
+    workflows.argoproj.io/description: Runs Data on EKS Blueprints.
+  name: terraform-data-on-eks-cleanup
+spec:
+  activeDeadlineSeconds: 3600
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+    secondsAfterSuccess: 43200
+    secondsAfterFailure: 86400
+  serviceAccountName: data-on-eks
+  entrypoint: main
+  arguments:
+    parameters:
+    - name: backstage-entity-name
+    - name: script-location
+    - name: admin-role
+  volumes:
+    - name: tf-state
+      secret:
+        secretName: "{{workflow.parameters.backstage-entity-name}}-tf-state"
+  templates:
+    - name: main
+      steps:
+        - - name: remove-resources
+            template: remove-resources
+        - - name: cleanup-tf
+            template: cleanup-tf
+    - name: remove-resources
+      inputs:
+          artifacts:
+            - name: go-template
+              path: /tmp/go-template
+              raw:
+                data: |
+                  {{- range .items -}}
+                      {{- if not .metadata.ownerReferences -}}
+                          {{- if eq .spec.type "LoadBalancer" -}}
+                              {{.metadata.name}} {{.metadata.namespace}}{{"\n"}}
+                          {{- end }}
+                      {{- end -}}
+                  {{- end -}}
+      script:
+        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.13
+        volumeMounts:
+          - name: tf-state
+            mountPath: /var/run/tf
+        command:
+          - bash
+        source: |
+          set -e -o pipefail
+          set +x
+          echo 'restoring tfstate from secret'
+          gunzip -c /var/run/tf/tfstate > /tmp/tfstate
+          cluster_arn=$(jq -r '.resources[] | select(.module == "module.eks" and .type == "aws_eks_cluster")| .instances[0].attributes.arn' /tmp/tfstate)
+          if [[ -z "${cluster_arn// }" ]]; then
+            exit 0
+          fi
+          cluster_name=$(echo $cluster_arn | cut -d '/' -f 2)
+          region=$(echo $cluster_arn | cut -d ':' -f 4)
+          mkdir ~/.kube/
+          aws eks update-kubeconfig --name $cluster_name --region $region
+          echo 'removing kubernetes services with loadbalancers'
+          lbs=$(kubectl get svc -A -o go-template-file=/tmp/go-template)
+          echo $lbs | while IFS= read -r line; do
+            if [[ -z "${line// }" ]]; then
+              continue
+            fi
+            name=$(echo ${line} | cut -f1 -d" "); 
+            namespace=$(echo ${line} | cut -f2 -d" "); 
+            echo "delete $name in $namespace";
+            kubectl delete svc $name -n $namespace;
+          done
+          
+          echo 'removing cluster information from backstage'
+          rm ~/.kube/config
+          
+          kubectl -n backstage get secrets k8s-config -o yaml | yq  '.data."k8s-config.yaml"' | base64 -d > /tmp/config
+          data=$(yq eval "del(.clusters[] | select(.name == \"$cluster_name\"))" /tmp/config | base64)
+          kubectl -n backstage get secrets k8s-config -o yaml | yq ".data.\"k8s-config.yaml\" = \"$data\"" | kubectl apply -f -
+          kubectl -n backstage rollout restart deployment backstage
+
+    - name: cleanup-tf
+      retryStrategy:
+        limit: "2"
+        retryPolicy: "Always"
+      inputs:
+        artifacts:
+        - name: data-on-eks
+          path: /src/data-on-eks
+          git:
+            repo: https://github.com/awslabs/data-on-eks.git
+            revision: main
+      script:
+        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.13
+        volumeMounts:
+          - mountPath: /var/run/tf
+            name: tf-state
+        command:
+          - bash
+        source: |
+          set -e -o pipefail
+          cd /src/data-on-eks/{{workflow.parameters.script-location}}
+          echo 'getting tf state from secrets'
+          gunzip -c /var/run/tf/tfstate > terraform.tfstate
+          cluster_arn=$(jq -r '.resources[] | select(.module == "module.eks" and .type == "aws_eks_cluster")| .instances[0].attributes.arn' terraform.tfstate)
+          region=$(echo $cluster_arn | cut -d '/' -f 4)
+          echo 'running cleanup script'
+          terraform init
+          set +e +o pipefail
+          printf "$region\n" | ./cleanup.sh
+          status=$?
+          gzip -k -c terraform.tfstate | base64 -w 0 > tfstate
+          kubectl get secret -n {{workflow.namespace}} {{workflow.parameters.backstage-entity-name}}-tf-state -o yaml > secret.yaml
+          data=$(cat tfstate) yq -i ".data.tfstate = env(data)" secret.yaml
+          kubectl apply -f secret.yaml
+          exit $status
