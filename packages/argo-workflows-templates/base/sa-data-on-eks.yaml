@@ -64,33 +64,3 @@ roleRef:
   kind: Role
   name: data-on-eks
   apiGroup: rbac.authorization.k8s.io
-
-# Fallback in case something went wrong when saving secrets in the data-on-eks ns
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: data-on-eks
-  namespace: default
-  labels:
-    app: data-on-eks
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch", "patch", "create", "update"]
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: data-on-eks
-  namespace: default
-  labels:
-    app: data-on-eks
-subjects:
-  - kind: ServiceAccount
-    name: data-on-eks
-    namespace: data-on-eks
-roleRef:
-  kind: Role
-  name: data-on-eks
-  apiGroup: rbac.authorization.k8s.io
