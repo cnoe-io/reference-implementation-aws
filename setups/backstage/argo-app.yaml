@@ -9,7 +9,8 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   ignoreDifferences:
-    - group: ""
+    - jsonPointers:
+      - /data/k8s-config.yaml
       kind: Secret
       name: k8s-config
       namespace: backstage
