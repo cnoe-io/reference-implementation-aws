@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backstage-scaffolder
+  namespace: "argo"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: backstage-scaffolder-argo-workflows
+rules:
+- apiGroups: [""]
+  resources: ["serviceaccounts", "roles", "rolebindings"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: backstage-scaffolder-argo-workflows
+subjects:
+- kind: ServiceAccount
+  name: backstage-scaffolder
+  namespace: argo
+roleRef:
+  kind: ClusterRole
+  name: backstage-namespace-access
+  apiGroup: rbac.authorization.k8s.io

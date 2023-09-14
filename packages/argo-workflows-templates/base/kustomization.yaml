@@ -2,3 +2,5 @@ resources:
   - sa-data-on-eks.yaml
   - cluster-workflow-data-on-eks.yaml
   - cluster-workflow-data-on-eks-cleanup.yaml
+  - cluster-workflow-spark-rbac.yaml
+  - sa-backstage-scaffolder.yaml

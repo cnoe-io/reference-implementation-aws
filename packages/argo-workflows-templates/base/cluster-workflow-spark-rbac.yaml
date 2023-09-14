@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  annotations:
+    workflows.argoproj.io/description: Applies RBAC configurations
+  name: apply-rbac-spark
+spec:
+  activeDeadlineSeconds: 3600
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+    secondsAfterSuccess: 43200
+    secondsAfterFailure: 86400
+  serviceAccountName: data-on-eks
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: apply-sa
+            template: apply-sa
+        - - name: apply-role
+            template: apply-role
+        - - name: apply-role-binding
+            template: apply-role-binding
+    - name: apply-sa
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: spark
+            namespace: "{{workflow.namespace}}"
+    - name: apply-role
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: Role
+          metadata:
+            name: spark-role
+            namespace: "{{workflow.namespace}}"
+          rules:
+            - apiGroups:
+                - ""
+              resources:
+                - pods
+              verbs:
+                - '*'
+            - apiGroups:
+                - ""
+              resources:
+                - services
+              verbs:
+                - '*'
+            - apiGroups:
+                - ""
+              resources:
+                - configmaps
+              verbs:
+                - '*'
+    - name: apply-role-binding
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          metadata:
+            name: spark-role-binding
+            namespace: "{{workflow.namespace}}"
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: Role
+            name: spark-role
+          subjects:
+            - kind: ServiceAccount
+              name: spark
+              namespace: "{{workflow.namespace}}"
