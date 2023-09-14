@@ -22,9 +22,9 @@ May use sealed secrets with full GitOps approach in the future. TODO
 ## Requirements
 
 - Github ORGANIZATION
-- An existing k8s cluster
+- An existing k8s cluster (e.g Amazon EKS 1.27)
 - AWS CLI
-- Kubectl CLI
+- Kubectl CLI (1.27)
 - jq
 - git
 - curl
@@ -75,6 +75,7 @@ $ vim private/github-token # paste your token
 $ cat private/github-token
 github_pat_ABCDEDFEINDK....
 ```
+# Make sure that the new GitHUb token can access your new GitHub Organization
 
 # DELETE AND PURGE THIS BEFORE RELEASE
 ## Before you install  (Because this repo isn't public yet)
@@ -198,7 +199,7 @@ You can confirm these by querying at a register.
 ```bash
 dig A `idp.<DOMAIN_NAME>` @1.1.1.1
 
-kubeclt get svc -n ingress-nginx
+kubectl get svc -n ingress-nginx
 ```
 
 HTTPS endpoints are also created with valid certificates.
@@ -208,12 +209,15 @@ openssl s_client -showcerts -servername id.<DOMAIN_NAME> -connect id.<DOMAIN_NAM
 curl https://idp.id.<DOMAIN_NAME>
 ```
 
+## How to access the solution?
+
 When you open a browser window and go to `https://idp.<DOMAIN_NAME>`, you should be prompted to login.
 Two users are created during the installation process: `user1` and `user2`. Their passwords are available in the keycloak namespace.
 
 ```bash
 k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
 ```
+# Make sure aws-load-balancer-controller is in sync
 
 
 
