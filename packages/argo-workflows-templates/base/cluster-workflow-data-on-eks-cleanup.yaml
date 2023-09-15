@@ -43,7 +43,7 @@ spec:
                       {{- end -}}
                   {{- end -}}
       script:
-        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.13
+        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.15
         volumeMounts:
           - name: tf-state
             mountPath: /var/run/tf
@@ -94,7 +94,7 @@ spec:
             repo: https://github.com/awslabs/data-on-eks.git
             revision: main
       script:
-        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.13
+        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.15
         volumeMounts:
           - mountPath: /var/run/tf
             name: tf-state
