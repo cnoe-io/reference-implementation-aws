@@ -233,7 +233,7 @@ Currently resources created by applications are not deleted. For example, if you
 </details>
 
 ## What can you do in Backstage? 
-TODOOOO
+See [this doc](./demo.md) for demos!
 
 ## Possible issues
 
