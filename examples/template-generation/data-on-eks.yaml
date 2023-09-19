@@ -10,7 +10,7 @@ spec:
   parameters:
     - title: Terraform config options
       properties:
-        tfVars:
+        tfVars: # this field is to be generated.
           title: Terraform variables
           type: object
     - title: Configuration Options
@@ -22,7 +22,7 @@ spec:
           title: namespace within the kubernetes cluster to deploy this
           type: string
           default: data-on-eks
-        adminRoleName:
+        adminRoleName: # update the aws-config cm to give admin access to this group.
           title: Admin Role Name
           description: Name of the role to give the administrative rights on the EKS cluster.
           default: Admin
@@ -32,7 +32,7 @@ spec:
           description: The cluster to run this workflow in. 
           type: string
           ui:field: KubernetesClusterPicker
-        repoUrl:
+        repoUrl: # need a place to store this entity information.
           title: Repository Location
           type: string
           ui:field: RepoUrlPicker
@@ -77,14 +77,14 @@ spec:
       name: Apply TF variables CM
       action: cnoe:kubernetes:apply
       input:
-        manifestPath: cm.yaml
+        manifestPath: cm.yaml # this contains tfvar json file.
         namespaced: true
         clusterName: ${{ parameters.clusterName }}
     - id: apply-workflow
       name: Start TF workflow
       action: cnoe:kubernetes:apply
       input:
-        manifestPath: workflow.yaml
+        manifestPath: workflow.yaml # initiates an argo workflows run.
         namespaced: true
         clusterName: ${{ parameters.clusterName }}
   output:
