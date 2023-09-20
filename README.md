@@ -56,6 +56,12 @@ The rest of the installation process assumes the GitHub app credentials are avai
 
 If you want to delete the GitHUb application, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
 
+After creating your dedicated GitHub organization, check Settings > Personal access tokens > Settings and edit below configuration 
+1. **Fine-grained personal access tokens**, select: Allow access via fine-grained personal access tokens
+2. **Require approval of fine-grained personal access tokens**, select: Do not require administrator approval
+3. **Personal access token (classic)**, select: Allow access via personal access tokens (classic)
+4. Click **Save**
+   
 ## Create a GitHub token
 
 A GitHub token is needed by ArgoCD to get information about repositories under your Organization. 
@@ -75,7 +81,6 @@ $ vim private/github-token # paste your token
 $ cat private/github-token
 github_pat_ABCDEDFEINDK....
 ```
-# Make sure that the new GitHUb token can access your new GitHub Organization
 
 # DELETE AND PURGE THIS BEFORE RELEASE
 ## Before you install  (Because this repo isn't public yet)
@@ -176,17 +181,17 @@ The following components are installed if you chose the full installation option
 
 | Name | Version |
 |---|---|
-| argo-workflows | v |
-| argocd | v |
-| aws-load-balancer-controller | v |
-| backstage | v |
-| cert-manager | v |
-| crossplane | v |
-| external-dns | v |
-| ingress-nginx | v |
-| keycloak | v |
-| spark-operator | v |
-| external-secrets | v |
+| argo-workflows | v3.4.8 |
+| argocd | v2.7.6 |
+| aws-load-balancer-controller | v2.5.3 |
+| backstage | v0.0.4 |
+| cert-manager | v1.12.2 |
+| crossplane | v1.12.2 |
+| external-dns | v0.13.5 |
+| ingress-nginx | v1.8.0 |
+| keycloak | v22.0.0 |
+| spark-operator | v1beta2-1.3.8-3.1.1 |
+| external-secrets | v0.9.2 |
 
 ### Things created outside of the cluster
 
