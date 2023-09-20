@@ -219,9 +219,6 @@ Two users are created during the installation process: `user1` and `user2`. Thei
 ```bash
 k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
 ```
-# Make sure aws-load-balancer-controller is in sync
-
-
 
 ## Uninstall
 1. Run `setups/uninstall.sh` and follow the prompts.
