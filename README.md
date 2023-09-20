@@ -174,19 +174,19 @@ type: kubernetes.io/tls
 
 The following components are installed if you chose the full installation option.
 
-| Name | Version | |
-|---|---|---|
-| argo-workflows | Row 1, Column 2 |
-| argocd | Row 2, Column 2 |
-| aws-load-balancer-controller | Row 2, Column 2 |
-| backstage | Row 2, Column 2 |
-| cert-manager | Row 2, Column 2 |
-| crossplane | Row 2, Column 2 |
-| external-dns | Row 2, Column 2 |
-| ingress-nginx | Row 2, Column 2 |
-| keycloak | Row 2, Column 2 |
-| spark-operator | Row 2, Column 2 |
-| external-secrets | Row 2, Column 2 |
+| Name | Version |
+|---|---|
+| argo-workflows | v |
+| argocd | v |
+| aws-load-balancer-controller | v |
+| backstage | v |
+| cert-manager | v |
+| crossplane | v |
+| external-dns | v |
+| ingress-nginx | v |
+| keycloak | v |
+| spark-operator | v |
+| external-secrets | v |
 
 ### Things created outside of the cluster
 
