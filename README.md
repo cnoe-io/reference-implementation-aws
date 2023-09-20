@@ -174,7 +174,7 @@ type: kubernetes.io/tls
 
 The following components are installed if you chose the full installation option.
 
-| Name | Version |
+| Name | Version | |
 |---|---|---|
 | argo-workflows | Row 1, Column 2 |
 | argocd | Row 2, Column 2 |
