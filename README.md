@@ -55,12 +55,6 @@ The file created above contains credentials. Handle it with care.
 The rest of the installation process assumes the GitHub app credentials are available at `private/github-integration.yaml`
 
 If you want to delete the GitHUb application, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
-
-After creating your dedicated GitHub organization, check Settings > Personal access tokens > Settings and edit below configuration 
-1. **Fine-grained personal access tokens**, select: Allow access via fine-grained personal access tokens
-2. **Require approval of fine-grained personal access tokens**, select: Do not require administrator approval
-3. **Personal access token (classic)**, select: Allow access via personal access tokens (classic)
-4. Click **Save**
    
 ## Create a GitHub token
 
@@ -81,6 +75,12 @@ $ vim private/github-token # paste your token
 $ cat private/github-token
 github_pat_ABCDEDFEINDK....
 ```
+
+After creating your dedicated GitHub organization, check Settings > Personal access tokens > Settings and edit below configuration 
+1. **Fine-grained personal access tokens**, select: Allow access via fine-grained personal access tokens
+2. **Require approval of fine-grained personal access tokens**, select: Do not require administrator approval
+3. **Personal access token (classic)**, select: Allow access via personal access tokens (classic)
+4. Click **Save**
 
 # DELETE AND PURGE THIS BEFORE RELEASE
 ## Before you install  (Because this repo isn't public yet)
@@ -184,7 +184,7 @@ The following components are installed if you chose the full installation option
 | argo-workflows | v3.4.8 |
 | argocd | v2.7.6 |
 | aws-load-balancer-controller | v2.5.3 |
-| backstage | v0.0.4 |
+| backstage | v1.16.0 |
 | cert-manager | v1.12.2 |
 | crossplane | v1.12.2 |
 | external-dns | v0.13.5 |
