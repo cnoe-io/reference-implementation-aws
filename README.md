@@ -22,8 +22,8 @@ May use sealed secrets with full GitOps approach in the future. TODO
 ## Requirements
 
 - Github ORGANIZATION
-- An existing EKS cluster version 1.27+
-- AWS CLI
+- An existing EKS cluster version (1.27+)
+- AWS CLI (2.13+)
 - Kubectl CLI (1.27+)
 - jq
 - git
@@ -174,8 +174,10 @@ type: kubernetes.io/tls
 
 The following components are installed if you chose the full installation option.
 
-**| Components | Version |**
+| Header 1 | Header 2 | Header 3 |
 |---|---|---|
+| Row 1, Column 1 | Row 1, Column 2 | Row 1, Column 3 |
+| Row 2, Column 1 | Row 2, Column 2 | Row 2, Column 3 |
 
 - argo-workflows
 - argocd
