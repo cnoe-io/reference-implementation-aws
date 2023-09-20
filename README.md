@@ -22,9 +22,9 @@ May use sealed secrets with full GitOps approach in the future. TODO
 ## Requirements
 
 - Github ORGANIZATION
-- An existing k8s cluster (e.g Amazon EKS 1.27)
+- An existing EKS cluster version 1.27+
 - AWS CLI
-- Kubectl CLI (1.27)
+- Kubectl CLI (1.27+)
 - jq
 - git
 - curl
@@ -173,6 +173,9 @@ type: kubernetes.io/tls
 ## What was created?
 
 The following components are installed if you chose the full installation option.
+
+**| Components | Version |**
+|---|---|---|
 
 - argo-workflows
 - argocd
