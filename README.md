@@ -22,9 +22,9 @@ May use sealed secrets with full GitOps approach in the future. TODO
 ## Requirements
 
 - Github ORGANIZATION
-- An existing k8s cluster
-- AWS CLI
-- Kubectl CLI
+- An existing EKS cluster version (1.27+)
+- AWS CLI (2.13+)
+- Kubectl CLI (1.27+)
 - jq
 - git
 - curl
@@ -55,7 +55,7 @@ The file created above contains credentials. Handle it with care.
 The rest of the installation process assumes the GitHub app credentials are available at `private/github-integration.yaml`
 
 If you want to delete the GitHUb application, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
-
+   
 ## Create a GitHub token
 
 A GitHub token is needed by ArgoCD to get information about repositories under your Organization. 
@@ -75,6 +75,12 @@ $ vim private/github-token # paste your token
 $ cat private/github-token
 github_pat_ABCDEDFEINDK....
 ```
+
+After creating your dedicated GitHub organization, check Settings > Personal access tokens > Settings and edit below configuration 
+1. **Fine-grained personal access tokens**, select: Allow access via fine-grained personal access tokens
+2. **Require approval of fine-grained personal access tokens**, select: Do not require administrator approval
+3. **Personal access token (classic)**, select: Allow access via personal access tokens (classic)
+4. Click **Save**
 
 # DELETE AND PURGE THIS BEFORE RELEASE
 ## Before you install  (Because this repo isn't public yet)
@@ -173,17 +179,19 @@ type: kubernetes.io/tls
 
 The following components are installed if you chose the full installation option.
 
-- argo-workflows
-- argocd
-- aws-load-balancer-controller
-- backstage
-- cert-manager
-- crossplane
-- external-dns
-- ingress-nginx
-- keycloak
-- spark-operator
-- external-secrets
+| Name | Version |
+|---|---|
+| argo-workflows | v3.4.8 |
+| argocd | v2.7.6 |
+| aws-load-balancer-controller | v2.5.3 |
+| backstage | v1.16.0 |
+| cert-manager | v1.12.2 |
+| crossplane | v1.12.2 |
+| external-dns | v0.13.5 |
+| ingress-nginx | v1.8.0 |
+| keycloak | v22.0.0 |
+| spark-operator | v1beta2-1.3.8-3.1.1 |
+| external-secrets | v0.9.2 |
 
 ### Things created outside of the cluster
 
@@ -198,7 +206,7 @@ You can confirm these by querying at a register.
 ```bash
 dig A `idp.<DOMAIN_NAME>` @1.1.1.1
 
-kubeclt get svc -n ingress-nginx
+kubectl get svc -n ingress-nginx
 ```
 
 HTTPS endpoints are also created with valid certificates.
@@ -208,14 +216,14 @@ openssl s_client -showcerts -servername id.<DOMAIN_NAME> -connect id.<DOMAIN_NAM
 curl https://idp.id.<DOMAIN_NAME>
 ```
 
+## How to access the solution?
+
 When you open a browser window and go to `https://idp.<DOMAIN_NAME>`, you should be prompted to login.
 Two users are created during the installation process: `user1` and `user2`. Their passwords are available in the keycloak namespace.
 
 ```bash
 k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
 ```
-
-
 
 ## Uninstall
 1. Run `setups/uninstall.sh` and follow the prompts.
