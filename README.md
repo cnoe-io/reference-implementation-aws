@@ -190,7 +190,6 @@ The following components are installed if you chose the full installation option
 | external-dns | v0.13.5 |
 | ingress-nginx | v1.8.0 |
 | keycloak | v22.0.0 |
-| spark-operator | v1beta2-1.3.8-3.1.1 |
 | external-secrets | v0.9.2 |
 
 ### Things created outside of the cluster

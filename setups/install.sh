@@ -4,7 +4,7 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 
 source ${REPO_ROOT}/setups/utils.sh
 
-full_apps=("aws-load-balancer-controller" "ingress-nginx" "cert-manager" "external-dns" "external-secrets" "keycloak" "argo-workflows" "backstage" "crossplane" "spark-operator")
+full_apps=("aws-load-balancer-controller" "ingress-nginx" "cert-manager" "external-dns" "external-secrets" "keycloak" "argo-workflows" "backstage" "crossplane")
 
 apps_to_install=()
 
