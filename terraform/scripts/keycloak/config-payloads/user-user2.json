@@ -1,0 +1,12 @@
+{
+    "username": "user2",
+    "email": "",
+    "firstName": "user",
+    "lastName": "two",
+    "requiredActions": [],
+    "emailVerified": false,
+    "groups": [
+      "/base-user"
+    ],
+    "enabled": true
+}

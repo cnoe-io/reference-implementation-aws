@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backstage
+  namespace: argocd
+  labels:
+    env: dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  ignoreDifferences:
+    - jsonPointers:
+      - /data/k8s-config.yaml
+      kind: Secret
+      name: k8s-config
+      namespace: backstage
+  project: cnoe
+  sources:
+    - repoURL: ${GITHUB_URL}
+      targetRevision: HEAD
+      path: packages/backstage/dev/
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: backstage
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true

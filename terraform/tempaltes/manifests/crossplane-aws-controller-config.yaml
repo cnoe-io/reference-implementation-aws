@@ -1,0 +1,12 @@
+apiVersion: pkg.crossplane.io/v1alpha1
+kind: ControllerConfig
+metadata:
+  name: provider-aws-config
+  annotations:
+    eks.amazonaws.com/role-arn: ${ROLE_ARN}
+spec:
+  podSecurityContext:
+    fsGroup: 2000
+  args:
+    - --debug
+    - --enable-management-policies

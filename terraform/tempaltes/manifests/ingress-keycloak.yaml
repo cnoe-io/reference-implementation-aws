@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  namespace: keycloak
+  annotations:
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - ${KEYCLOAK_DOMAIN_NAME}
+      secretName: keycloak-prod-tls
+  rules:
+    - host: ${KEYCLOAK_DOMAIN_NAME}
+      http:
+        paths:
+          - path: /realms/master
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8081
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8081
+          - path: /realms
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+          - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080

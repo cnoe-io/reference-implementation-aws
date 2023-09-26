@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane
+  namespace: argocd
+  labels:
+    env: dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: cnoe
+  sources:
+    - chart: crossplane
+      repoURL: https://charts.crossplane.io/stable
+      targetRevision: 1.13.2
+      helm:
+        releaseName: crossplane
+        valueFiles:
+          - $values/packages/crossplane/dev/values.yaml
+    - repoURL: ${GITHUB_URL}
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: crossplane-system
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
