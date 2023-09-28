@@ -5,8 +5,9 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 source ${REPO_ROOT}/setups/utils.sh
 
 echo -e "${GREEN}Installing with the following options: ${NC}"
-cat ${REPO_ROOT}/setups/config.yaml
-
+echo -e "${GREEN}----------------------------------------------------${NC}"
+yq '... comments=""' ${REPO_ROOT}/setups/config.yaml
+echo -e "${GREEN}----------------------------------------------------${NC}"
 echo -e "${PURPLE}\nTargets:${NC}"
 echo "Kubernetes cluster: $(kubectl config current-context)"
 echo "AWS profile (if set): ${AWS_PROFILE}"
