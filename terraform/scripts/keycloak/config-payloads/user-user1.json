@@ -1,0 +1,12 @@
+{
+    "username": "user1",
+    "email": "",
+    "firstName": "user",
+    "lastName": "one",
+    "requiredActions": [],
+    "emailVerified": false,
+    "groups": [
+      "/admin"
+    ],
+    "enabled": true
+}

@@ -1,0 +1,28 @@
+{
+    "protocol": "openid-connect",
+    "clientId": "backstage",
+    "name": "Backstage Client",
+    "description": "Used for Backstage SSO",
+    "publicClient": false,
+    "authorizationServicesEnabled": false,
+    "serviceAccountsEnabled": false,
+    "implicitFlowEnabled": false,
+    "directAccessGrantsEnabled": true,
+    "standardFlowEnabled": true,
+    "frontchannelLogout": true,
+    "attributes": {
+      "saml_idp_initiated_sso_url_name": "",
+      "oauth2.device.authorization.grant.enabled": false,
+      "oidc.ciba.grant.enabled": false
+    },
+    "alwaysDisplayInConsole": false,
+    "rootUrl": "",
+    "baseUrl": "",
+    "redirectUris": [
+      "https://${BACKSTAGE_DOMAIN_NAME}/api/auth/keycloak-oidc/handler/frame"
+    ],
+    "webOrigins": [
+      "/*"
+    ]
+  }
+  

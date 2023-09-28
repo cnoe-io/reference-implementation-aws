@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+  labels:
+    env: dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: cnoe
+  sources:
+    - chart: aws-load-balancer-controller
+      repoURL: https://aws.github.io/eks-charts
+      targetRevision: 1.5.4
+      helm:
+        releaseName: aws-load-balancer-controller
+        parameters:
+          - name: serviceAccount.name
+            value: aws-load-balancer-controller
+          - name: clusterName
+            value: ${CLUSTER_NAME}
+          - name: serviceAccount.annotations.eks\.amazonaws\.com/role-arn
+            value: ${ROLE_ARN}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: aws-load-balancer-controller
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: aws-load-balancer-webhook
+      namespace: aws-load-balancer-controller
+      jsonPointers:
+      - /data
+    - group: "admissionregistration.k8s.io"
+      kind: MutatingWebhookConfiguration
+      name: aws-load-balancer-webhook
+      namespace: aws-load-balancer-controller
+      jsonPointers:
+      - /webhooks[]/clientConfig/caBundle
+    - group: "admissionregistration.k8s.io"
+      kind: ValidatingWebhookConfiguration
+      name: aws-load-balancer-webhook
+      namespace: aws-load-balancer-controller
+      jsonPointers:
+      - /webhooks[]/clientConfig/caBundle
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true

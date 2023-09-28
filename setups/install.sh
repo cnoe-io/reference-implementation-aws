@@ -4,43 +4,10 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 
 source ${REPO_ROOT}/setups/utils.sh
 
-full_apps=("aws-load-balancer-controller" "ingress-nginx" "cert-manager" "external-dns" "external-secrets" "keycloak" "argo-workflows" "backstage" "crossplane")
-
-apps_to_install=()
-
-filter_apps() {
-  for i in "${full_apps[@]}"; do
-    skip=
-    for j in "${filtered_apps[@]}"; do
-        [[ $i == $j ]] && { skip=1; break; }
-    done
-    [[ -n $skip ]] || apps_to_install+=("$i")
-  done
-}
-
-cd ${REPO_ROOT}/setups
-env_file=${REPO_ROOT}/setups/config
-
-while IFS='=' read -r key value; do
-  [[ $key == \#* ]] && continue
-  export "$key"="$value"
-done < $env_file
-
-if [[ ! -z "${GITHUB_URL}" ]]; then
-    export GITHUB_URL=$(strip_trailing_slash "${GITHUB_URL}")
-fi
-
-if [[ ! -z "${DOMAIN_NAME}" ]]; then
-    export DOMAIN_NAME=$(get_cleaned_domain_name "${DOMAIN_NAME}")
-fi
-
-env_vars=("GITHUB_URL" "DOMAIN_NAME" "BACKSTAGE_SSO_ENABLED" "ARGO_SSO_ENABLED" "CLUSTER_NAME" "REGION" "MANAGED_DNS" "MANAGED_CERT" "HOSTEDZONE_ID")
-
 echo -e "${GREEN}Installing with the following options: ${NC}"
-for env_var in "${env_vars[@]}"; do
-  echo -e "${env_var}: ${!env_var}"
-done
-
+echo -e "${GREEN}----------------------------------------------------${NC}"
+yq '... comments=""' ${REPO_ROOT}/setups/config.yaml
+echo -e "${GREEN}----------------------------------------------------${NC}"
 echo -e "${PURPLE}\nTargets:${NC}"
 echo "Kubernetes cluster: $(kubectl config current-context)"
 echo "AWS profile (if set): ${AWS_PROFILE}"
@@ -53,23 +20,11 @@ if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
   exit 0
 fi
 
+# Set up ArgoCD. We will use ArgoCD to install all components.
+cd "${REPO_ROOT}/setups/argocd/"
+./install.sh
+cd -
 
-if [[ "${MANAGED_CERT}" == "true" && "${MANAGED_DNS}" == "true" ]]; then
-  install_apps "${full_apps[@]}"
-  exit
-fi
-
-filtered_apps=()
-
-if [[ "${MANAGED_DNS}" == "false" ]];
-then
-  filtered_apps+=("external-dns")
-fi
-
-if [[ "${MANAGED_CERT}" == "false" ]];
-then
-  filtered_apps+=("cert-manager")
-fi
-
-filter_apps
-install_apps "${apps_to_install[@]}"
+# The rest of the steps are defined as a Terraform module. Parse the config to JSON and use it as the Terraform variable file. This is done because JSON doesn't allow you to easily place comments.
+cd "${REPO_ROOT}/terraform/"
+yq -o json '.'  ../setups/config.yaml > terraform.tfvars.json
