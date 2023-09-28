@@ -33,6 +33,9 @@ May use sealed secrets with full GitOps approach in the future. TODO
 
 ## Create GitHub Apps for your GitHub Organization
 
+GitHub app is used to enable integration between Backstage and GitHub.
+This allows you for integration actions such as automatically importing Backstage configuration such as Organization information and templates.
+
 We strongly encourage you to create a **dedicated GitHub organization**. If you don't have an organization for this purpose, please follow [this link](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/creating-a-new-organization-from-scratch) to create one.
 
 There are two ways to create GitHub integration with Backstage. You can use the Backstage CLI, or create it manually. See [this page](https://backstage.io/docs/integrations/github/github-apps) for more information on creating one manually. Once the app is created, place it under the private directory with the name `github-integration.yaml`. 
@@ -50,7 +53,7 @@ GITHUB_APP_FILE=$(ls github-app-* | head -n1)
 mv ${GITHUB_APP_FILE} private/github-integration.yaml
 ```
 
-The file created above contains credentials. Handle it with care.
+**The file created above contains credentials. Handle it with care.**
 
 The rest of the installation process assumes the GitHub app credentials are available at `private/github-integration.yaml`
 
@@ -76,39 +79,16 @@ $ cat private/github-token
 github_pat_ABCDEDFEINDK....
 ```
 
-After creating your dedicated GitHub organization, check Settings > Personal access tokens > Settings and edit below configuration 
-1. **Fine-grained personal access tokens**, select: Allow access via fine-grained personal access tokens
-2. **Require approval of fine-grained personal access tokens**, select: Do not require administrator approval
-3. **Personal access token (classic)**, select: Allow access via personal access tokens (classic)
-4. Click **Save**
+# Install
 
-# DELETE AND PURGE THIS BEFORE RELEASE
-## Before you install  (Because this repo isn't public yet)
+Follow the following steps to get started.
 
-1. Clone this repo locally. E.g. `git clone git@github.com:cnoe-io/reference-implementation-aws-user-friendly.git`
-2. Create a new **PRIVATE** repo under your newly created GitHub organization.
-3. Add a new remote `git remote add github-org <GITHUB_URL>` For example:
-     ```git remote add github-org git@github.com:manabuOrg/reference-implementation-aws-user-friendly.git```
-4. Push it to the new remote. `git push github-org`
-5. Update the `GITHUB_URL` value in the [config file](./setups/config).
-
-
-## FOR AWS EMPLOYEES
-
-**IF YOU DON'T HAVE A DOMAIN**
-
-1. Create a domain in Supernova. Choose `people` as the organization. Read the Supernova wiki for more information.
-2. Create a new SUB domain for this purpose and delegate it to a Route53 zone. Read the wiki.
-3. Use the Route53 zone id for the rest of the process.
-
-## Install
-**READ THE SECTION ABOVE.**
 1. Create GitHub apps and GitHub token as described above.
-2. Create a new EKS cluster. You can use an existing cluster but we cannot guarantee any existing resources will work with the script. You can create a new basic cluster with the included [`eksctl.yaml`](./eksctl.yaml) file:
+2. Create a new EKS cluster. We do not include EKS cluster in the installation module because EKS cluster requirements vary between organizations and the focus of this is integration of different projects. If you prefer, you can create a new basic cluster with the included [`eksctl.yaml`](./eksctl.yaml) file:
     ```eksctl create -f eksctl.yaml```
     You can get eksctl from [this link](https://eksctl.io/).
-3. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). We **strongly encourage creating a dedicated sub domain** for this. If you'd prefer managing DNS somewhere else, set `MANAGED_DNS=false`
-4. Get the host zone id and put it in the config file. e.g.
+3. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). We **strongly encourage creating a dedicated sub domain** for this. If you'd rather manage DNS yourself, you can set `enable_dns_management` in the config file.
+4. Get the host zone id and put it in the config file. 
     ```bash
     aws route53 list-hosted-zones-by-name --dns-name <YOUR_DOMAIN_NAME> --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
     # in the setups/config file, update the zone id.
@@ -116,7 +96,7 @@ After creating your dedicated GitHub organization, check Settings > Personal acc
     ```
 5. Update the [`setups/config`](setups/config) file with your own values.
 6. Run `setups/install.sh` and follow the prompts. See the section below about monitoring installation progress.
-7. Once installation completes, navigate to `idp.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
+7. Once installation completes, navigate to `backstage.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
     ```bash
     kubectl get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
@@ -138,12 +118,13 @@ Go to [`http://localhost:8081`](http://localhost:8081) and login with the userna
 ### If you installed it without automatic DNS configuration.
 
 If you set `MANAGED_DNS=false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
-- `idp.<DOMAIN_NAME>`
+- `backstage.<DOMAIN_NAME>`
 - `keycloak.<DOMAIN_NAME>`
 - `argo.<DOMAIN_NAME>`
 - `argocd.<DOMAIN_NAME>`
 
-Point these records to the value returned by the following command.
+Point these records to the value returned by the following command. 
+
 ```bash
 k get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 ```
@@ -166,7 +147,7 @@ Secret format should be something like:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: idp.<DOMAIN>
+  name: backstage.<DOMAIN>
   namespace: backstage
 data:
   tls.crt: <base64 encoded cert>
@@ -196,14 +177,14 @@ The following components are installed if you chose the full installation option
 
 If full installation is done, you should have these DNS entries available. They all point to the Network Load Balancer.
 
-- `idp.<DOMAIN_NAME>` 
+- `backstage.<DOMAIN_NAME>` 
 - `argo.<DOMAIN_NAME>`
 - `keycloak.<DOMAIN_NAME>`
 
 You can confirm these by querying at a register.
 
 ```bash
-dig A `idp.<DOMAIN_NAME>` @1.1.1.1
+dig A `backstage.<DOMAIN_NAME>` @1.1.1.1
 
 kubectl get svc -n ingress-nginx
 ```
@@ -212,12 +193,12 @@ HTTPS endpoints are also created with valid certificates.
 
 ```bash
 openssl s_client -showcerts -servername id.<DOMAIN_NAME> -connect id.<DOMAIN_NAME>:443 <<< "Q"
-curl https://idp.id.<DOMAIN_NAME>
+curl https://backstage.<DOMAIN_NAME>
 ```
 
 ## How to access the solution?
 
-When you open a browser window and go to `https://idp.<DOMAIN_NAME>`, you should be prompted to login.
+When you open a browser window and go to `https://backstage.<DOMAIN_NAME>`, you should be prompted to login.
 Two users are created during the installation process: `user1` and `user2`. Their passwords are available in the keycloak namespace.
 
 ```bash
