@@ -1,0 +1,7 @@
+apiVersion: aws.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: provider-aws-config
+spec:
+  credentials:
+    source: IRSA

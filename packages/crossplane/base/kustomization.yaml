@@ -1,0 +1,4 @@
+namespace: crossplane-system
+resources:
+  - provider-aws-config.yaml
+  - provider-aws.yaml
