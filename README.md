@@ -20,6 +20,7 @@ The installation process follows the following pattern.
 3. Run Terraform. Terraform is responsible for:
     - Managing AWS resources necessary for the Kubernetes operators to function. Mostly IAM Roles.
     - Install components as ArgoCD applications. Pass IAM role information where necessary.
+    - Apply Kubernetes manifests such as secrets and ingress where information cannot easily be passed to ArgoCD.
     - Run all the above in an order because installation order matters for many of these components. For example, Keycloak must be installed and ready before Backstage can be installed and configured.
 
 ```mermaid
@@ -35,10 +36,11 @@ erDiagram
   "ArgoCD" ||--o{ "Components" : "installs to the cluster"
 ```
 
+This installation pattern where some Kubernetes manifests are handled in Terraform while others are handled in GitOps manner may not be suitable for many organizations. If you can be certain about parameters such as domain name and certificate handling, it is better to utilize GitOps approach where these information are committed to a repository. The reason it is handled this way is to allow for customization for different organizations without forking this repository and committing organization specific information into the repository. 
 
 ## Secret handling
 
-Currently handled outside of repository and set via bash script. Secrets such as GitHub token and TLS private keys are stored in the `/private` directory.
+Currently handled outside of repository and set via bash script. Secrets such as GitHub token and TLS private keys are stored in the `${REPO_ROOT}/private` directory.
 
 We may be able to use sealed secrets with full GitOps approach in the future.
 
