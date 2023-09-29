@@ -1,6 +1,6 @@
 # This is the GITHUB URL where Kubernetes manifests are stored.
 # If you forked this repo, you will need to update this.
-repo_url: "https://github.com/manabuOrg/ref-impl"
+repo_url: "https://github.com/cnoe-io/reference-implementation-aws"
 # Tags to apply to AWS resources
 tags: 
   env: "dev"

@@ -2,31 +2,11 @@
 set -e -o pipefail
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
-
+SETUP_DIR="${REPO_ROOT}/setups"
+TF_DIR="${REPO_ROOT}/terraform"
 source ${REPO_ROOT}/setups/utils.sh
 
-cd ${REPO_ROOT}/setups
-env_file=${REPO_ROOT}/setups/config
-
-while IFS='=' read -r key value; do
-  [[ $key == \#* ]] && continue
-  export "$key"="$value"
-done < $env_file
-
-if [[ ! -z "${GITHUB_URL}" ]]; then
-    export GITHUB_URL=$(strip_trailing_slash "${GITHUB_URL}")
-fi
-
-if [[ ! -z "${DOMAIN_NAME}" ]]; then
-    export DOMAIN_NAME=$(get_cleaned_domain_name "${DOMAIN_NAME}")
-fi
-
-env_vars=("GITHUB_URL" "DOMAIN_NAME" "BACKSTAGE_SSO_ENABLED" "ARGO_SSO_ENABLED" "CLUSTER_NAME" "REGION" "MANAGED_CERT_DNS" "HOSTEDZONE_ID")
-
-echo -e "${RED}Uninstalling with the following options: ${NC}"
-for env_var in "${env_vars[@]}"; do
-  echo -e "${env_var}: ${!env_var}"
-done
+cd ${SETUP_DIR}
 
 echo -e "${PURPLE}\nTargets:${NC}"
 echo "Kubernetes cluster: $(kubectl config current-context)"
@@ -40,13 +20,9 @@ if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
   exit 0
 fi
 
-apps=(crossplane backstage spark-operator argo-workflows keycloak  external-secrets cert-manager ingress-nginx external-dns aws-load-balancer-controller argocd)
+cd "${TF_DIR}"
+terraform destroy
 
-SETUP_DIR="$(git rev-parse --show-toplevel)/setups"
-
-for app in "${apps[@]}"; do
-  echo -e "${GREEN}Uninstalling ${app}. It may take several minutes${NC}"
-  cd "${SETUP_DIR}/${app}/"
-  ./uninstall.sh || true # might be a bad idea
-  cd -
-done
+cd "${SETUP_DIR}/argocd/"
+./uninstall.sh
+cd - 

@@ -4,29 +4,53 @@
 
 > **_NOTE:_**  Applications deployed in this repository are not meant or configured for production.
 
-## Notes
-- INSTALL SCRIPTS MUST BE RAN AGAINST AN EKS CLUSTER. We use IRSA to talk to AWS services.
-- Components are installed as ArgoCD Applications.
-- Files under the `/packages` directory are meant to be suable without any modifications. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD's Helm parameters.
-
-We could probably deploy everything as a ArgoCD's app of apps with sync wave and what not. TODOooo
-
-## Secret handling. 
-
-Currently handled outside of repository and set via bash script. Secrets such as GitHub token and TLS private keys are stored in the `/private` directory.
-
-May use sealed secrets with full GitOps approach in the future. TODO
 
 # Installation
 
+- Installation script must be used with a EKS cluster because we use IRSA to talk to AWS services.
+- Components are installed as ArgoCD Applications.
+- Files under the `/packages` directory are meant to be usable without any modifications. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD's Helm parameters.
+
+## Basic installation flow
+
+The installation process follows the following pattern. 
+
+1. Create a GitHub App for Backstage integration.
+2. Install ArgoCD and configure it to be able to monitor your GitHub Organization.
+3. Run Terraform. Terraform is responsible for:
+    - Managing AWS resources necessary for the Kubernetes operators to function. Mostly IAM Roles.
+    - Install components as ArgoCD applications. Pass IAM role information where necessary.
+    - Run all the above in an order because installation order matters for many of these components. For example, Keycloak must be installed and ready before Backstage can be installed and configured.
+
+```mermaid
+---
+title: Installation Process
+---
+erDiagram
+  "Local Machine" ||--o{ "ArgoCD" : "1. installs"
+  "Local Machine" ||--o{ "Terraform" : "2. invokes"
+  "Terraform" ||--o{ "AWS Resources" : "3. creates"
+  "Terraform" ||--o{ "ArgoCD" : "4. create ArgoCD Apps"
+  "ArgoCD" ||--o{ "This Repo" : "pulls manifests"
+  "ArgoCD" ||--o{ "Components" : "installs to the cluster"
+```
+
+
+## Secret handling
+
+Currently handled outside of repository and set via bash script. Secrets such as GitHub token and TLS private keys are stored in the `/private` directory.
+
+We may be able to use sealed secrets with full GitOps approach in the future.
+
 ## Requirements
 
-- Github ORGANIZATION
+- Github **Organization** (free to create)
 - An existing EKS cluster version (1.27+)
 - AWS CLI (2.13+)
 - Kubectl CLI (1.27+)
 - jq
 - git
+- yq
 - curl
 - kustomize
 - node + npm (if you choose to create GitHub App via CLI)
@@ -79,7 +103,7 @@ $ cat private/github-token
 github_pat_ABCDEDFEINDK....
 ```
 
-# Install
+## Install
 
 Follow the following steps to get started.
 
@@ -94,12 +118,13 @@ Follow the following steps to get started.
     # in the setups/config file, update the zone id.
     HOSTEDZONE_ID=ZO020111111
     ```
-5. Update the [`setups/config`](setups/config) file with your own values.
+5. Update the [`setups/config`](setups/config.yaml) file with your own values.
 6. Run `setups/install.sh` and follow the prompts. See the section below about monitoring installation progress.
 7. Once installation completes, navigate to `backstage.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
     ```bash
     kubectl get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
+
 
 ### Monitoring installation progress
 
@@ -189,14 +214,14 @@ dig A `backstage.<DOMAIN_NAME>` @1.1.1.1
 kubectl get svc -n ingress-nginx
 ```
 
-HTTPS endpoints are also created with valid certificates.
+A Network Load Balancer is also created. This is managed by the AWS Load Balancer Controller and points to ingress-nginx pod. This pod is responsible for routing requests to correct places. As a result, HTTPS endpoints are created with valid certificates.
 
 ```bash
 openssl s_client -showcerts -servername id.<DOMAIN_NAME> -connect id.<DOMAIN_NAME>:443 <<< "Q"
 curl https://backstage.<DOMAIN_NAME>
 ```
 
-## How to access the solution?
+## How to access the Backstage instance?
 
 When you open a browser window and go to `https://backstage.<DOMAIN_NAME>`, you should be prompted to login.
 Two users are created during the installation process: `user1` and `user2`. Their passwords are available in the keycloak namespace.
