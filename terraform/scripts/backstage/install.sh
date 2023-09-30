@@ -52,6 +52,25 @@ CLIENT_SCOPE_GROUPS_ID=$(curl -sS -H "Content-Type: application/json" -H "Author
 
 curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X PUT  localhost:8080/admin/realms/cnoe/clients/${CLIENT_ID}/default-client-scopes/${CLIENT_SCOPE_GROUPS_ID}
 
+# Get ArgoCD token for Backstage
+kubectl port-forward svc/argocd-server -n argocd 8085:80 > /dev/null 2>&1 &
+pid=$!
+trap '{
+  rm config-payloads/*-to-be-applied.json || true
+  kill $pid
+}' EXIT
+echo "waiting for port forward to be ready"
+while ! nc -vz localhost 8085 > /dev/null 2>&1 ; do
+    sleep 2
+done
+
+pass=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+
+token=$(curl -sS localhost:8085/api/v1/session -d "{\"username\":\"admin\",\"password\":\"${pass}\"}" | yq .token)
+
+# THIS DOES NOT EXPIRE. Has read all permissions.
+argocdToken=$(curl http://localhost:8085/api/v1/account/backstage/token -X POST -H "Authorization: Bearer ${token}" | yq .token)
+
 echo 'storing client secrets to backstage namespace'
 envsubst < secret-env-var.yaml | kubectl apply -f -
 envsubst < secret-integrations.yaml | kubectl apply -f -

@@ -3,6 +3,7 @@ resources:
   - ../base/
   - service-argogrpc.yaml
   - appproject-cnoe.yaml
+  - appproject-demo.yaml
 patchesStrategicMerge:
   - cm-argocd-cm.yaml
   - argocd-cmd-params-cm.yaml

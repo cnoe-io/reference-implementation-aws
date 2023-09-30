@@ -5,3 +5,4 @@ metadata:
 data:
   policy.csv: |
     g, superuser, role:admin
+    g, backstage, role:readonly

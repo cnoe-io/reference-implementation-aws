@@ -63,7 +63,13 @@ data:
         secure: true
         headers:
           Authorization:
-            $env: ARGO_WORKFLOWS_AUTH_TOKEN
+            $env: {ARGO_WORKFLOWS_AUTH_TOKEN}
+      '/argocd/api':
+        target: ${ARGO_CD_URL}
+        changeOrigin: true
+        headers:
+          Cookie:
+            $env: ARGOCD_AUTH_TOKEN
 
     # Reference documentation http://backstage.io/docs/features/techdocs/configuration
     # Note: After experimenting with basic setup, use CI/CD to generate docs

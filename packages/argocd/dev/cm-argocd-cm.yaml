@@ -6,14 +6,9 @@ metadata:
     app.kubernetes.io/part-of: argocd
   name: argocd-cm
 data:
+  accounts.backstage: apiKey
+  accounts.backstage.enabled: "true"
   application.resourceTrackingMethod: annotation
-  # url: https://argocd.a1.mccloman.people.aws.dev
-  # oidc.config: |
-  #   name: Keycloak
-  #   issuer: https://keycloak.a1.mccloman.people.aws.dev/realms/canoe
-  #   clientID: argo
-  #   clientSecret: $oidc.keycloak.clientSecret
-  #   requestedScopes: ["openid", "profile", "email", "groups"]
   resource.exclusions: |
     - kinds:
         - ProviderConfigUsage

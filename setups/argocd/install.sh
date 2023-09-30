@@ -50,4 +50,6 @@ fi
 set -e
 echo 'waiting for ArgoCD to be ready'
 kubectl -n argocd rollout status --watch --timeout=300s statefulset/argocd-application-controller
+kubectl -n argocd rollout status --watch --timeout=300s deployment/argocd-server
+
 cd -
