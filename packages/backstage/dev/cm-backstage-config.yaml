@@ -63,7 +63,7 @@ data:
         secure: true
         headers:
           Authorization:
-            $env: {ARGO_WORKFLOWS_AUTH_TOKEN}
+            $env: ARGO_WORKFLOWS_AUTH_TOKEN
       '/argocd/api':
         target: ${ARGO_CD_URL}
         changeOrigin: true

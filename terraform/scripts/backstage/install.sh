@@ -69,7 +69,7 @@ pass=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.d
 token=$(curl -sS localhost:8085/api/v1/session -d "{\"username\":\"admin\",\"password\":\"${pass}\"}" | yq .token)
 
 # THIS DOES NOT EXPIRE. Has read all permissions.
-argocdToken=$(curl http://localhost:8085/api/v1/account/backstage/token -X POST -H "Authorization: Bearer ${token}" | yq .token)
+argocdToken=$(curl -sS http://localhost:8085/api/v1/account/backstage/token -X POST -H "Authorization: Bearer ${token}" | yq .token)
 
 echo 'storing client secrets to backstage namespace'
 envsubst < secret-env-var.yaml | kubectl apply -f -
