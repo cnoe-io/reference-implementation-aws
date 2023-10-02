@@ -107,7 +107,7 @@ data:
       locations:
         # Examples from a public GitHub repository.
         - type: url
-          target: https://github.com/manabuOrg/backstage-templates-public/blob/main/catalog-info.yaml
+          target: https://github.com/awslabs/backstage-templates-on-eks/blob/main/catalog-info.yaml
         ## Uncomment these lines to add an example org
         # - type: url
         #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
