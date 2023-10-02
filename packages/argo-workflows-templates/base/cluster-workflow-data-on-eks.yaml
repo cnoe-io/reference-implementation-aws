@@ -39,7 +39,7 @@ spec:
           configMap:
             name: "{{workflow.parameters.backstage-entity-name}}-tf-cm"
       container:
-        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.15
+        image: public.ecr.aws/cnoe-io/misc:tf-manager-v0.0.1
         tty: true
         stdin: true
         volumeMounts:
@@ -56,7 +56,7 @@ spec:
             value: /var/run/tf/terraform.tfvars.json
     - name: restart-backstage
       script:
-        image: public.ecr.aws/m8u6z8z4/manabu-test:tf-manager-v0.0.15
+        image: public.ecr.aws/cnoe-io/misc:tf-manager-v0.0.1
         command:
           - bash
         source: |
