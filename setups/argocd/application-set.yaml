@@ -28,6 +28,9 @@ spec:
       source:
         path: kustomize/dev
         repoURL: '{{ url }}'
-        targetRevision: '{{ branch }}'
+        targetRevision: HEAD
       syncPolicy:
         automated: {}
+        syncOptions:
+          - CreateNamespace=true
+
