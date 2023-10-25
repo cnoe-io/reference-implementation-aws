@@ -28,3 +28,5 @@ cd -
 # The rest of the steps are defined as a Terraform module. Parse the config to JSON and use it as the Terraform variable file. This is done because JSON doesn't allow you to easily place comments.
 cd "${REPO_ROOT}/terraform/"
 yq -o json '.'  ../setups/config.yaml > terraform.tfvars.json
+terraform init -upgrade
+terraform apply -auto-approve
