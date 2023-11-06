@@ -20,7 +20,7 @@ resource "aws_iam_policy" "external-secrets" {
           "secretsmanager:ListSecretVersionIds"
         ],
         "Resource": [
-          "arn:aws:secretsmanager:us-west-2:${data.aws_caller_identity.current.account_id}:secret:cnoe/keycloak/*"
+          "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:cnoe/keycloak/*"
         ]
       }
     ]
@@ -141,7 +141,7 @@ resource "kubernetes_manifest" "secret_keycloak_keycloak_config" {
 }
 
 resource "kubernetes_manifest" "secret_keycloak_postgresql_config" {
-  count = local.secret_count == 1 ? 0 : 1
+  count = local.secret_count == 1 ? 1 : 0
 
   manifest = {
     "apiVersion" = "v1"
@@ -159,7 +159,7 @@ resource "kubernetes_manifest" "secret_keycloak_postgresql_config" {
 }
 
 resource "kubernetes_manifest" "secret_keycloak_keycloak_user_config" {
-  count = local.secret_count == 1 ? 0 : 1
+  count = local.secret_count == 1 ? 1 : 0
 
   manifest = {
     "apiVersion" = "v1"
