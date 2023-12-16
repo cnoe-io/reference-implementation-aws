@@ -93,7 +93,7 @@ resource "kubectl_manifest" "application_argocd_argo_workflows" {
     terraform_data.argo_workflows_keycloak_setup
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/argo-workflows.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/argo-workflows.yaml", {
       GITHUB_URL = local.repo_url
       KEYCLOAK_CNOE_URL = local.kc_cnoe_url
       ARGO_REDIRECT_URL = local.argo_redirect_url
@@ -106,7 +106,7 @@ resource "kubectl_manifest" "application_argocd_argo_workflows_templates" {
     terraform_data.argo_workflows_keycloak_setup
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/argo-workflows-templates.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/argo-workflows-templates.yaml", {
       GITHUB_URL = local.repo_url
     }
   )
@@ -117,7 +117,7 @@ resource "kubectl_manifest" "application_argocd_argo_workflows_sso_config" {
     terraform_data.argo_workflows_keycloak_setup
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/argo-workflows-sso-config.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/argo-workflows-sso-config.yaml", {
       GITHUB_URL = local.repo_url
     }
   )
@@ -128,7 +128,7 @@ resource "kubectl_manifest" "ingress_argo_workflows" {
     kubectl_manifest.application_argocd_argo_workflows,
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/manifests/ingress-argo-workflows.yaml", {
+  yaml_body = templatefile("${path.module}/templates/manifests/ingress-argo-workflows.yaml", {
       ARGO_WORKFLOWS_DOMAIN_NAME = local.argo_domain_name
     }
   )

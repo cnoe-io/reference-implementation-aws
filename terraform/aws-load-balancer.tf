@@ -17,7 +17,7 @@ module "aws_load_balancer_role" {
 
 resource "kubectl_manifest" "application_argocd_aws_load_balancer_controller" {
   depends_on = [ module.aws_load_balancer_role ]
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/aws-load-balancer.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/aws-load-balancer.yaml", {
      CLUSTER_NAME = local.cluster_name
      ROLE_ARN = module.aws_load_balancer_role.iam_role_arn
     }
