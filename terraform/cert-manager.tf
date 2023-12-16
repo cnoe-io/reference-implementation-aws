@@ -1,5 +1,5 @@
 resource "kubectl_manifest" "application_argocd_cert_manager" {
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/cert-manager.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/cert-manager.yaml", {
     REPO_URL = local.repo_url
   })
 
@@ -15,7 +15,7 @@ resource "kubectl_manifest" "cluster_issuer_prod" {
     kubectl_manifest.application_argocd_cert_manager,
     kubectl_manifest.application_argocd_ingress_nginx
   ]
-  yaml_body = templatefile("${path.module}/tempaltes/manifests/cluster-issuer.yaml", {
+  yaml_body = templatefile("${path.module}/templates/manifests/cluster-issuer.yaml", {
     REPO_URL = local.repo_url
   })
 }

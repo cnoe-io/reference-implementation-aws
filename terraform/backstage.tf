@@ -62,7 +62,7 @@ resource "kubectl_manifest" "application_argocd_backstage" {
     terraform_data.backstage_keycloak_setup
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/backstage.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/backstage.yaml", {
       GITHUB_URL = local.repo_url
     }
   )
@@ -73,7 +73,7 @@ resource "kubectl_manifest" "ingress_backstage" {
     kubectl_manifest.application_argocd_backstage,
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/manifests/ingress-backstage.yaml", {
+  yaml_body = templatefile("${path.module}/templates/manifests/ingress-backstage.yaml", {
       BACKSTAGE_DOMAIN_NAME = local.backstage_domain_name
     }
   )

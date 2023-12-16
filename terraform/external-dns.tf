@@ -56,7 +56,7 @@ module "external_dns_role" {
 }
 
 resource "kubectl_manifest" "application_argocd_external_dns" {
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/external-dns.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/external-dns.yaml", {
       GITHUB_URL = local.repo_url
       ROLE_ARN = module.external_dns_role[0].iam_role_arn
       DOMAIN_NAME = data.aws_route53_zone.selected[0].name

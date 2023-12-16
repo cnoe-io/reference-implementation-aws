@@ -2,7 +2,7 @@ resource "kubectl_manifest" "application_argocd_ingress_nginx" {
   depends_on = [ 
     kubectl_manifest.application_argocd_aws_load_balancer_controller
    ]
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/ingress-nginx.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/ingress-nginx.yaml", {
       GITHUB_URL = local.repo_url
     }
     )

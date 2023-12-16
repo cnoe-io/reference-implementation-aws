@@ -113,7 +113,7 @@ resource "kubectl_manifest" "keycloak_secret_store" {
     kubernetes_manifest.serviceaccount_external_secret_keycloak
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/manifests/keycloak-secret-store.yaml", {
+  yaml_body = templatefile("${path.module}/templates/manifests/keycloak-secret-store.yaml", {
       REGION = local.region
     }
   )
@@ -206,7 +206,7 @@ resource "kubectl_manifest" "application_argocd_keycloak" {
     kubectl_manifest.application_argocd_ingress_nginx
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/argocd-apps/keycloak.yaml", {
+  yaml_body = templatefile("${path.module}/templates/argocd-apps/keycloak.yaml", {
       GITHUB_URL = local.repo_url
       PATH = "${local.secret_count == 1 ? "packages/keycloak/dev-external-secrets/" : "packages/keycloak/dev/"}"
     }
@@ -232,7 +232,7 @@ resource "kubectl_manifest" "ingress_keycloak" {
     kubectl_manifest.application_argocd_keycloak,
   ]
 
-  yaml_body = templatefile("${path.module}/tempaltes/manifests/ingress-keycloak.yaml", {
+  yaml_body = templatefile("${path.module}/templates/manifests/ingress-keycloak.yaml", {
       KEYCLOAK_DOMAIN_NAME = local.kc_domain_name
     }
   )
