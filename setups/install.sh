@@ -20,6 +20,8 @@ if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
   exit 0
 fi
 
+export GITHUB_URL=$(yq '.repo_url' ./setups/config.yaml)
+
 # Set up ArgoCD. We will use ArgoCD to install all components.
 cd "${REPO_ROOT}/setups/argocd/"
 ./install.sh
