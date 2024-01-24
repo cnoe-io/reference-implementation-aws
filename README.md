@@ -49,6 +49,7 @@ We may be able to use sealed secrets with full GitOps approach in the future.
 - Github **Organization** (free to create)
 - An existing EKS cluster version (1.27+)
 - AWS CLI (2.13+)
+- eksctl (0.167.0+)
 - Kubectl CLI (1.27+)
 - jq
 - git
