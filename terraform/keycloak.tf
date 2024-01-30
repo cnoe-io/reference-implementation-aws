@@ -141,7 +141,7 @@ resource "kubernetes_manifest" "secret_keycloak_keycloak_config" {
 }
 
 resource "kubernetes_manifest" "secret_keycloak_postgresql_config" {
-  count = local.secret_count == 1 ? 1 : 0
+  count = local.secret_count == 1 ? 0 : 1
 
   manifest = {
     "apiVersion" = "v1"
