@@ -53,7 +53,7 @@ if [ $? -ne 0 ]; then
 fi
 
 minor=$(kubectl version --client=true -o yaml | yq '.clientVersion.minor')
-if [[ ${minor} -lt "20" ]]; then
+if [[ ${minor} -lt "27" ]]; then
   echo -e "${RED} ${minor} this kubectl version is not supported. Please upgrade to 1.27+ ${NC}"
   exit 5
 fi
