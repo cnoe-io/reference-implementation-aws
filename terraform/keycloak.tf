@@ -20,7 +20,7 @@ resource "aws_iam_policy" "external-secrets" {
           "secretsmanager:ListSecretVersionIds"
         ],
         "Resource": [
-          "arn:aws:secretsmanager:us-west-2:${data.aws_caller_identity.current.account_id}:secret:cnoe/keycloak/*"
+          "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:cnoe/keycloak/*"
         ]
       }
     ]
