@@ -57,6 +57,9 @@ We may be able to use sealed secrets with full GitOps approach in the future.
 - curl
 - kustomize
 - node + npm (if you choose to create GitHub App via CLI)
+- netcat (nc)
+
+> You also need to have the port `8080` on localhost free, it will be used by installation script to port-forward on keycloack application.
 
 ## Create GitHub Apps for your GitHub Organization
 
