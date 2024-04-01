@@ -28,6 +28,8 @@ spec:
                 secretKeyRef:
                   name: postgresql-config
                   key: POSTGRES_PASSWORD
+            - name: KC_HOSTNAME
+              value: ${KEYCLOAK_DOMAIN_NAME}
           envFrom:
             - secretRef:
                 name: keycloak-config
