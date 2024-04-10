@@ -119,7 +119,7 @@ Follow the following steps to get started.
     ```bash
     aws route53 list-hosted-zones-by-name --dns-name <YOUR_DOMAIN_NAME> --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
     # in the setups/config file, update the zone id.
-    HOSTEDZONE_ID=ZO020111111
+    HOSTEDZONE_ID: ZO020111111
     ```
 5. Update the [`setups/config`](setups/config.yaml) file with your own values.
 6. Run `setups/install.sh` and follow the prompts. See the section below about monitoring installation progress.
@@ -145,7 +145,7 @@ Go to [`http://localhost:8081`](http://localhost:8081) and login with the userna
 
 ### If you installed it without automatic DNS configuration.
 
-If you set `MANAGED_DNS=false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
+If you set `enable_dns_management: false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
 - `backstage.<DOMAIN_NAME>`
 - `keycloak.<DOMAIN_NAME>`
 - `argo.<DOMAIN_NAME>`
