@@ -9,7 +9,7 @@ For example, to generate input field from a terraform module in the Data on EKS 
 ```bash
 git clone https://github.com/awslabs/data-on-eks.git /tmp/data-on-eks
 
-cnoe-cli template tf -i /tmp/data-on-eks/analytics/terraform/spark-k8s-operator -o examples/template-generation -t examples/template-generation/data-on-eks.yaml -p '.spec.parameters[0].properties.tfVars
+cnoe template tf -i /tmp/data-on-eks/analytics/terraform/spark-k8s-operator -o examples/template-generation -t examples/template-generation/data-on-eks.yaml -p '.spec.parameters[0].properties.tfVars'
 
 ```
 The above command takes the terraform module available at `/tmp/data-on-eks/analytics/terraform/spark-k8s-operator` then inserts generated backstage fields into a partially configured template at `examples/template-generation/data-on-eks.yaml`. This partially configure template contains fields that are common to all modules in the Data on EKS repository.
