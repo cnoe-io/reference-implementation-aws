@@ -119,7 +119,7 @@ Follow the following steps to get started.
     ```bash
     aws route53 list-hosted-zones-by-name --dns-name <YOUR_DOMAIN_NAME> --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
     # in the setups/config file, update the zone id.
-    HOSTEDZONE_ID: ZO020111111
+    hosted_zone_id:: ZO020111111
     ```
 5. Update the [`setups/config`](setups/config.yaml) file with your own values.
 6. Run `setups/install.sh` and follow the prompts. See the section below about monitoring installation progress.
