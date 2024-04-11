@@ -80,6 +80,17 @@ GITHUB_APP_FILE=$(ls github-app-* | head -n1)
 mv ${GITHUB_APP_FILE} private/github-integration.yaml
 ```
 
+If you are using the above process to GitHub App, please make sure to select third option below, if your GitHub App access needs publishing access to create GitHub repositories for your backstage templates:
+
+```bash
+npx '@backstage/cli' create-github-app ${GITHUB_ORG_NAME}
+? Select permissions [required] (these can be changed later but then require approvals in all installations) (Press <space> to select, <a> to toggle all, <i> to invert selection,
+and <enter> to proceed)
+ ◉ Read access to content (required by Software Catalog to ingest data from repositories)
+ ◉ Read access to members (required by Software Catalog to ingest GitHub teams)
+❯◯ Read and Write to content and actions (required by Software Templates to create new repositories)
+```
+
 **The file created above contains credentials. Handle it with care.**
 
 The rest of the installation process assumes the GitHub app credentials are available at `private/github-integration.yaml`
