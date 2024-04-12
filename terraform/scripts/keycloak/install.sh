@@ -3,6 +3,7 @@ set -e -o pipefail
 
 export USER1_PASSWORD=${1}
 ADMIN_PASSWORD=${2}
+export KEYCLOAK_DOMAIN_NAME=${3}
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
 echo "waiting for keycloak to be ready. may take a few minutes"

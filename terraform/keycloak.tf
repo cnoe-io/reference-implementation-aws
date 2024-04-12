@@ -213,7 +213,7 @@ resource "kubectl_manifest" "application_argocd_keycloak" {
   )
 
   provisioner "local-exec" {
-    command = "./install.sh '${random_password.keycloak_user_password.result}' '${random_password.keycloak_admin_password.result}'"
+    command = "./install.sh '${random_password.keycloak_user_password.result}' '${random_password.keycloak_admin_password.result}' '${local.kc_domain_name}'"
 
     working_dir = "${path.module}/scripts/keycloak"
     interpreter = ["/bin/bash", "-c"]
