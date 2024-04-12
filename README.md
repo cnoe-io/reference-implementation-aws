@@ -67,28 +67,23 @@ We strongly encourage you to create a **dedicated GitHub organization**. If you 
 
 There are two ways to create GitHub integration with Backstage. You can use the Backstage CLI, or create it manually. See [this page](https://backstage.io/docs/integrations/github/github-apps) for more information on creating one manually. Once the app is created, place it under the private directory with the name `github-integration.yaml`. 
 
-To create one with the CLI, follow the steps below.
+To create one with the CLI, follow the steps below. If you are using cli to create GitHub App, please make sure to select third option in the permissions prompt, if your GitHub App access needs publishing access to create GitHub repositories for your backstage templates.
 
 ```bash
 npx '@backstage/cli' create-github-app ${GITHUB_ORG_NAME}
 # If prompted, select all for permissions or select permissions listed in this page https://backstage.io/docs/integrations/github/github-apps#app-permissions
 # In the browser window, allow access to all repositories then install the app.
 
-# move it to a "private" location. 
-mkdir -p private
-GITHUB_APP_FILE=$(ls github-app-* | head -n1)
-mv ${GITHUB_APP_FILE} private/github-integration.yaml
-```
-
-If you are using the above process to GitHub App, please make sure to select third option below, if your GitHub App access needs publishing access to create GitHub repositories for your backstage templates:
-
-```bash
-npx '@backstage/cli' create-github-app ${GITHUB_ORG_NAME}
 ? Select permissions [required] (these can be changed later but then require approvals in all installations) (Press <space> to select, <a> to toggle all, <i> to invert selection,
 and <enter> to proceed)
  ◉ Read access to content (required by Software Catalog to ingest data from repositories)
  ◉ Read access to members (required by Software Catalog to ingest GitHub teams)
 ❯◯ Read and Write to content and actions (required by Software Templates to create new repositories)
+
+# move it to a "private" location. 
+mkdir -p private
+GITHUB_APP_FILE=$(ls github-app-* | head -n1)
+mv ${GITHUB_APP_FILE} private/github-integration.yaml
 ```
 
 **The file created above contains credentials. Handle it with care.**
