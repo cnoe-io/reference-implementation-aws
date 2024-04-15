@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: data-on-eks
+  name: tf-eks-observability
   labels:
-    app: data-on-eks
+    app: tf-eks-observability
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: data-on-eks
-  namespace: data-on-eks
+  name: tf-eks-observability
+  namespace: tf-eks-observability
   labels:
-    app: data-on-eks
+    app: tf-eks-observability
 rules:
   - apiGroups: [""]
     resources: ["secrets", "configmaps"]
@@ -20,16 +20,16 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: data-on-eks
-  namespace: data-on-eks
+  name: tf-eks-observability
+  namespace: tf-eks-observability
   labels:
-    app: data-on-eks
+    app: tf-eks-observability
 subjects:
 - kind: ServiceAccount
-  name: data-on-eks
+  name: tf-eks-observability
 roleRef:
   kind: Role
-  name: data-on-eks
+  name: tf-eks-observability
   apiGroup: rbac.authorization.k8s.io
 
 # allow for updating backstage config
@@ -37,10 +37,10 @@ roleRef:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: data-on-eks
+  name: tf-eks-observability
   namespace: backstage
   labels:
-    app: data-on-eks
+    app: tf-eks-observability
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -52,15 +52,15 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: data-on-eks
+  name: tf-eks-observability
   namespace: backstage
   labels:
-    app: data-on-eks
+    app: tf-eks-observability
 subjects:
   - kind: ServiceAccount
-    name: data-on-eks
-    namespace: data-on-eks
+    name: tf-eks-observability
+    namespace: tf-eks-observability
 roleRef:
   kind: Role
-  name: data-on-eks
+  name: tf-eks-observability
   apiGroup: rbac.authorization.k8s.io
