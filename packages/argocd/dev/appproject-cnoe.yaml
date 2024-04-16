@@ -38,5 +38,5 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: data-on-eks
       server: https://kubernetes.default.svc
-    - namespace: data-on-eks
+    - namespace: tf-eks-observability
       server: https://kubernetes.default.svc
