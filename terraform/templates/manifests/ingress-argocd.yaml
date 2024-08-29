@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: backstage
-  namespace: backstage
+  name: argocd-server-ingress
+  namespace: argocd
   annotations:
     cert-manager.io/cluster-issuer: 'letsencrypt-prod'
 spec:
@@ -19,6 +19,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: backstage
+                name: argocd-server
                 port:
-                  number: 7007
+                  name: https
