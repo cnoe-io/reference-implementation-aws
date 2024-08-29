@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - ${BACKSTAGE_DOMAIN_NAME}
-      secretName: backstage-prod-tls
+        - ${ARGOCD_DOMAIN_NAME}
+      secretName: argocd-prod-tls
   rules:
-    - host: ${BACKSTAGE_DOMAIN_NAME}
+    - host: ${ARGOCD_DOMAIN_NAME}
       http:
         paths:
           - path: /
