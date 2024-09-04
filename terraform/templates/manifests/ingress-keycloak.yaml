@@ -21,14 +21,14 @@ spec:
               service:
                 name: keycloak
                 port:
-                  number: 8081
+                  number: 8080
           - path: /
-            pathType: Exact
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: keycloak
                 port:
-                  number: 8081
+                  number: 8080
           - path: /realms
             pathType: Prefix
             backend:
