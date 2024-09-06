@@ -4,9 +4,9 @@ resource "kubectl_manifest" "application_argocd_cert_manager" {
   })
 }
 
-resource "null_resource" "wait_for_cert_manager" {
+resource "terraform_data" "wait_for_cert_manager" {
   provisioner "local-exec" {
-    command = "kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd application/cert-manager && kubectl wait --for=jsonpath=.status.sync.status=Synced --timeout=300s -n argocd application/cert-manager && sleep 60"
+    command = "kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd application/cert-manager && kubectl wait --for=jsonpath=.status.sync.status=Synced --timeout=300s -n argocd application/cert-manager"
   }
 
   depends_on = [kubectl_manifest.application_argocd_cert_manager]
@@ -14,7 +14,7 @@ resource "null_resource" "wait_for_cert_manager" {
 
 resource "kubectl_manifest" "cluster_issuer_prod" {
   depends_on = [
-    null_resource.wait_for_cert_manager,
+    terraform_data.wait_for_cert_manager,
     kubectl_manifest.application_argocd_ingress_nginx
   ]
   yaml_body = templatefile("${path.module}/templates/manifests/cluster-issuer.yaml", {

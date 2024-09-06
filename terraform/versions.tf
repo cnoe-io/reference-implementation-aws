@@ -18,6 +18,9 @@ terraform {
       source  = "alekc/kubectl"
       version = ">= 2.0.0"
     }
-    null = {}
+    http = {
+      source = "hashicorp/http"
+      version = ">= 3.4.4"
+    }
   }
 }
