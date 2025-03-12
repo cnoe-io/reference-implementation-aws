@@ -1,6 +1,8 @@
 
 ![overview](docs/images/overview.png)
 
+> **_NOTE:_** This repository is no longer maintained and has been superceded by [stacks](https://github.com/cnoe-io/stacks).
+
 
 > **_NOTE:_**  Applications deployed in this repository are not meant or configured for production.
 
