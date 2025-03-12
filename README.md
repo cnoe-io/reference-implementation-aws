@@ -1,6 +1,6 @@
 
 > [!CAUTION]
-> Don't execute the code without commenting the test cases. This repository is no longer maintained and has been superceded by [stacks](https://github.com/cnoe-io/stacks).
+> This repository is no longer maintained and has been superceded by [stacks](https://github.com/cnoe-io/stacks).
 
 ![overview](docs/images/overview.png)
 
