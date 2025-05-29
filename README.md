@@ -1,6 +1,6 @@
 
 > [!CAUTION]
-> The current version of the AWS reference implementation is no longer maintained. A new version is currently work in progress. Find more information about the new version in #49.
+> The current version of the AWS reference implementation is no longer maintained. A new version is currently work in progress. Find more information about the new version in issue #49.
 
 ![overview](docs/images/overview.png)
 
