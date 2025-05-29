@@ -1,6 +1,6 @@
 
 > [!CAUTION]
-> This repository is no longer maintained and has been superceded by [stacks](https://github.com/cnoe-io/stacks).
+> The current version of the AWS reference implementation is no longer maintained. A new version is currently work in progress. Find more information about the new version in #49.
 
 ![overview](docs/images/overview.png)
 
