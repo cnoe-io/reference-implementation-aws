@@ -3,7 +3,11 @@ kind: ClusterConfig
 metadata:
   name: cnoe-ref-impl
   region: us-west-2
-  version: "1.28"
+  version: "1.32"
+vpc:
+  cidr: "10.0.0.0/16"
+  nat:
+    gateway: Single
 managedNodeGroups:
   - name: managed-ng-1
     instanceType: m5.large
@@ -13,15 +17,14 @@ managedNodeGroups:
     volumeSize: 100
     ssh:
       allow: false
-    iam:
-      withAddonPolicies:
-        autoScaler: true
     labels:
       role: general-purpose
 iam:
   withOIDC: true
 addons:
-- name: aws-ebs-csi-driver
-  version: "v1.28.0-eksbuild.1"
-  attachPolicyARNs:
-  - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies:
+      ebsCSIController: true
+  - name: coredns
+  - name: kube-proxy
+  - name: vpc-cni

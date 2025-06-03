@@ -4,8 +4,15 @@ export GREEN='\033[0;32m'
 export PURPLE='\033[0;35m'
 export NC='\033[0m'
 
+files_for_subst() {
+  "${REPO_ROOT}/packages/argocd/values.yaml"
+}
 check_command() {
   command -v "$1" >/dev/null 2>&1
+}
+
+config_subst() {
+  yq eval '.key.path = "new_value"' -i file.yaml
 }
 
 # Validation
@@ -32,14 +39,14 @@ if [ "$( grep  -v "^$\|^ *$" -c  "${DEFAULT_KUBECONFIG_FILE}" )" -eq "0" ]; then
     exit 1
 fi
 
-kubectl cluster-info > /dev/null
-if [ $? -ne 0 ]; then
-  echo "Could not get cluster info. Ensure kubectl is configured correctly"
-  exit 1
-fi
+# kubectl cluster-info > /dev/null
+# if [ $? -ne 0 ]; then
+#   echo "Could not get cluster info. Ensure kubectl is configured correctly"
+#   exit 1
+# fi
 
-minor=$(kubectl version --client=true -o yaml | yq '.clientVersion.minor')
-if [[ ${minor} -lt "27" ]]; then
-  echo -e "${RED} ${minor} this kubectl version is not supported. Please upgrade to 1.27+ ${NC}"
-  exit 5
-fi
+# minor=$(kubectl version --client=true -o yaml | yq '.clientVersion.minor')
+# if [[ ${minor} -lt "27" ]]; then
+#   echo -e "${RED} ${minor} this kubectl version is not supported. Please upgrade to 1.27+ ${NC}"
+#   exit 5
+# fi
