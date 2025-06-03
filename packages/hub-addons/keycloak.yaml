@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak
+  namespace: argocd
+  labels:
+    env: dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: cnoe
+  sources:
+    - repoURL: https://charts.bitnami.com/bitnami
+      targetRevision: HEAD
+      path: ${PATH}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: keycloak
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
