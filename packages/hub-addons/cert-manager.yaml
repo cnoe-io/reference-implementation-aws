@@ -20,6 +20,9 @@ spec:
     - repoURL: https://github.com/punkwalker/reference-implementation-aws
       targetRevision: ref-impl-v2
       ref: values
+    - repoURL: https://github.com/punkwalker/reference-implementation-aws
+      targetRevision: ref-impl-v2
+      path: packages/cert-manager/manifests
   destination:
     server: "https://kubernetes.default.svc"
     namespace: cert-manager
