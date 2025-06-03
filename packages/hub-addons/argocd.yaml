@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd
+  name: argocd-hub
   namespace: argocd
   labels:
     env: dev
@@ -24,7 +24,7 @@ spec:
       ref: values
     - repoURL: https://github.com/punkwalker/reference-implementation-aws
       targetRevision: ref-impl-v2
-      path: manifests
+      path: packages/argocd/manifests
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

@@ -16,7 +16,7 @@ spec:
       helm:
         releaseName: ingress-nginx
         valueFiles:
-          - $values/ingress-nginx/dev/values.yaml
+          - $values/packages/ingress-nginx/values.yaml
     - repoURL: https://github.com/punkwalker/reference-implementation-aws.git
       targetRevision: ref-impl-v2
       ref: values
