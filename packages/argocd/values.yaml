@@ -1506,12 +1506,12 @@ configs:
 #   # @default -- `""` (defaults to global.logging.level)
 #   # logLevel: ""
 
-# ## Redis
-# redis:
-#   # -- Enable redis
-#   enabled: true
-#   # -- Redis name
-#   name: redis
+## Redis
+redis:
+  # -- Disable redis
+  enabled: false
+  # # -- Redis name
+  # name: redis
 
 #   # -- Runtime class name for redis
 #   # @default -- `""` (defaults to global.runtimeClassName)
