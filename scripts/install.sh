@@ -61,10 +61,10 @@ stringData:
 EOF
 
 # Run idpbuilder for applying packages
-idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages/"
+idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages/" -c "argocd:${CLUSTER_SECRET_FILE}"
 
 # Apply remote cluster secret
-kubectl apply -f "$CLUSTER_SECRET_FILE"
+# kubectl apply -f "$CLUSTER_SECRET_FILE"
 
 
 # REPO_ROOT=$(git rev-parse --show-toplevel)

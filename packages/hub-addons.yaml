@@ -13,9 +13,15 @@ spec:
     name: eks-krew
     namespace: argocd
   sources:
-    - repoURL: cnoe://hub-addons
+    - repoURL: cnoe://hub-addons-appset
       targetRevision: HEAD
-      path: "."
+      path: chart
+      helm:
+        valueFiles:
+          - $values/values.yaml
+    - repoURL: cnoe://hub-addons-appset
+      targetRevision: HEAD
+      ref: values
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

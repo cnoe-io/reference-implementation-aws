@@ -18,10 +18,10 @@ spec:
       helm:
         valueFiles:
           - $values/values.yaml
-    - repoURL: cnoe://argocd
+    - repoURL: cnoe://argo-cd
       targetRevision: HEAD
       ref: values
-    - repoURL: cnoe://argocd
+    - repoURL: cnoe://argo-cd
       targetRevision: HEAD
       path: manifests
   syncPolicy:
