@@ -697,7 +697,7 @@ ingress:
   ## e.g:
     - hosts:
       - keycloak.advaitt.people.aws.dev
-      secretName: argocd-prod-tls
+      secretName: keycloak-prod-tls
   ##
   secrets: []
   ## @param ingress.extraRules Additional rules to be covered with this ingress record

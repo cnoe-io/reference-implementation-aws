@@ -22,7 +22,7 @@ spec:
   data:
   - secretKey: password
     remoteRef:
-      conversionStrategy: Default
+      conversionStrategy: Default # TODO: Remove when figured out how to avoid Diffs for CR defaults
       decodingStrategy: None
       key: cnoe-reference-implemntation-aws
       metadataPolicy: None

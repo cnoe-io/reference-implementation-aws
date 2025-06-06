@@ -37,13 +37,13 @@ cat << EOF > "$CLUSTER_SECRET_FILE"
 apiVersion: v1
 kind: Secret
 metadata:
-  name: $CLUSTER_NAME
+  name: hub
   namespace: argocd
   labels:
     argocd.argoproj.io/secret-type: cluster
 type: Opaque
 stringData:
-  name: $CLUSTER_NAME
+  name: hub
   server: $SERVER_URL
   clusterResources: "true"
   config: |
