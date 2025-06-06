@@ -27,17 +27,8 @@ spec:
       targetRevision: HEAD
       path: manifests
   syncPolicy:
-    automated:
-      allowEmpty: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-    retry:
-      limit: -1
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 10m
     automated:
       selfHeal: true
       prune: true
