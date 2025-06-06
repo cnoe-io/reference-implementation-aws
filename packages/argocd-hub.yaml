@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-hub
+  name: argocd-in-cluster
   namespace: argocd
   labels:
     env: dev
@@ -18,6 +18,8 @@ spec:
       helm:
         valueFiles:
           - $values/values.yaml
+        ignoreMissingValueFiles: true
+        releaseName: argocd
     - repoURL: cnoe://argo-cd
       targetRevision: HEAD
       ref: values

@@ -1,3 +1,6 @@
+valueFiles:
+  - "."
+
 argocd:
   enabled: true
   chartName: argo-cd
@@ -7,10 +10,8 @@ argocd:
   chartRepository: "https://argoproj.github.io/argo-helm"
   additionalResources:
     path: true
-    manifestPath: "argocd/manifests"
+    manifestPath: "manifests"
     type: "manifests"
-valueFiles:
-  - "."
 
 aws-load-balancer-controller:
   enabled: true
@@ -43,6 +44,66 @@ aws-load-balancer-controller:
   #     - key: enable_argocd
   #       operator: In
   #       values: ['true']
+ingress-nginx:
+  enabled: true
+  chartName: ingress-nginx
+  namespace: ingress-nginx
+  releaseName: ingress-nginx
+  defaultVersion: "4.7.0"
+  chartRepository: "https://kubernetes.github.io/ingress-nginx"
+
+external-dns:
+  enabled: true
+  releaseName: external-dns
+  namespace: external-dns
+  chartName: external-dns
+  chartRepository: https://kubernetes-sigs.github.io/external-dns
+  defaultVersion: "1.16.1"
+  # selector:
+  #   matchExpressions:
+  #     - key: enable_external_dns
+  #       operator: In
+  #       values: ['true']
+
+external-secrets:
+  enabled: true
+  enableAckPodIdentity: false
+  namespace: external-secrets
+  chartName: external-secrets
+  defaultVersion: "0.17.0"
+  chartRepository: "https://charts.external-secrets.io"
+  # additionalResources:
+  #   path: "charts/fleet-secret"
+  #   type: "ecr-token"
+  #   helm:
+  #    releaseName: ecr-token
+  additionalResources:
+    path: true
+    manifestPath: "manifests"
+    type: "manifests"
+  # selector:
+  #   matchExpressions:
+  #     - key: enable_external_secrets
+  #       operator: In
+  #       values: ['true']
+  # valuesObject:
+  #   installCRDs:  '{{default toBool(true) toBool((index .metadata.labels "use_external_secrets"))}}'
+  #   serviceAccount:
+  #     name: "external-secrets-sa"
+  #     annotations:
+  #       eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "external_secrets_iam_role_arn")}}'
+
+cert-manager:
+  enabled: true
+  chartName: cert-manager
+  namespace: cert-manager
+  releaseName: cert-manager
+  defaultVersion: "1.17.2"
+  chartRepository: "https://charts.jetstack.io"
+  additionalResources:
+    path: true
+    manifestPath: "manifests"
+    type: "manifests"
 # iam-chart:
 #   enabled: false
 #   enableAckPodIdentity: false 
@@ -123,29 +184,7 @@ aws-load-balancer-controller:
 #       name:  'route53-controller'
 #       annotations:
 #         eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "ack_route53_controller_role_arn")}}'
-# external-secrets:
-#   enabled: true
-#   enableAckPodIdentity: false
-#   namespace: external-secrets
-#   chartName: external-secrets
-#   defaultVersion: "0.10.3"
-#   chartRepository: "https://charts.external-secrets.io"
-#   additionalResources:
-#     path: "charts/fleet-secret"
-#     type: "ecr-token"
-#     helm:
-#      releaseName: ecr-token
-#   selector:
-#     matchExpressions:
-#       - key: enable_external_secrets
-#         operator: In
-#         values: ['true']
-#   valuesObject:
-#     installCRDs:  '{{default toBool(true) toBool((index .metadata.labels "use_external_secrets"))}}'
-#     serviceAccount:
-#       name: "external-secrets-sa"
-#       annotations:
-#         eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "external_secrets_iam_role_arn")}}'
+
 # metrics-server:
 #   enabled: false
 #   namespace: kube-system
@@ -222,17 +261,5 @@ aws-load-balancer-controller:
 #   selector:
 #     matchExpressions:
 #       - key: enable_kro_resource_groups
-#         operator: In
-#         values: ['true']
-# external-dns:
-#   enabled: false
-#   releaseName: external-dns
-#   namespace: '{{.metadata.annotations.external_dns_namespace}}'
-#   chartName: external-dns
-#   chartRepository: https://kubernetes-sigs.github.io/external-dns
-#   defaultVersion: "1.14.5"
-#   selector:
-#     matchExpressions:
-#       - key: enable_external_dns
 #         operator: In
 #         values: ['true']
