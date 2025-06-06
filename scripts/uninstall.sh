@@ -23,20 +23,38 @@ fi
 CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
 AWS_REGION=$(yq '.region' config.yaml)
 
-
-
+ADDONS=(
+  cert-manager
+  external-dns
+  external-secrets
+  ingress-nginx
+  aws-load-balancer-controller
+)
 # KUBECONFIG_FILE=$(mktemp)
 # aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE
 # KUBECONFIG=$(kubectl config --kubeconfig $KUBECONFIG_FILE view --raw -o json)
 # SERVER_URL=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster.server')
 # CA_DATA=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster."certificate-authority-data"')
 
-for app in $(kubectl get applications.argoproj.io -n argocd | awk '{ print $1}' | head | grep -v 'argocd' | grep -v 'NAME')
-  do 
-    kubectl delete applications.argoproj.io $app -n argocd
-  done
+# Delete all application sets except argocd
+for app in "${ADDONS[@]}"; do 
+  kubectl delete applicationsets.argoproj.io -n argocd $app
+done
 
-kubectl delete applications.argoproj.io argocd-hub -n argocd
+# Patch ArgoCD AppSet to remove finalizer and Delete it
+kubectl patch applicationsets.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl delete applicationsets.argoproj.io -n argocd argocd
+
+# Delete ArgoCD App
+kubectl delete applicationsets.argoproj.io -n argocd argocd
+
+# Wait for 3mins for ArgoCD to be deleted
+sleep 180
+
+# Patch ArgoCD App to remove finalizer for completing deletion of ArgoCD App.
+kubectl patch applications.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
+
+# kubectl delete applications.argoproj.io argocd-hub -n argocd
 # cd "${TF_DIR}"
 # terraform destroy
 

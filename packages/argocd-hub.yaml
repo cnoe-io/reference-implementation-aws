@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-in-cluster
+  name: argocd-hub
   namespace: argocd
   labels:
     env: dev
@@ -9,7 +9,7 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
-    name: eks-krew
+    name: hub
     namespace: argocd
   sources:
     - chart: argo-cd

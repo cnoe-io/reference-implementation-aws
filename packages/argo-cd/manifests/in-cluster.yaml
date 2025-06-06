@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: in-cluster
+  name: hub
   namespace: argocd
   labels:
     argocd.argoproj.io/secret-type: cluster
     clusterClass: "control-plane"
-    clusterName: "in-cluster"
+    clusterName: "hub"
     environment: "control-plane"
   annotations:
     addons_repo_url: "https://github.com/punkwalker/reference-implementation-aws"
@@ -14,5 +14,5 @@ metadata:
     addons_repo_basepath: "packages"
 type: Opaque
 stringData:
-  name: in-cluster
+  name: hub
   server: https://kubernetes.default.svc

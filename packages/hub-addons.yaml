@@ -10,7 +10,7 @@ metadata:
 spec:
   project: default
   destination:
-    name: eks-krew
+    name: hub
     namespace: argocd
   sources:
     - repoURL: cnoe://hub-addons-appset

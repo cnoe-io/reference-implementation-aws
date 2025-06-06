@@ -104,6 +104,18 @@ cert-manager:
     path: true
     manifestPath: "manifests"
     type: "manifests"
+
+keycloak:
+  enabled: true
+  chartName: keycloak
+  namespace: keycloak
+  releaseName: keycloak
+  defaultVersion: "24.7.3"
+  chartRepository: "https://charts.bitnami.com/bitnami"
+  additionalResources:
+    path: true
+    manifestPath: "manifests"
+    type: "manifests"
 # iam-chart:
 #   enabled: false
 #   enableAckPodIdentity: false 
