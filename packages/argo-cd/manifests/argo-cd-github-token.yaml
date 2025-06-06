@@ -22,5 +22,8 @@ spec:
   data:
   - secretKey: password
     remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
       key: cnoe-reference-implemntation-aws
+      metadataPolicy: None
       property: argo-cd-github-token
