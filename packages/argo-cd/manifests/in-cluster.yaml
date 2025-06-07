@@ -1,3 +1,4 @@
+# TODO: Figure out how to create this secret from AWS Secret Manager or something
 apiVersion: v1
 kind: Secret
 metadata:
