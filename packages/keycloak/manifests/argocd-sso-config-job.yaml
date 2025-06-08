@@ -1,0 +1,109 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-config-job
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "40"
+data:
+  argocd-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "argocd",
+      "name": "ArgoCD Client",
+      "description": "Used for ArgoCD SSO",
+      "publicClient": true,
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "https://argocd.advaitt.people.aws.dev",
+      "baseUrl": "/applications",
+      "redirectUris": [
+        "https://argocd.advaitt.people.aws.dev/auth/callback",
+        "https://argocd.advaitt.people.aws.dev/pkce/verify",
+        "http://localhost:8085/auth/callback"
+      ],
+      "adminUrl": "https://argocd.advaitt.people.aws.dev",
+      "webOrigins": [
+        "https://argocd.advaitt.people.aws.dev"
+      ]
+    }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: argocd-config
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"
+spec:
+  template:
+    metadata:
+      generateName: argocd-config
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: keycloak-config
+          secret:
+            secretName: keycloak-config
+        - name: config-payloads
+          configMap:
+            name: argocd-config-job
+      containers:
+        - name: argocd-config
+          image: docker.io/library/ubuntu:22.04
+          volumeMounts:
+            - name: keycloak-config
+              readOnly: true
+              mountPath: "/var/secrets/"
+            - name: config-payloads
+              readOnly: true
+              mountPath: "/var/config/"
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              #! /bin/bash
+              set -ex -o pipefail
+              apt -qq update && apt -qq install curl jq gettext-base -y
+              
+              ADMIN_PASSWORD=$(cat /var/secrets/KEYCLOAK_ADMIN_PASSWORD)
+              KEYCLOAK_URL=http://keycloak.keycloak.svc.cluster.local:80
+              KEYCLOAK_TOKEN=$(curl -sS  --fail-with-body -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+                --data-urlencode "username=cnoe-admin" \
+                --data-urlencode "password=${ADMIN_PASSWORD}" \
+                --data-urlencode "grant_type=password" \
+                --data-urlencode "client_id=admin-cli" \
+                ${KEYCLOAK_URL}/realms/cnoe/protocol/openid-connect/token | jq -e -r '.access_token')
+              
+              set +e
+              
+              curl --fail-with-body -H "Authorization: bearer ${KEYCLOAK_TOKEN}"  "${KEYCLOAK_URL}/admin/realms/cnoe"  &> /dev/null
+              if [ $? -ne 0 ]; then
+                exit 1
+              fi
+              set -e
+              
+              echo "creating ArgoCD client"
+              curl -sS --fail-with-body -H "Content-Type: application/json" \
+                -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+                -X POST --data @/var/config/argocd-client-payload.json \
+                  ${KEYCLOAK_URL}/admin/realms/cnoe/clients
+              
+              CLIENT_ID=$(curl -sS --fail-with-body -H "Content-Type: application/json" \
+                -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+                -X GET ${KEYCLOAK_URL}/admin/realms/cnoe/clients | jq -e -r  '.[] | select(.clientId == "argocd") | .id')
+              
+              CLIENT_SCOPE_GROUPS_ID=$(curl -sS --fail-with-body -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X GET  ${KEYCLOAK_URL}/admin/realms/cnoe/client-scopes | jq -e -r  '.[] | select(.name == "groups") | .id')
+              curl -sS -H "Content-Type: application/json" -H "Authorization: bearer ${KEYCLOAK_TOKEN}" -X PUT  ${KEYCLOAK_URL}/admin/realms/cnoe/clients/${CLIENT_ID}/default-client-scopes/${CLIENT_SCOPE_GROUPS_ID}
+
+
