@@ -61,9 +61,10 @@ stringData:
   POSTGRES_HOST: "postgresql.backstage.svc.cluster.local"
   POSTGRES_PORT: "5432"
   POSTGRES_USER: "backstage"
+  POSTGRES_DB: "backstage"
   BACKSTAGE_FRONTEND_URL: "https://backstage.advaitt.people.aws.dev"
   KEYCLOAK_NAME_METADATA: "https://keycloak.advaitt.people.aws.dev/realms/cnoe/.well-known/openid-configuration"
-  ARGO_WORKFLOWS_URL: ""
+  ARGO_WORKFLOWS_URL: "https://argo-workflow.advaitt.people.aws.dev"
   ARGO_CD_URL: "https://argocd.advaitt.people.aws.dev"
 ---
 # Source: backstage/templates/secrets.yaml
@@ -243,24 +244,6 @@ rules:
     - watch
 ---
 # Source: backstage/templates/rbac.yaml
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: backstage-read-all
-  labels:
-    helm.sh/chart: backstage-0.1.0
-    app.kubernetes.io/name: backstage
-    app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "v0.0.2"
-    app.kubernetes.io/managed-by: Helm
-subjects:
-- kind: ServiceAccount
-  name: backstage
-  namespace: backstage
-roleRef:
-  kind: ClusterRole
-  name: read-all
-  apiGroup: rbac.authorization.k8s.io---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -300,6 +283,26 @@ rules:
 - apiGroups: ["argoproj.io"]
   resources: ["workflows"]
   verbs: ["*"]
+---
+# Source: backstage/templates/rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: backstage-read-all
+  labels:
+    helm.sh/chart: backstage-0.1.0
+    app.kubernetes.io/name: backstage
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.0.2"
+    app.kubernetes.io/managed-by: Helm
+subjects:
+- kind: ServiceAccount
+  name: backstage
+  namespace: backstage
+roleRef:
+  kind: ClusterRole
+  name: read-all
+  apiGroup: rbac.authorization.k8s.io
 ---
 # Source: backstage/templates/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -471,8 +474,6 @@ spec:
           envFrom:
             - secretRef:
                 name: backstage-env-vars
-            - secretRef:
-                name: postgresql-config
 ---
 # Source: backstage/templates/postgresql.yaml
 apiVersion: apps/v1

@@ -24,7 +24,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
 
-{{- if .Values.rbac.argoWorkflows.create -}}
+{{- if .Values.rbac.argoWorkflows.create }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
