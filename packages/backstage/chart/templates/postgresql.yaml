@@ -1,20 +1,4 @@
 {{- if .Values.postgresql.enabled -}}
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: {{ include "postgresql.fullname" . }}
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ include "postgresql.fullname" . }}
-    {{- include "backstage.labels" . | nindent 4 }}
-spec:
-  storageClassName: {{ .Values.postgresql.persistence.storageClass }}
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: {{ .Values.postgresql.persistence.size }}
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -50,10 +34,15 @@ spec:
         - name: data
           mountPath: /var/lib/postgresql/data
           subPath: postgress
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: {{ include "postgresql.fullname" . }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .Values.postgresql.persistence.size }}
 ---
 apiVersion: v1
 kind: Service

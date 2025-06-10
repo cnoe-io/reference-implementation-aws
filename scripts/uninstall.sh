@@ -23,6 +23,12 @@ fi
 # Delete idpbuilder local kind cluster instance
 idpbuilder delete cluster --name localdev
 
+# Get EKS kubeconfig
+CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
+AWS_REGION=$(yq '.region' config.yaml)
+KUBECONFIG_FILE=$(mktemp)
+aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+
 # Addons to be deleted
 ADDONS=(
   backstage
@@ -35,30 +41,27 @@ ADDONS=(
 )
 
 # Delete all application sets except argocd
-for app in "${ADDONS[@]}"; do 
-  kubectl delete applicationsets.argoproj.io -n argocd $app
+for app in "${ADDONS[@]}"; do
+  echo "Deleting $app AppSet..."
+  kubectl delete applicationsets.argoproj.io -n argocd $app --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
   # Wait for AppSet deletion to complete before moving to next AppSet
-  while kubectl get applications.argoproj.io -n argocd -l addonName=$app &>/dev/null; do
+  while [ $(kubectl get applications.argoproj.io -n argocd -l addonName=$app --no-headers --kubeconfig $KUBECONFIG_FILE 2>/dev/null | wc -l) -ne 0 ]; do
     echo "Waiting for $app AppSet to be deleted..."
-    sleep 5
+    sleep 10
   done
 done
 
-# Patch ArgoCD AppSet to remove finalizer and Delete it
-# kubectl patch applicationsets.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
-# kubectl delete applicationsets.argoproj.io -n argocd argocd
-
 # Delete ArgoCD App
-kubectl delete applicationsets.argoproj.io -n argocd argocd
+echo "Deleting argocd AppSet..."
+kubectl delete applicationsets.argoproj.io -n argocd argocd --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 
-# Wait for 3mins for ArgoCD to be deleted
-while kubectl get applications.argoproj.io -n argocd -l addonName=argocd &>/dev/null; do
-  echo "Waiting for argocd AppSet to be deleted..."
-  sleep 5
-done
+# Wait for 2mins for ArgoCD to be deleted
+echo "Waiting for argocd AppSet to be deleted..."
+sleep 120
 
-# Patch ArgoCD App to remove finalizer for completing deletion of ArgoCD App.
-# kubectl patch applications.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
+# Remove PVCs for keycloak
+# echo "Deleting PVCs for keycloak..."
+# kubectl delete pvc -n keycloak data-keycloak-postgresql-0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 
 # kubectl delete applications.argoproj.io argocd-hub -n argocd
 # cd "${TF_DIR}"

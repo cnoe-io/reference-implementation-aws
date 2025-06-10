@@ -644,6 +644,7 @@ ingress:
   ##
   annotations:
     cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    argocd.argoproj.io/sync-wave: "60"
   ## @param ingress.labels Additional labels for the Ingress resource.
   ## e.g:
   ## labels:

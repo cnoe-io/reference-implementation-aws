@@ -27,7 +27,7 @@ AWS_REGION=$(yq '.region' config.yaml)
 
 
 KUBECONFIG_FILE=$(mktemp)
-aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE
+aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 KUBECONFIG=$(kubectl config --kubeconfig $KUBECONFIG_FILE view --raw -o json)
 SERVER_URL=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster.server')
 CA_DATA=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster."certificate-authority-data"')
@@ -63,9 +63,12 @@ EOF
 # Run idpbuilder for applying packages
 idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages/" -c "argocd:${CLUSTER_SECRET_FILE}"
 
-# Apply remote cluster secret
-# kubectl apply -f "$CLUSTER_SECRET_FILE"
+# Wait for hub-addons to be healthy
+kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd application/hub-addons --timeout=5m
+sleep 30
 
+# Finally wait for ArgoCD on the hub Cluster to be Healthy
+kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd application/argocd-hub --kubeconfig $KUBECONFIG_FILE --timeout=-15m
 
 # REPO_ROOT=$(git rev-parse --show-toplevel)
 
