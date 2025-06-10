@@ -29,8 +29,8 @@ metadata:
   labels:
     {{- include "application-sets.labels" $ | nindent 4 }}
     {{- if $chartConfig.labelsAppSet }}{{- toYaml $chartConfig.labelsAppSet | nindent 4 }}{{- end }}
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
 spec:
   goTemplate: true
   {{- if $chartConfig.goTemplateOptions }}

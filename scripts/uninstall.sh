@@ -20,10 +20,12 @@ if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
   exit 0
 fi
 
-CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
-AWS_REGION=$(yq '.region' config.yaml)
+# Delete idpbuilder local kind cluster instance
+idpbuilder delete cluster --name localdev
 
+# Addons to be deleted
 ADDONS=(
+  backstage
   keycloak
   cert-manager
   external-dns
@@ -31,29 +33,32 @@ ADDONS=(
   ingress-nginx
   aws-load-balancer-controller
 )
-# KUBECONFIG_FILE=$(mktemp)
-# aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE
-# KUBECONFIG=$(kubectl config --kubeconfig $KUBECONFIG_FILE view --raw -o json)
-# SERVER_URL=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster.server')
-# CA_DATA=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster."certificate-authority-data"')
 
 # Delete all application sets except argocd
 for app in "${ADDONS[@]}"; do 
   kubectl delete applicationsets.argoproj.io -n argocd $app
+  # Wait for AppSet deletion to complete before moving to next AppSet
+  while kubectl get applications.argoproj.io -n argocd -l addonName=$app &>/dev/null; do
+    echo "Waiting for $app AppSet to be deleted..."
+    sleep 5
+  done
 done
 
 # Patch ArgoCD AppSet to remove finalizer and Delete it
-kubectl patch applicationsets.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
-kubectl delete applicationsets.argoproj.io -n argocd argocd
+# kubectl patch applicationsets.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
+# kubectl delete applicationsets.argoproj.io -n argocd argocd
 
 # Delete ArgoCD App
 kubectl delete applicationsets.argoproj.io -n argocd argocd
 
 # Wait for 3mins for ArgoCD to be deleted
-sleep 600
+while kubectl get applications.argoproj.io -n argocd -l addonName=argocd &>/dev/null; do
+  echo "Waiting for argocd AppSet to be deleted..."
+  sleep 5
+done
 
 # Patch ArgoCD App to remove finalizer for completing deletion of ArgoCD App.
-kubectl patch applications.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
+# kubectl patch applications.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'
 
 # kubectl delete applications.argoproj.io argocd-hub -n argocd
 # cd "${TF_DIR}"
