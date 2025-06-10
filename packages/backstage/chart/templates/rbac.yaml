@@ -1,54 +1,52 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: backstage
-  namespace: backstage
-
----
+{{- if .Values.rbac.create -}}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: read-all
+  labels:
+    {{- include "backstage.labels" . | nindent 4 }}
 rules:
-- apiGroups: ["*"]
-  resources: ["*"]
-  verbs: ["get", "list", "watch"]
+{{- toYaml .Values.rbac.rules | nindent 2 }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: backstage-read-all
+  labels:
+    {{- include "backstage.labels" . | nindent 4 }}
 subjects:
 - kind: ServiceAccount
-  name: backstage
-  namespace: backstage
+  name: {{ include "backstage.serviceAccountName" . }}
+  namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
   name: read-all
   apiGroup: rbac.authorization.k8s.io
+{{- end }}
+
+{{- if .Values.rbac.argoWorkflows.create -}}
 ---
-# These are needed for the argo workflow plugin to create workflows during scaffolding.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: backstage-argo-worfklows
+  labels:
+    {{- include "backstage.labels" . | nindent 4 }}
 rules:
-- apiGroups: ["argoproj.io"]
-  resources: ["workflows"]
-  verbs: ["create"]
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["create"]  
+{{- toYaml .Values.rbac.argoWorkflows.rules | nindent 2 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: backstage-argo-worfklows
+  labels:
+    {{- include "backstage.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: backstage-argo-worfklows
 subjects:
 - kind: ServiceAccount
-  name: backstage
-  namespace: backstage
+  name: {{ include "backstage.serviceAccountName" . }}
+  namespace: {{ .Values.namespace }}
+{{- end }}

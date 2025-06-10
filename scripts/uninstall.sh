@@ -24,6 +24,7 @@ CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
 AWS_REGION=$(yq '.region' config.yaml)
 
 ADDONS=(
+  keycloak
   cert-manager
   external-dns
   external-secrets
@@ -49,7 +50,7 @@ kubectl delete applicationsets.argoproj.io -n argocd argocd
 kubectl delete applicationsets.argoproj.io -n argocd argocd
 
 # Wait for 3mins for ArgoCD to be deleted
-sleep 180
+sleep 600
 
 # Patch ArgoCD App to remove finalizer for completing deletion of ArgoCD App.
 kubectl patch applications.argoproj.io -n argocd argocd --type json -p '[{"op": "remove", "path": "/metadata/finalizers"}]'

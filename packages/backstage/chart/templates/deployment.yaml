@@ -2,11 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backstage
-  namespace: backstage
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: backstage
+    {{- include "backstage.labels" . | nindent 4 }}
 spec:
+  replicas: {{ .Values.backstage.replicas }}
+  selector:
+    matchLabels:
+      app: backstage
   template:
+    metadata:
+      labels:
+        app: backstage
     spec:
-      serviceAccountName: backstage
+      serviceAccountName: {{ include "backstage.serviceAccountName" . }}
       volumes:
         - name: backstage-config
           projected:
@@ -28,12 +38,18 @@ spec:
                       path: k8s-config.yaml
       containers:
         - name: backstage
-          image: public.ecr.aws/cnoe-io/backstage:v0.0.2
+          image: "{{ .Values.backstage.image.repository }}:{{ .Values.backstage.image.tag }}"
+          imagePullPolicy: {{ .Values.backstage.image.pullPolicy }}
           command:
             - node
             - packages/backend
             - --config
             - config/app-config.yaml
+          ports:
+            - name: http
+              containerPort: {{ .Values.backstage.config.backend.listen.port }}
+          resources:
+            {{- toYaml .Values.backstage.resources | nindent 12 }}
           volumeMounts:
             - name: backstage-config
               mountPath: "/app/config"
@@ -41,3 +57,5 @@ spec:
           envFrom:
             - secretRef:
                 name: backstage-env-vars
+            - secretRef:
+                name: postgresql-config

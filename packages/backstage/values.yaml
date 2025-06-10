@@ -1,0 +1,130 @@
+# Default values for backstage chart
+nameOverride: ""
+fullnameOverride: ""
+
+# Namespace to deploy resources
+namespace: backstage
+
+# Backstage deployment configuration
+backstage:
+  # image:
+  #   repository: public.ecr.aws/cnoe-io/backstage
+  #   tag: v0.0.2
+  #   pullPolicy: IfNotPresent
+  # replicas: 1
+  # resources:
+  #   limits:
+  #     memory: 1Gi
+  #   requests:
+  #     cpu: 200m
+  #     memory: 512Mi
+  # serviceAccount:
+  #   create: true
+  #   name: backstage
+  config:
+    app:
+      # title: CNOE Backstage
+      baseUrl: "https://backstage.advaitt.people.aws.dev"
+    # organization:
+    #   name: CNOE
+    backend:
+      baseUrl: "https://backstage.advaitt.people.aws.dev"
+      # listen:
+      #   port: 7007
+      # csp:
+      #   connectsrc: ["'self'", 'http:', 'https:']
+      cors:
+        origin: "https://backstage.advaitt.people.aws.dev"
+        # methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+        # credentials: true
+      database:
+        client: pg
+        # connection:
+        #   host: postgresql
+        #   port: 5432
+        #   user: postgres
+        #   password: postgres
+      # cache:
+      #   store: memory
+    # integrations:
+    #   github:
+    #     - host: github.com
+          # Token will be provided via secret
+    # auth:
+    #   environment: development
+    #   session:
+    #     secret: "MW2sV-sIPngEl26vAzatV-6VqfsgAx4bPIz7PuE_2Lk="
+    #   providers:
+    #     keycloakoidc:
+    #       development:
+    #         clientId: backstage
+    #         scope: 'openid profile email groups'
+    #         prompt: auto
+#     catalog:
+#       import:
+#         entityFilename: catalog-info.yaml
+#         pullRequestBranchName: backstage-integration
+#       rules:
+#         - allow: [Component, System, API, Resource, Location, Template]
+#       locations:
+#         - type: url
+#           target: https://github.com/awslabs/backstage-templates-on-eks/blob/main/catalog-info.yaml
+#     kubernetes:
+#       serviceLocatorMethod:
+#         type: 'multiTenant'
+
+# # PostgreSQL configuration
+# postgresql:
+#   enabled: true
+#   image:
+#     repository: docker.io/library/postgres
+#     tag: 15.3-alpine3.18
+#     pullPolicy: IfNotPresent
+#   resources:
+#     limits:
+#       memory: 500Mi
+#     requests:
+#       cpu: 100m
+#       memory: 300Mi
+#   persistence:
+#     enabled: true
+#     storageClass: gp2
+#     size: 1Gi
+#   env:
+#     POSTGRES_USER: postgres
+#     POSTGRES_PASSWORD: postgres
+#     POSTGRES_DB: backstage
+
+# # RBAC configuration
+# rbac:
+#   create: true
+#   rules:
+#     - apiGroups: ["*"]
+#       resources: ["*"]
+#       verbs: ["get", "list", "watch"]
+#   argoWorkflows:
+#     create: true
+#     rules:
+#       - apiGroups: ["argoproj.io"]
+#         resources: ["workflows"]
+#         verbs: ["create"]
+#       - apiGroups: [""]
+#         resources: ["configmaps"]
+#         verbs: ["create"]
+
+# # User RBAC configuration
+# userRbac:
+#   enabled: true
+#   superuserGroup: superuser
+#   backstageUsersGroup: backstage-users
+
+# Environment variables for Backstage
+env:
+  # These will be stored in a secret
+  # POSTGRES_HOST: postgresql.backstage.svc.cluster.local
+  # POSTGRES_PORT: "5432"
+  # POSTGRES_USER: backstage
+  BACKSTAGE_FRONTEND_URL: "https://backstage.advaitt.people.aws.dev"
+  KEYCLOAK_NAME_METADATA: "https://keycloak.advaitt.people.aws.dev/realms/cnoe/.well-known/openid-configuration"
+  # ARGO_WORKFLOWS_URL: ""
+  ARGO_CD_URL: "https://argocd.advaitt.people.aws.dev"

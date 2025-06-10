@@ -116,6 +116,18 @@ keycloak:
     path: true
     manifestPath: "manifests"
     type: "manifests"
+
+backstage:
+  enabled: true
+  chartName: backstage
+  namespace: backstage
+  releaseName: backstage
+  type: chart
+  path: packages/backstage/chart
+  additionalResources:
+    path: true
+    manifestPath: "manifests"
+    type: "manifests"
 # iam-chart:
 #   enabled: false
 #   enableAckPodIdentity: false 

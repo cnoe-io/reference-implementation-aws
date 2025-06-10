@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backstage-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: backstage
+    {{- include "backstage.labels" . | nindent 4 }}
+data:
+  app-config.yaml: |
+    app:
+      title: {{ .Values.backstage.config.app.title }}
+      baseUrl: ${BACKSTAGE_FRONTEND_URL}
+    organization:
+      name: {{ .Values.backstage.config.organization.name }}
+    backend:
+      baseUrl: ${BACKSTAGE_FRONTEND_URL}
+      listen:
+        port: {{ .Values.backstage.config.backend.listen.port }}
+      csp:
+        connect-src: {{ .Values.backstage.config.backend.csp.connectsrc }}
+      cors:
+        origin: ${BACKSTAGE_FRONTEND_URL}
+        methods: {{ .Values.backstage.config.backend.cors.methods | toJson }}
+        credentials: {{ .Values.backstage.config.backend.cors.credentials }}
+      database:
+        client: {{ .Values.backstage.config.backend.database.client }}
+        connection:
+          host: ${POSTGRES_HOST}
+          port: ${POSTGRES_PORT}
+          user: ${POSTGRES_USER}
+          password: ${POSTGRES_PASSWORD}
+      cache:
+        store: {{ .Values.backstage.config.backend.cache.store }}
+
+    integrations:
+      github:
+        - host: github.com
+          apps:
+            - $include: github-integration.yaml
+
+    proxy:
+      '/argo-workflows/api':
+        target: ${ARGO_WORKFLOWS_URL}
+        changeOrigin: true
+        secure: true
+        headers:
+          Authorization:
+            $env: ARGO_WORKFLOWS_AUTH_TOKEN
+      '/argocd/api':
+        target: ${ARGO_CD_URL}
+        changeOrigin: true
+        headers:
+          Cookie:
+            $env: ARGOCD_AUTH_TOKEN
+
+    techdocs:
+      builder: 'local'
+      generator:
+        runIn: 'docker'
+      publisher:
+        type: 'local'
+
+    auth:
+      environment: {{ .Values.backstage.config.auth.environment }}
+      session:
+        secret: {{ .Values.backstage.config.auth.session.secret | quote }}
+      providers:
+        keycloak-oidc:
+          development:
+            metadataUrl: ${KEYCLOAK_NAME_METADATA}
+            clientId: {{ .Values.backstage.config.auth.providers.keycloakoidc.development.clientId }}
+            clientSecret: ${BACKSTAGE_CLIENT_SECRET}
+            scope: {{ .Values.backstage.config.auth.providers.keycloakoidc.development.scope | quote }}
+            prompt: {{ .Values.backstage.config.auth.providers.keycloakoidc.development.prompt }}
+
+    scaffolder:
+      # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+    catalog:
+      import:
+        entityFilename: {{ .Values.backstage.config.catalog.import.entityFilename }}
+        pullRequestBranchName: {{ .Values.backstage.config.catalog.import.pullRequestBranchName }}
+      rules:
+        {{- toYaml .Values.backstage.config.catalog.rules | nindent 8 }}
+      locations:
+        {{- range .Values.backstage.config.catalog.locations }}
+        - type: {{ .type }}
+          target: {{ .target }}
+        {{- end }}
+    kubernetes:
+      serviceLocatorMethod:
+        type: {{ .Values.backstage.config.kubernetes.serviceLocatorMethod.type | quote }}
+      clusterLocatorMethods:
+        - $include: k8s-config.yaml
+    argoWorkflows:
+        baseUrl: ${ARGO_WORKFLOWS_URL}

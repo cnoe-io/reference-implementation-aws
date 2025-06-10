@@ -1,7 +1,0 @@
-resources:
-  - ../base
-  - sa-backstage.yaml
-  - cm-backstage-config.yaml
-  - secret-k8s-config.yaml
-patchesStrategicMerge:
-  - patches/deployment-backstage.yaml
