@@ -18,7 +18,7 @@ data:
       listen:
         port: {{ .Values.backstage.config.backend.listen.port }}
       csp:
-        connect-src: {{ .Values.backstage.config.backend.csp.connectsrc }}
+        connect-src: {{.Values.backstage.config.backend.csp.connectsrc | toJson }}
       cors:
         origin: ${BACKSTAGE_FRONTEND_URL}
         methods: {{ .Values.backstage.config.backend.cors.methods | toJson }}

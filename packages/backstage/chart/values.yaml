@@ -32,7 +32,7 @@ backstage:
       listen:
         port: 7007
       csp:
-        connectsrc: ["'self'", 'http:', 'https:']
+        connectsrc: ['self', 'http:', 'https:']
       cors:
         origin: "http://localhost:7007"
         methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
