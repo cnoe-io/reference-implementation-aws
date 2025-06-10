@@ -125,6 +125,7 @@ env:
   # POSTGRES_PORT: "5432"
   # POSTGRES_USER: backstage
   BACKSTAGE_FRONTEND_URL: "https://backstage.advaitt.people.aws.dev"
+  BACKSTAGE_DOMAIN: "backstage.advaitt.people.aws.dev"
   KEYCLOAK_NAME_METADATA: "https://keycloak.advaitt.people.aws.dev/realms/cnoe/.well-known/openid-configuration"
   ARGO_WORKFLOWS_URL: "https://argo-workflow.advaitt.people.aws.dev"
   ARGO_CD_URL: "https://argocd.advaitt.people.aws.dev"

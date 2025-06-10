@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.env.BACKSTAGE_FRONTEND_URL | quote }}
+        - {{ .Values.env.BACKSTAGE_DOMAIN | quote }}
       secretName: backstage-prod-tls
   rules:
-    - host: {{ .Values.env.BACKSTAGE_FRONTEND_URL | quote }}
+    - host: {{ .Values.env.BACKSTAGE_DOMAIN | quote }}
       http:
         paths:
           - path: /

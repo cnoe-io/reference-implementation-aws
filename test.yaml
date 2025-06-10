@@ -524,5 +524,31 @@ spec:
         persistentVolumeClaim:
           claimName: postgresql
 ---
+# Source: backstage/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backstage
+  namespace: backstage
+  annotations:
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "https://backstage.advaitt.people.aws.dev"
+      secretName: backstage-prod-tls
+  rules:
+    - host: "https://backstage.advaitt.people.aws.dev"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backstage
+                port:
+                  number: 7007
+---
 # Source: backstage/templates/secrets.yaml
 # TODO: Seperate Backstage Secret and PostGres Secret.
