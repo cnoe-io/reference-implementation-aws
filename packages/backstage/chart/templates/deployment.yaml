@@ -57,5 +57,3 @@ spec:
           envFrom:
             - secretRef:
                 name: backstage-env-vars
-            - secretRef:
-                name: postgresql-config
