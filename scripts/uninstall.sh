@@ -57,11 +57,11 @@ kubectl delete applicationsets.argoproj.io -n argocd argocd --kubeconfig $KUBECO
 
 # Wait for 2mins for ArgoCD to be deleted
 echo "Waiting for argocd AppSet to be deleted..."
-sleep 120
+sleep 60
 
-# Remove PVCs for keycloak
-# echo "Deleting PVCs for keycloak..."
-# kubectl delete pvc -n keycloak data-keycloak-postgresql-0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+Remove PVCs for keycloak
+echo "Deleting PVCs for keycloak..."
+kubectl delete pvc -n keycloak data-keycloak-postgresql-0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 
 # kubectl delete applications.argoproj.io argocd-hub -n argocd
 # cd "${TF_DIR}"

@@ -36,7 +36,7 @@ spec:
           subPath: postgress
   volumeClaimTemplates:
   - apiVersion: v1	
-    kind: PersistentVolumeClaim	
+    kind: PersistentVolumeClaim
     metadata:
       name: data
     spec:
