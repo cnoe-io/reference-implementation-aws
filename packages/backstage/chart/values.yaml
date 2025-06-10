@@ -123,6 +123,7 @@ env:
   POSTGRES_HOST: postgresql.backstage.svc.cluster.local
   POSTGRES_PORT: "5432"
   POSTGRES_USER: backstage
+  POSTGRES_DB: backstage
   BACKSTAGE_FRONTEND_URL: ""
   KEYCLOAK_NAME_METADATA: ""
   ARGO_WORKFLOWS_URL: ""
