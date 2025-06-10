@@ -42,7 +42,7 @@ spec:
         imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
         envFrom:
         - secretRef:
-            name: postgresql-config
+            name: backstage-env-vars
         ports:
         - containerPort: 5432
           name: postgresdb
