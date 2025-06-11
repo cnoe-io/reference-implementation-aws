@@ -1205,9 +1205,9 @@ configs:
 #     rules: []
 
 # ## Dex
-# dex:
-#   # -- Enable dex
-#   enabled: true
+dex:
+  # -- Enable dex
+  enabled: false
 #   # -- Dex name
 #   name: dex-server
 
