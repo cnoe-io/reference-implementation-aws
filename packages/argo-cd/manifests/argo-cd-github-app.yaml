@@ -4,7 +4,7 @@
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: github-token
+  name: github-app
   namespace: argocd
 spec:
   refreshInterval: "15m"
@@ -12,20 +12,36 @@ spec:
     name: aws-secretsmanager
     kind: ClusterSecretStore
   target:
-    name: github-token
+    name: github-app
     template:
       metadata:
         labels:
           argocd.argoproj.io/secret-type: repo-creds
       data:
+        type: git
         url: "https://github.com/punkwalker/reference-implementation-aws"
-        username: unused
-        password: "{{ .password }}"
+        githubAppID: "{{ .appId }}"
+        githubAppInstallationID: "{{ .installationId }}"
+        githubAppPrivateKey: "{{ .privateKey }}"
   data:
-  - secretKey: password
+  - secretKey: appId
     remoteRef:
       conversionStrategy: Default # TODO: Remove when figured out how to avoid Diffs for CR defaults
       decodingStrategy: None
       key: cnoe-reference-implemntation-aws
       metadataPolicy: None
-      property: argo-cd-github-token
+      property: argocd-github.appId
+  - secretKey: installationId
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: cnoe-reference-implemntation-aws
+      metadataPolicy: None
+      property: argocd-github.installationId
+  - secretKey: privateKey
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: cnoe-reference-implemntation-aws
+      metadataPolicy: None
+      property: argocd-github.privateKey
