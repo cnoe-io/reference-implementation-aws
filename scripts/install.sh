@@ -5,6 +5,9 @@ export REPO_ROOT=$(git rev-parse --show-toplevel)
 
 source ${REPO_ROOT}/scripts/utils.sh
 
+CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
+AWS_REGION=$(yq '.region' config.yaml)
+
 # Additional colors
 export BLUE='\033[0;34m'
 export YELLOW='\033[0;33m'
@@ -36,13 +39,10 @@ fi
 
 echo -e "\n${BOLD}${BLUE}🚀 Starting installation process...${NC}"
 
-CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
-AWS_REGION=$(yq '.region' config.yaml)
-
 echo -e "${CYAN}📡 Connecting to cluster:${NC} ${BOLD}${CLUSTER_NAME}${NC} in ${BOLD}${AWS_REGION}${NC}"
 
 KUBECONFIG_FILE=$(mktemp)
-echo -e "${PURPLE}🔑 Generating temporary kubeconfig...${NC}"
+echo -e "${PURPLE}🔑 Generating temporary kubeconfig for cluster ${BOLD}${CLUSTER_NAME}${NC}...${NC}"
 aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 KUBECONFIG=$(kubectl config --kubeconfig $KUBECONFIG_FILE view --raw -o json)
 SERVER_URL=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster.server')

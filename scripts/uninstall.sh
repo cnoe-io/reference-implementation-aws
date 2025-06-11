@@ -4,13 +4,16 @@ set -e -o pipefail
 REPO_ROOT=$(git rev-parse --show-toplevel)
 source ${REPO_ROOT}/scripts/utils.sh
 
+CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
+AWS_REGION=$(yq '.region' config.yaml)
+
 # Header
 echo -e "${BOLD}${RED}🗑️ ========================================== 🗑️${NC}"
 echo -e "${BOLD}${RED}🧹      CNOE AWS Reference Implementation     🧹${NC}"
 echo -e "${BOLD}${RED}🗑️ ========================================== 🗑️${NC}\n"
 
 echo -e "${BOLD}${PURPLE}🎯 Targets:${NC}"
-echo -e "${CYAN}🔶 Kubernetes cluster:${NC} $(kubectl config current-context)"
+echo -e "${CYAN}🔶 Kubernetes cluster:${NC} $CLUSTER_NAME in ${BOLD}$AWS_REGION${NC}"
 echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
 echo -e "${CYAN}🔶 AWS account number:${NC} $(aws sts get-caller-identity --query "Account" --output text)"
 
@@ -29,8 +32,6 @@ echo -e "${CYAN}🔄 Deleting idpbuilder local kind cluster instance...${NC}"
 idpbuilder delete cluster --name localdev > /dev/null 2>&1
 
 # Get EKS kubeconfig
-CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
-AWS_REGION=$(yq '.region' config.yaml)
 echo -e "${PURPLE}🔑 Generating temporary kubeconfig for cluster ${BOLD}${CLUSTER_NAME}${NC}...${NC}"
 KUBECONFIG_FILE=$(mktemp)
 aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
