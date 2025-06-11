@@ -4,12 +4,6 @@ set -e -o pipefail
 REPO_ROOT=$(git rev-parse --show-toplevel)
 source ${REPO_ROOT}/scripts/utils.sh
 
-# Additional colors
-export BLUE='\033[0;34m'
-export YELLOW='\033[0;33m'
-export CYAN='\033[0;36m'
-export BOLD='\033[1m'
-
 # Header
 echo -e "${BOLD}${RED}🗑️ ========================================== 🗑️${NC}"
 echo -e "${BOLD}${RED}🧹      CNOE AWS Reference Implementation     🧹${NC}"

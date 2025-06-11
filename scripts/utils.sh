@@ -1,18 +1,17 @@
 set -e
+# Colors
 export RED='\033[0;31m'
 export GREEN='\033[0;32m'
 export PURPLE='\033[0;35m'
 export NC='\033[0m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+export CYAN='\033[0;36m'
+export BOLD='\033[1m'
 
-files_for_subst() {
-  "${REPO_ROOT}/packages/argocd/values.yaml"
-}
+
 check_command() {
   command -v "$1" >/dev/null 2>&1
-}
-
-config_subst() {
-  yq eval '.key.path = "new_value"' -i file.yaml
 }
 
 # Validation
