@@ -48,9 +48,16 @@ ADDONS=(
   aws-load-balancer-controller
 )
 
-echo -e "${BOLD}${YELLOW}📦 Removing add-ons in sequence...${NC}"
+# Remove addons-appset applicationset and corresponding appset-chart applicationset with orphan deletion policy. 
+# The addons will be removed in specific order later.
+echo -e "${CYAN}🗑️  Deleting ${BOLD}addons-appset${NC} ${CYAN}ApplicationSet...${NC}"
+kubectl delete applicationsets.argoproj.io -n argocd addons-appset --cascade=orphan --kubeconfig $KUBECONFIG_FILE  > /dev/null 2>&1
 
-# Delete all application sets except argocd
+echo -e "${CYAN}🗑️  Deleting ${BOLD}appset-chart${NC} ${CYAN}ApplicationSet...${NC}"
+kubectl get applications.argoproj.io -n argocd -l addonName=addons-appset --cascade=orphan --no-headers --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+
+echo -e "${BOLD}${YELLOW}📦 Removing add-ons in sequence...${NC}"
+# Delete all addon application sets except argocd
 for app in "${ADDONS[@]}"; do
   echo -e "${CYAN}🗑️  Deleting ${BOLD}$app${NC} ${CYAN}AppSet...${NC}"
   kubectl delete applicationsets.argoproj.io -n argocd $app --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
@@ -88,6 +95,7 @@ echo -e "${GREEN}✅ ${BOLD}argocd${NC} ${GREEN}successfully removed!${NC}"
 # Remove PVCs for keycloak
 echo -e "${CYAN}🗑️  Deleting PVCs for ${BOLD}keycloak${NC}...${NC}"
 kubectl delete pvc -n keycloak data-keycloak-postgresql-0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
+kubectl delete pvc -n backstage data-postgresql-0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
 echo -e "${GREEN}✅ Keycloak PVCs removed!${NC}"
 
 echo -e "\n${BOLD}${GREEN}🎉 Uninstallation Complete! 🎉${NC}"
