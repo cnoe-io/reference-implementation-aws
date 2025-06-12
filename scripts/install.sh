@@ -83,7 +83,7 @@ idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packa
 echo -e "${YELLOW}⏳ Waiting for hub-addons to be healthy...${NC}"
 kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd application/hub-addons --timeout=15m
 echo -e "${GREEN}✅ hub-addons is now healthy!${NC}"
-sleep 30
+sleep 60
 
 echo -e "${YELLOW}⏳ Waiting for Backstage on the hub Cluster to be Healthy...${NC}"
 kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd application/backstage-hub --kubeconfig $KUBECONFIG_FILE --timeout=-30m
