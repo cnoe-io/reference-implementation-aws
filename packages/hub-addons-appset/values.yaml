@@ -139,8 +139,7 @@ argo-workflows:
   valuesObject:
     server:
       sso:
-        # issuer: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe"
-        issuer: "http://keycloak.keycloak.svc.cluster.local/realms/cnoe"
+        issuer: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe"
         redirectUrl: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback"
       ingress:
         hosts:

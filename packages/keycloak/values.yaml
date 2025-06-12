@@ -579,7 +579,8 @@ service:
   externalTrafficPolicy: Cluster
   ## @param service.annotations Additional custom annotations for Keycloak service
   ##
-  annotations: {}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-20"
   ## @param service.extraPorts Extra port to expose on Keycloak service
   ##
   extraPorts: []
@@ -644,7 +645,7 @@ ingress:
   ##
   annotations:
     cert-manager.io/cluster-issuer: 'letsencrypt-prod'
-    argocd.argoproj.io/sync-wave: "60"
+    argocd.argoproj.io/sync-wave: "-10"
   ## @param ingress.labels Additional labels for the Ingress resource.
   ## e.g:
   ## labels:
