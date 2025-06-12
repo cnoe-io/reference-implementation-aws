@@ -212,7 +212,7 @@ data:
       "rootUrl": "",
       "baseUrl": "",
       "redirectUris": [
-        "https://argo-workflow.advaitt.people.aws.dev:8443/argo-workflows/oauth2/callback"
+        "https://argo-workflows.advaitt.people.aws.dev/oauth2/callback"
       ],
       "webOrigins": [
         "/*"
