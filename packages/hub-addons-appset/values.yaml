@@ -143,9 +143,9 @@ argo-workflows:
         redirectUrl: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback"
       ingress:
         hosts:
-        - host: "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
-          paths:
-          -  "/{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}"
+        - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
+        paths: 
+        -  "/{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}"
         tls:
         - hosts:
           - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"

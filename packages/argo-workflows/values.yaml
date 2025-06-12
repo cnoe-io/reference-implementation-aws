@@ -13,10 +13,10 @@ server:
     enabled: true
     clientId: # Required for sso configuration
       name: keycloak-oidc
-      key: client-id
+      key: ARGO_WORKFLOWS_CLIENT_ID
     clientSecret:
       name: keycloak-oidc
-      key: secret-key
+      key: ARGO_WORKFLOWS_CLIENT_SECRET
     scopes:
       - openid
       - profile
