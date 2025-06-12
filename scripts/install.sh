@@ -86,7 +86,7 @@ echo -e "${GREEN}✅ hub-addons is now healthy!${NC}"
 sleep 30
 
 echo -e "${YELLOW}⏳ Waiting for Backstage on the hub Cluster to be Healthy...${NC}"
-kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd application/backstage-hub --kubeconfig $KUBECONFIG_FILE --timeout=-15m
+kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd application/backstage-hub --kubeconfig $KUBECONFIG_FILE --timeout=-30m
 echo -e "${BOLD}${GREEN}✅ Backstage is now healthy!${NC}"
 
 echo -e "\n${BOLD}${BLUE}🎉 Installation completed successfully! 🎉${NC}"
