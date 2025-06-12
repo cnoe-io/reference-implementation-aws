@@ -2,10 +2,10 @@
 valueFiles:
   - "."
 
-hub-addons-appset:
+addons-appset:
   enabled: true
-  chartName: addons-appset
+  chartName: addons
   namespace: argocd
-  releaseName: addons-appset
+  releaseName: addons
   type: chart
-  path: packages/addons-appset/chart
+  path: packages/appset-chart

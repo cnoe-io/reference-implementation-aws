@@ -15,7 +15,7 @@ spec:
   sources:
     - repoURL: cnoe://appset-chart
       targetRevision: HEAD
-      path: chart
+      path: "."
       helm:
         valueFiles:
           - $values/values.yaml
