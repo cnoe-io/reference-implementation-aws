@@ -79,15 +79,15 @@ EOF
 
 echo -e "${BOLD}${GREEN}🔄 Running idpbuilder to apply packages...${NC}"
 idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages/" -c "argocd:${CLUSTER_SECRET_FILE}"
+sleep 60
 
 echo -e "${YELLOW}⏳ Waiting for hub-addons to be healthy...${NC}"
 kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd application/hub-addons --timeout=15m
 echo -e "${GREEN}✅ hub-addons is now healthy!${NC}"
-sleep 60
 
-echo -e "${YELLOW}⏳ Waiting for Backstage on the hub Cluster to be Healthy...${NC}"
-kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd application/backstage-hub --kubeconfig $KUBECONFIG_FILE --timeout=-30m
-echo -e "${BOLD}${GREEN}✅ Backstage is now healthy!${NC}"
+echo -e "${YELLOW}⏳ Waiting for all Argo CD apps on the hub Cluster to be Healthy...${NC}"
+kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd --all applications --kubeconfig $KUBECONFIG_FILE --timeout=-30m
+echo -e "${BOLD}${GREEN}✅ All Argo CD apps is now healthy!${NC}"
 
 echo -e "\n${BOLD}${BLUE}🎉 Installation completed successfully! 🎉${NC}"
 echo -e "${CYAN}📊 You can now access your resources and start deploying applications.${NC}"

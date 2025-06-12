@@ -1,0 +1,11 @@
+# Used for deploying the hub-addons AppSet chart ArgoCD Application on hub cluster
+valueFiles:
+  - "."
+
+hub-addons-appset:
+  enabled: true
+  chartName: addons-appset
+  namespace: argocd
+  releaseName: addons-appset
+  type: chart
+  path: packages/addons-appset/chart
