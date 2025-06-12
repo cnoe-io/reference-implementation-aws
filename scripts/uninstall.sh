@@ -38,6 +38,7 @@ aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig
 
 # Addons to be deleted
 ADDONS=(
+  argo-workflows
   backstage
   keycloak
   cert-manager
@@ -75,7 +76,7 @@ while [ $(kubectl get applications.argoproj.io -n argocd -l addonName=argocd --n
   
   if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
     echo -e "${YELLOW}⚠️ Timeout reached. Patching ${BOLD}argocd${NC} ${YELLOW}applications to remove finalizers...${NC}"
-    kubectl patch applications.argoproj.io -n argocd -l addonName=argocd --type json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' --kubeconfig $KUBECONFIG_FILE || true
+    kubectl patch applications.argoproj.io -n argocd argocd-hub --type json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' --kubeconfig $KUBECONFIG_FILE || true
     break
   fi
   

@@ -132,23 +132,24 @@ backstage:
 argo-workflows:
   enabled: true
   chartName: argo-workflows
-  namespace: argo-workflows
+  namespace: argo
   releaseName: argo-workflows
   defaultVersion: "0.45.18"
   chartRepository: "https://argoproj.github.io/argo-helm"
   valuesObject:
     server:
       sso:
-        issuer: '{{ if .metadata.annotations.path_routing }}https://{{.metadata.annotations.oidc_provider}}.{{.metadata.annotations.domain}}{{ else }}https://{{.metadata.annotations.domain}}/{{.metadata.annotations.oidc_provider}}{{ end }}/realms/cnoe'
-        redirectUrl: '{{ if .metadata.annotations.path_routing }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ else }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ end }}/oauth2/callback'
+        issuer: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe"
+        redirectUrl: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback"
       ingress:
         hosts:
-        - host: '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+        - host: "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
           paths:
-          - path: /'{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}'
+          -  "/{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}"
         tls:
         - hosts:
-          - '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+          - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
+          secretName: argo-workflows-prod-tls
   additionalResources:
     path: true
     manifestPath: "manifests"

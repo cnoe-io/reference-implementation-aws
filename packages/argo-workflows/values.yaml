@@ -9,11 +9,6 @@ server:
     annotations:
       cert-manager.io/cluster-issuer: 'letsencrypt-prod'
     ingressClassName: 'nginx'
-    hosts:
-    - paths:
-      - pathType: Prefix
-    tls:
-    - secretName: argo-workflows-prod-tls
   sso:
     enabled: true
     clientId: # Required for sso configuration

@@ -61,15 +61,15 @@ spec:
                 - host: '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain
                     }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
                   paths:
-                  - path: /'{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}'
+                  - path: /{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}
                 tls:
                 - hosts:
                   - '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain
                     }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
               sso:
-                issuer: '{{ if .metadata.annotations.path_routing }}https://{{.metadata.annotations.oidc_provider}}.{{.metadata.annotations.domain}}{{
-                  else }}https://{{.metadata.annotations.domain}}/{{.metadata.annotations.oidc_provider}}{{
-                  end }}/realms/cnoe'
+                issuer: '{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider
+                  }}/{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain
+                  }}{{ end }}/realms/cnoe'
                 redirectUrl: '{{ if .metadata.annotations.path_routing }}https://argo-workflows.{{
                   .metadata.annotations.domain }}{{ else }}https://{{ .metadata.annotations.domain
                   }}/argo-workflows{{ end }}/oauth2/callback'
@@ -82,7 +82,668 @@ spec:
         path:
           '{{.metadata.annotations.addons_repo_basepath}}/argo-workflows/manifests'
       destination:
-        namespace: 'argo-workflows'
+        namespace: 'argo'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "argo-cd"
+          addonChartVersion: "8.0.14"
+          addonChartRepository: "https://argoproj.github.io/argo-helm"
+          chart: "argo-cd"
+  template:
+    metadata:
+      name: 'argocd-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: argocd
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: 'argocd'
+          ignoreMissingValueFiles: true
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/argo-cd/values.yaml
+      
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        path:
+          '{{.metadata.annotations.addons_repo_basepath}}/argo-cd/manifests'
+      destination:
+        namespace: 'argocd'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "aws-load-balancer-controller"
+          addonChartVersion: "1.13.2"
+          addonChartRepository: "https://aws.github.io/eks-charts"
+          chart: "aws-load-balancer-controller"
+  template:
+    metadata:
+      name: 'aws-load-balancer-controller-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: aws-load-balancer-controller
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: '{{ .values.addonChart }}'
+          ignoreMissingValueFiles: true
+          valuesObject:
+            clusterName: '{{ .name }}'
+            serviceAccount:
+              name: aws-load-balancer-controller
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/aws-load-balancer-controller/values.yaml
+      destination:
+        namespace: 'kube-system'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+      ignoreDifferences:
+        - jsonPointers:
+          - /data
+          kind: Secret
+          name: aws-load-balancer-tls
+        - group: admissionregistration.k8s.io
+          jqPathExpressions:
+          - .webhooks[].clientConfig.caBundle
+          kind: MutatingWebhookConfiguration
+        - group: admissionregistration.k8s.io
+          jqPathExpressions:
+          - .webhooks[].clientConfig.caBundle
+          kind: ValidatingWebhookConfiguration
+      ignoreDifferences:
+        - jsonPointers:
+          - /data
+          kind: Secret
+          name: aws-load-balancer-tls
+        - group: admissionregistration.k8s.io
+          jqPathExpressions:
+          - .webhooks[].clientConfig.caBundle
+          kind: MutatingWebhookConfiguration
+        - group: admissionregistration.k8s.io
+          jqPathExpressions:
+          - .webhooks[].clientConfig.caBundle
+          kind: ValidatingWebhookConfiguration
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: backstage
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "backstage"
+          chart: "backstage"
+  template:
+    metadata:
+      name: 'backstage-{{ .name }}'
+      labels:
+        addonVersion: '{{.metadata.annotations.addons_repo_revision}}'
+        addon: 'true'
+        addonName: backstage
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        path: 'packages/backstage/chart'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        helm:
+          releaseName: 'backstage'
+          ignoreMissingValueFiles: true
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/backstage/values.yaml
+      
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        path:
+          '{{.metadata.annotations.addons_repo_basepath}}/backstage/manifests'
+      destination:
+        namespace: 'backstage'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cert-manager
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "cert-manager"
+          addonChartVersion: "1.17.2"
+          addonChartRepository: "https://charts.jetstack.io"
+          chart: "cert-manager"
+  template:
+    metadata:
+      name: 'cert-manager-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: cert-manager
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: 'cert-manager'
+          ignoreMissingValueFiles: true
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/cert-manager/values.yaml
+      
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        path:
+          '{{.metadata.annotations.addons_repo_basepath}}/cert-manager/manifests'
+      destination:
+        namespace: 'cert-manager'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: external-dns
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "external-dns"
+          addonChartVersion: "1.16.1"
+          addonChartRepository: "https://kubernetes-sigs.github.io/external-dns"
+          chart: "external-dns"
+  template:
+    metadata:
+      name: 'external-dns-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: external-dns
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: 'external-dns'
+          ignoreMissingValueFiles: true
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/external-dns/values.yaml
+      destination:
+        namespace: 'external-dns'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: external-secrets
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "external-secrets"
+          addonChartVersion: "0.17.0"
+          addonChartRepository: "https://charts.external-secrets.io"
+          chart: "external-secrets"
+  template:
+    metadata:
+      name: 'external-secrets-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: external-secrets
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: '{{ .values.addonChart }}'
+          ignoreMissingValueFiles: true
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/external-secrets/values.yaml
+      
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        path:
+          '{{.metadata.annotations.addons_repo_basepath}}/external-secrets/manifests'
+      destination:
+        namespace: 'external-secrets'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ingress-nginx
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "ingress-nginx"
+          addonChartVersion: "4.7.0"
+          addonChartRepository: "https://kubernetes.github.io/ingress-nginx"
+          chart: "ingress-nginx"
+  template:
+    metadata:
+      name: 'ingress-nginx-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: ingress-nginx
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: 'ingress-nginx'
+          ignoreMissingValueFiles: true
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/ingress-nginx/values.yaml
+      destination:
+        namespace: 'ingress-nginx'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: keycloak
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "keycloak"
+          addonChartVersion: "24.7.3"
+          addonChartRepository: "https://charts.bitnami.com/bitnami"
+          chart: "keycloak"
+  template:
+    metadata:
+      name: 'keycloak-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: keycloak
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: 'keycloak'
+          ignoreMissingValueFiles: true
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/keycloak/values.yaml
+      
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        path:
+          '{{.metadata.annotations.addons_repo_basepath}}/keycloak/manifests'
+      destination:
+        namespace: 'keycloak'
         name: '{{ .name }}'
       syncPolicy:
         automated:
