@@ -4,9 +4,19 @@ workflow:
   rbac:
     create: false
 server:
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    ingressClassName: 'nginx'
+    hosts:
+    - paths:
+      - pathType: Prefix
+    tls:
+    - secretName: argo-workflows-prod-tls
   sso:
     enabled: true
-    clientId:
+    clientId: # Required for sso configuration
       name: keycloak-oidc
       key: client-id
     clientSecret:
@@ -21,4 +31,4 @@ server:
       enabled: true
   extraArgs:
     - --auth-mode=client
-    - --auth-mode=sso
+    - --auth-mode=sso # Required for sso configuration

@@ -1,0 +1,100 @@
+---
+# Source: application-sets/templates/application-set.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argo-workflows
+  namespace: argocd
+  annotations:
+    helm.sh/chart: application-sets-0.1.0
+  labels:
+    helm.sh/chart: application-sets-0.1.0
+    app.kubernetes.io/name: application-sets
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+        values:
+          addonChart: "argo-workflows"
+          addonChartVersion: "0.45.18"
+          addonChartRepository: "https://argoproj.github.io/argo-helm"
+          chart: "argo-workflows"
+  template:
+    metadata:
+      name: 'argo-workflows-{{ .name }}'
+      labels:
+        addonVersion: '{{.values.addonChartVersion }}'
+        addon: 'true'
+        addonName: argo-workflows
+        environment: '{{.metadata.labels.environment}}'
+        clusterName: '{{.name}}'
+        kubernetesVersion: '{{default "v1.32.0" (index .metadata.labels "kubernetesVersion")}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        ref: values
+      - repoURL: '{{ .values.addonChartRepository }}'
+        chart: '{{ .values.chart }}'
+        targetRevision: '{{.values.addonChartVersion }}'
+        helm:
+          releaseName: 'argo-workflows'
+          ignoreMissingValueFiles: true
+          valuesObject:
+            server:
+              ingress:
+                hosts:
+                - host: '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain
+                    }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+                  paths:
+                  - path: /'{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}'
+                tls:
+                - hosts:
+                  - '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain
+                    }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+              sso:
+                issuer: '{{ if .metadata.annotations.path_routing }}https://{{.metadata.annotations.oidc_provider}}.{{.metadata.annotations.domain}}{{
+                  else }}https://{{.metadata.annotations.domain}}/{{.metadata.annotations.oidc_provider}}{{
+                  end }}/realms/cnoe'
+                redirectUrl: '{{ if .metadata.annotations.path_routing }}https://argo-workflows.{{
+                  .metadata.annotations.domain }}{{ else }}https://{{ .metadata.annotations.domain
+                  }}/argo-workflows{{ end }}/oauth2/callback'
+          valueFiles:
+            
+            - $values/{{.metadata.annotations.addons_repo_basepath}}/argo-workflows/values.yaml
+      
+      - repoURL: '{{.metadata.annotations.addons_repo_url}}'
+        targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
+        path:
+          '{{.metadata.annotations.addons_repo_basepath}}/argo-workflows/manifests'
+      destination:
+        namespace: 'argo-workflows'
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+          prune: false
+          selfHeal: false
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
+          limit: -1
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true

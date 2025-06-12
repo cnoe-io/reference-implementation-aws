@@ -67,8 +67,19 @@ kubectl delete applicationsets.argoproj.io -n argocd argocd --kubeconfig $KUBECO
 
 # Wait for ArgoCD to be deleted
 echo -e "${YELLOW}⏳ Waiting for ${BOLD}argocd${NC} ${YELLOW}AppSet to be deleted...${NC}"
+START_TIME=$(date +%s)
+TIMEOUT=120 # 2 minutes timeout
 while [ $(kubectl get applications.argoproj.io -n argocd -l addonName=argocd --no-headers --kubeconfig $KUBECONFIG_FILE 2>/dev/null | wc -l) -ne 0 ]; do
-  echo -e "${YELLOW}⏳ Still waiting for ${BOLD}argocd${NC} ${YELLOW}AppSet to be deleted...${NC}"
+  CURRENT_TIME=$(date +%s)
+  ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+  
+  if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
+    echo -e "${YELLOW}⚠️ Timeout reached. Patching ${BOLD}argocd${NC} ${YELLOW}applications to remove finalizers...${NC}"
+    kubectl patch applications.argoproj.io -n argocd -l addonName=argocd --type json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' --kubeconfig $KUBECONFIG_FILE || true
+    break
+  fi
+  
+  echo -e "${YELLOW}⏳ Still waiting for ${BOLD}argocd${NC} ${YELLOW}AppSet to be deleted... (${ELAPSED_TIME}s elapsed)${NC}"
   sleep 10
 done
 echo -e "${GREEN}✅ ${BOLD}argocd${NC} ${GREEN}successfully removed!${NC}"

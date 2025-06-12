@@ -13,6 +13,8 @@ metadata:
     addons_repo_url: "https://github.com/punkwalker/reference-implementation-aws"
     addons_repo_revision: ref-impl-v2
     addons_repo_basepath: "packages"
+    path_routing: false
+    domain: advaitt.people.aws.dev
 type: Opaque
 stringData:
   name: hub

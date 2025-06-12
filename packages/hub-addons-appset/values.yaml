@@ -28,7 +28,7 @@ aws-load-balancer-controller:
     serviceAccount:
       name:  "aws-load-balancer-controller"
     # vpcId: '{{.metadata.annotations.aws_vpc_id}}'
-    clusterName: '{{.name}}'
+    clusterName: '{{ .name }}'
   ignoreDifferences:
     - kind: Secret
       name: aws-load-balancer-tls
@@ -124,6 +124,31 @@ backstage:
   releaseName: backstage
   type: chart
   path: packages/backstage/chart
+  additionalResources:
+    path: true
+    manifestPath: "manifests"
+    type: "manifests"
+
+argo-workflows:
+  enabled: true
+  chartName: argo-workflows
+  namespace: argo-workflows
+  releaseName: argo-workflows
+  defaultVersion: "0.45.18"
+  chartRepository: "https://argoproj.github.io/argo-helm"
+  valuesObject:
+    server:
+      sso:
+        issuer: '{{ if .metadata.annotations.path_routing }}https://{{.metadata.annotations.oidc_provider}}.{{.metadata.annotations.domain}}{{ else }}https://{{.metadata.annotations.domain}}/{{.metadata.annotations.oidc_provider}}{{ end }}/realms/cnoe'
+        redirectUrl: '{{ if .metadata.annotations.path_routing }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ else }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ end }}/oauth2/callback'
+      ingress:
+        hosts:
+        - host: '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+          paths:
+          - path: /'{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}'
+        tls:
+        - hosts:
+          - '{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"
