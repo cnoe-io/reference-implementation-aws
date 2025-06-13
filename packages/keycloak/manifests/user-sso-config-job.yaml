@@ -150,16 +150,16 @@ data:
         "oidc.ciba.grant.enabled": false
       },
       "alwaysDisplayInConsole": false,
-      "rootUrl": "https://argocd.advaitt.people.aws.dev",
+      "rootUrl": "https://${ARGO_CD_URL}",
       "baseUrl": "/applications",
       "redirectUris": [
-        "https://argocd.advaitt.people.aws.dev/auth/callback",
-        "https://argocd.advaitt.people.aws.dev/pkce/verify",
+        "https://${ARGO_CD_URL}/auth/callback",
+        "https://${ARGO_CD_URL}/pkce/verify",
         "http://localhost:8085/auth/callback"
       ],
-      "adminUrl": "https://argocd.advaitt.people.aws.dev",
+      "adminUrl": "https://${ARGO_CD_URL}",
       "webOrigins": [
-        "https://argocd.advaitt.people.aws.dev"
+        "https://${ARGO_CD_URL}"
       ]
     }
   backstage-client-payload.json: |
@@ -184,10 +184,10 @@ data:
       "rootUrl": "",
       "baseUrl": "",
       "redirectUris": [
-        "https://backstage.advaitt.people.aws.dev/api/auth/keycloak-oidc/handler/frame"
+        "https://${BACKSTAGE_URL}/api/auth/keycloak-oidc/handler/frame"
       ],
       "webOrigins": [
-        "https://argocd.advaitt.people.aws.dev"
+        "https://${BACKSTAGE_URL}"
       ]
     }
   argo-client-payload.json: |
@@ -212,10 +212,10 @@ data:
       "rootUrl": "",
       "baseUrl": "",
       "redirectUris": [
-        "https://argo-workflows.advaitt.people.aws.dev/oauth2/callback"
+        "https://${ARGO_WORKFLOW_URL}/oauth2/callback"
       ],
       "webOrigins": [
-        "/*"
+        "https://${ARGO_WORKFLOW_URL}"
       ]
     }
 ---
@@ -234,9 +234,6 @@ spec:
       serviceAccountName: keycloak-config
       restartPolicy: Never
       volumes:
-        - name: keycloak-config
-          secret:
-            secretName: keycloak-config
         - name: config-payloads
           configMap:
             name: keycloak-config-job
@@ -244,12 +241,12 @@ spec:
         - name: keycloak-config
           image: docker.io/library/ubuntu:22.04
           volumeMounts:
-            - name: keycloak-config
-              readOnly: true
-              mountPath: "/var/secrets/"
             - name: config-payloads
               readOnly: true
               mountPath: "/var/config/"
+          envFrom:
+            - secretRef:
+                name: keycloak-config
           command: ["/bin/bash", "-c"]
           args:
             - |
@@ -262,10 +259,12 @@ spec:
                 local endpoint=$1
                 local payload=$2
                 local resource_name=$3
+
+                envsubst < ${payload} > /tmp/payload-env.json
                 
                 HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -H "Content-Type: application/json" \
                   -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-                  -X POST --data @${payload} \
+                  -X POST --data @/tmp/payload-env.json \
                   ${KEYCLOAK_URL}${endpoint})
                 
                 if [ "$HTTP_STATUS" -eq 409 ]; then
@@ -300,9 +299,9 @@ spec:
               }
               
               # Get Keycloak token for initial Admin user
-              ADMIN_PASSWORD=$(cat /var/secrets/KEYCLOAK_ADMIN_PASSWORD)
+              # ADMIN_PASSWORD=$(cat /var/secrets/KEYCLOAK_ADMIN_PASSWORD)
               KEYCLOAK_URL=http://keycloak.keycloak.svc.cluster.local:80
-              USER1_PASSWORD=$(cat /var/secrets/USER1_PASSWORD)
+              # USER1_PASSWORD=$(cat /var/secrets/USER1_PASSWORD)
               HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -X POST -H "Content-Type: application/x-www-form-urlencoded" \
                 --data-urlencode "username=cnoe-admin" \
                 --data-urlencode "password=${ADMIN_PASSWORD}" \

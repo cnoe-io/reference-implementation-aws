@@ -5,6 +5,13 @@ fullnameOverride: ""
 # Namespace to deploy resources
 namespace: backstage
 
+ingress:
+  ingressClassName: ""
+  enabled: false
+  annotations: {}
+  path: /
+  tls: false
+
 # Backstage deployment configuration
 backstage:
   image:

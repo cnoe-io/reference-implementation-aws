@@ -9,11 +9,11 @@ metadata:
     clusterClass: "control-plane"
     clusterName: "hub"
     environment: "control-plane"
+    path_routing: "true" # Set to false to disable path routing
   annotations:
     addons_repo_url: "https://github.com/punkwalker/reference-implementation-aws"
     addons_repo_revision: ref-impl-v2
     addons_repo_basepath: "packages"
-    path_routing: "" # Set to some value for enabling path routing
     domain: advaitt.people.aws.dev
     oidc_provider: keycloak
 type: Opaque

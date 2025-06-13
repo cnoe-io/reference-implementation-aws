@@ -54,8 +54,9 @@ echo -e "${CYAN}🗑️  Deleting ${BOLD}addons-appset${NC} ${CYAN}ApplicationSe
 kubectl delete applicationsets.argoproj.io -n argocd addons-appset --cascade=orphan --kubeconfig $KUBECONFIG_FILE  > /dev/null 2>&1
 
 echo -e "${CYAN}🗑️  Deleting ${BOLD}appset-chart${NC} ${CYAN}ApplicationSet...${NC}"
-kubectl get applications.argoproj.io -n argocd -l addonName=addons-appset --cascade=orphan --no-headers --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+kubectl delete applications.argoproj.io -n argocd -l addonName=addons-appset --cascade=orphan --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 
+# Start removing addons in order
 echo -e "${BOLD}${YELLOW}📦 Removing add-ons in sequence...${NC}"
 # Delete all addon application sets except argocd
 for app in "${ADDONS[@]}"; do

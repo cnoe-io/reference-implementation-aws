@@ -204,7 +204,7 @@ auth:
 adminRealm: "cnoe"
 ## @param production Run Keycloak in production mode. TLS configuration is required except when using proxy=edge.
 ##
-production: false
+production: true
 ## @param proxyHeaders Set Keycloak proxy headers
 ##
 proxyHeaders: "forwarded"
@@ -216,7 +216,7 @@ proxy: ""
 ## @param httpRelativePath Set the path relative to '/' for serving resources. Useful if you are migrating from older version which were using '/auth/'
 ## ref: https://www.keycloak.org/migration/migrating-to-quarkus#_default_context_path_changed
 ##
-httpRelativePath: "/"
+# httpRelativePath: "/"
 ## Keycloak Service Discovery settings
 ## ref: https://github.com/bitnami/containers/tree/main/bitnami/keycloak#cluster-configuration
 ##
@@ -622,7 +622,7 @@ ingress:
   # controller: default
   ## @param ingress.hostname Default host for the ingress record (evaluated as template)
   ##
-  hostname: keycloak.advaitt.people.aws.dev
+  # hostname: keycloak.advaitt.people.aws.dev
   ## @param ingress.hostnameStrict Disables dynamically resolving the hostname from request headers.
   ## Should always be set to true in production, unless your reverse proxy overwrites the Host header.
   ## If enabled, the hostname option needs to be specified.
@@ -643,9 +643,8 @@ ingress:
   ##   kubernetes.io/ingress.class: nginx
   ##   cert-manager.io/cluster-issuer: cluster-issuer-name
   ##
-  annotations:
-    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
-    argocd.argoproj.io/sync-wave: "-10"
+  # annotations:
+  #   cert-manager.io/cluster-issuer: 'letsencrypt-prod'
   ## @param ingress.labels Additional labels for the Ingress resource.
   ## e.g:
   ## labels:
@@ -697,9 +696,9 @@ ingress:
   ## It is also possible to create and manage the certificates outside of this helm chart
   ## Please see README.md for more information
   ## e.g:
-    - hosts:
-      - keycloak.advaitt.people.aws.dev
-      secretName: keycloak-prod-tls
+    # - hosts:
+    #   - keycloak.advaitt.people.aws.dev
+    #   secretName: keycloak-prod-tls
   ##
   secrets: []
   ## @param ingress.extraRules Additional rules to be covered with this ingress record

@@ -4,18 +4,22 @@ metadata:
   name: backstage
   namespace: backstage
   annotations:
-    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
-  ingressClassName: nginx
+  ingressClassName: {{ .Values.ingress.ingressClassName | quote }}
+  {{- if eq .Values.ingress.tls true }}
   tls:
     - hosts:
         - {{ .Values.env.BACKSTAGE_DOMAIN | quote }}
       secretName: backstage-prod-tls
+  {{- end }}
   rules:
     - host: {{ .Values.env.BACKSTAGE_DOMAIN | quote }}
       http:
         paths:
-          - path: /
+          - path: {{ default "/" .Values.ingress.path }}
             pathType: Prefix
             backend:
               service:
