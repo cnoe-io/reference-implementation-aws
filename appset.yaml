@@ -652,11 +652,11 @@ spec:
         selector:
           matchLabels:
             argocd.argoproj.io/secret-type: cluster
-            matchExpressions:
-            - key: path_routing
-              operator: In
-              values:
-              - "false"
+          matchExpressions:
+          - key: path_routing
+            operator: In
+            values:
+            - "false"
         values:
           addonChart: "ingress-nginx"
           addonChartVersion: "4.7.0"
@@ -731,11 +731,11 @@ spec:
         selector:
           matchLabels:
             argocd.argoproj.io/secret-type: cluster
-            matchExpressions:
-            - key: path_routing
-              operator: In
-              values:
-              - "true"
+          matchExpressions:
+          - key: path_routing
+            operator: In
+            values:
+            - "true"
         values:
           addonChart: "ingress-nginx"
           addonChartVersion: "4.7.0"

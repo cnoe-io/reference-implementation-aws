@@ -70,7 +70,7 @@ spec:
             {{- toYaml $chartConfig.selectorMatchLabels | nindent 12 }}
             {{- end }}
         {{- if and $chartConfig.selector $useSelectors }}
-          {{- toYaml $chartConfig.selector | nindent 12 }}
+          {{- toYaml $chartConfig.selector | nindent 10 }}
         {{- end }}
         {{- if not $chartConfig.resourceGroup }}
         values:
