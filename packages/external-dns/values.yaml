@@ -1,4 +1,5 @@
 sources:
+  - service
   - ingress
 provider: aws
 txtOwnerId: cnoe-external-dns

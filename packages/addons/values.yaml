@@ -82,6 +82,9 @@ ingress-nginx-pr: # For PathRouting
     controller:
       extraArgs:
         default-ssl-certificate: '{{ if eq .metadata.labels.path_routing "true" }}"ingress-nginx/default-tls-prod"{{ end }}'
+      service:
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"
