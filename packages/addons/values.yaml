@@ -79,12 +79,7 @@ ingress-nginx-pr: # For PathRouting
   chartRepository: "https://kubernetes.github.io/ingress-nginx"
   valuesObject:
     controller:
-      extraArgs: |-
-        {{- if eq .metadata.labels.path_routing "true" }}
-        default-ssl-certificate: ingress-nginx/default-tls-prod
-        {{- else }}
-        {}
-        {{- end }}
+      extraArgs: {{ if eq .metadata.labels.path_routing "true" }}{ "default-ssl-certificate": "ingress-nginx/default-tls-prod" }{{ else }}{}{{ end }}
   additionalResources:
     path: true
     manifestPath: "manifests"
