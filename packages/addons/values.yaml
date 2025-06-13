@@ -170,7 +170,7 @@ backstage:
   path: packages/backstage/chart
   valuesObject:
     ingress:
-      annotations: '{{ if eq .metadata.labels.path_routing "false" }}{ "cert-manager.io/cluster-issuer": "letsencrypt-prod" }{{ else }}{}{{ end }}'
+      annotations: '{{ if eq .metadata.labels.path_routing "false" }}{ "cert-manager.io/cl uster-issuer": "letsencrypt-prod" }{{ else }}{}{{ end }}'
       tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
       path: '/{{ if eq .metadata.labels.path_routing "true" }}backstage{{ end }}'
     env: 

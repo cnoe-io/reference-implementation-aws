@@ -64,13 +64,13 @@ spec:
           matchLabels:
             argocd.argoproj.io/secret-type: cluster
             {{- if $globalSelectors }}
-            {{- toYaml $globalSelectors | nindent 18 }}
+            {{- toYaml $globalSelectors | nindent 12 }}
             {{- end }}
             {{- if $chartConfig.selectorMatchLabels }}
-            {{- toYaml $chartConfig.selectorMatchLabels | nindent 18 }}
+            {{- toYaml $chartConfig.selectorMatchLabels | nindent 12 }}
             {{- end }}
         {{- if and $chartConfig.selector $useSelectors }}
-          {{- toYaml $chartConfig.selector | nindent 16 }}
+          {{- toYaml $chartConfig.selector | nindent 12 }}
         {{- end }}
         {{- if not $chartConfig.resourceGroup }}
         values:
