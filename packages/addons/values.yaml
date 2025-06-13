@@ -16,7 +16,8 @@ argocd:
       domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
     server:
       ingress:
-        annotations: '{{ if eq .metadata.labels.path_routing "false" }}{ "cert-manager.io/cluster-issuer": "letsencrypt-prod" }{{ else }}{}{{ end }}'
+        annotations: 
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
         path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
         tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
     params:
@@ -79,7 +80,8 @@ ingress-nginx-pr: # For PathRouting
   chartRepository: "https://kubernetes.github.io/ingress-nginx"
   valuesObject:
     controller:
-      extraArgs: {{ if eq .metadata.labels.path_routing "true" }}{ "default-ssl-certificate": "ingress-nginx/default-tls-prod" }{{ else }}{}{{ end }}
+      extraArgs:
+        default-ssl-certificate: '{{ if eq .metadata.labels.path_routing "true" }}"ingress-nginx/default-tls-prod"{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"
@@ -155,7 +157,8 @@ keycloak:
     ingress:
       hostname: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
       tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
-      annotations: '{{ if eq .metadata.labels.path_routing "false" }}{ "cert-manager.io/cluster-issuer": "letsencrypt-prod" }{{ else }}{}{{ end }}'
+      annotations: 
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"
@@ -170,7 +173,8 @@ backstage:
   path: packages/backstage/chart
   valuesObject:
     ingress:
-      annotations: '{{ if eq .metadata.labels.path_routing "false" }}{ "cert-manager.io/cl uster-issuer": "letsencrypt-prod" }{{ else }}{}{{ end }}'
+      annotations: 
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
       tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
       path: '/{{ if eq .metadata.labels.path_routing "true" }}backstage{{ end }}'
     env: 
