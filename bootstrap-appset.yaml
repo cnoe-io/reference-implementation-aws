@@ -1,23 +1,29 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: addons-appset
+  name: bootstrap-appset
   namespace: argocd
   labels:
     env: dev
 spec:
   project: default
   destination:
-    name: hub
+    server: https://kubernetes.default.svc
     namespace: argocd
   sources:
-    - repoURL: cnoe://appset-chart
+    # - repoURL: cnoe://packages
+    #   targetRevision: HEAD
+    #   path: "appset-chart"
+    #   helm:
+    #     valueFiles:
+    #       - $values/addons-appset/values.yaml # For installing all addons on hub
+    - repoURL: cnoe://packages 
       targetRevision: HEAD
-      path: "."
+      path: "appset-chart"
       helm:
         valueFiles:
-          - $values/values.yaml
-    - repoURL: cnoe://addons-appset
+          - $values/bootstrap/values.yaml # For bootstrap ArgoCD and ESO on hub for bootstrapping
+    - repoURL: cnoe://packages
       targetRevision: HEAD
       ref: values
   syncPolicy:

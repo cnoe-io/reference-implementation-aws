@@ -57,7 +57,17 @@ metadata:
   name: hub
   namespace: argocd
   labels:
-    argocd.argoproj.io/secret-type: cluster
+    argocd.argoproj.io/secret-type: cluster 
+    clusterClass: "control-plane"
+    clusterName: "hub"
+    environment: "control-plane"
+    path_routing: "true" # Set to false to disable path routing # TODO: Fetch config values here
+  annotations:
+    addons_repo_url: "http://cnoe.localtest.me:8443/gitea/giteaAdmin/idpbuilder-localdev-bootstrap-appset-packages.git"
+    addons_repo_revision: "HEAD" 
+    addons_repo_basepath: "." 
+    domain: advaitt.people.aws.dev # TODO: Fetch config values here
+    oidc_provider: keycloak
 type: Opaque
 stringData:
   name: hub
@@ -78,7 +88,7 @@ stringData:
 EOF
 
 echo -e "${BOLD}${GREEN}🔄 Running idpbuilder to apply packages...${NC}"
-idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages/" -c "argocd:${CLUSTER_SECRET_FILE}"
+idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/" -c "argocd:${CLUSTER_SECRET_FILE}"
 
 echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
 sleep 60 # Wait 1 minute before checking the status

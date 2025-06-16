@@ -11,13 +11,24 @@ argocd:
   releaseName: argocd
   defaultVersion: "8.0.14"
   chartRepository: "https://argoproj.github.io/argo-helm"
+  valuesObject:
+    global:
+      domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
+    server:
+      ingress:
+        annotations: 
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+        path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+        tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
+    params:
+      server.basehref: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"
     type: "manifests"
 
 aws-load-balancer-controller:
-  enabled: false
+  enabled: true
   # enableAckPodIdentity: true
   namespace: kube-system
   defaultVersion: "1.13.2"
@@ -47,8 +58,8 @@ aws-load-balancer-controller:
   #     - key: enable_argocd
   #       operator: In
   #       values: ['true']
-ingress-nginx:
-  enabled: false
+ingress-nginx: # For no PathRouting
+  enabled: true
   chartName: ingress-nginx
   namespace: ingress-nginx
   releaseName: ingress-nginx
@@ -56,7 +67,7 @@ ingress-nginx:
   chartRepository: "https://kubernetes.github.io/ingress-nginx"
 
 external-dns:
-  enabled: false
+  enabled: true
   releaseName: external-dns
   namespace: external-dns
   chartName: external-dns
@@ -97,7 +108,7 @@ external-secrets:
   #       eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "external_secrets_iam_role_arn")}}'
 
 cert-manager:
-  enabled: false
+  enabled: true
   chartName: cert-manager
   namespace: cert-manager
   releaseName: cert-manager
@@ -107,33 +118,57 @@ cert-manager:
     path: true
     manifestPath: "manifests"
     type: "manifests"
+  # selector:
+  #   matchExpressions:
+  #     - key: path_routing
+  #       operator: In
+  #       values: ['true']
 
 keycloak:
-  enabled: false
+  enabled: true
   chartName: keycloak
   namespace: keycloak
   releaseName: keycloak
   defaultVersion: "24.7.3"
   chartRepository: "https://charts.bitnami.com/bitnami"
+  valuesObject:
+    httpRelativePath: '/{{ if eq .metadata.labels.path_routing "true" }}keycloak{{ end }}'
+    ingress:
+      hostname: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
+      annotations: 
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"
     type: "manifests"
 
 backstage:
-  enabled: false
+  enabled: true
   chartName: backstage
   namespace: backstage
   releaseName: backstage
   type: chart
   path: packages/backstage/chart
+  valuesObject:
+    ingress:
+      annotations: 
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+      tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
+      path: '/{{ if eq .metadata.labels.path_routing "true" }}backstage{{ end }}'
+    env: 
+      BACKSTAGE_FRONTEND_URL: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/backstage{{ end }}'
+      BACKSTAGE_DOMAIN: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      KEYCLOAK_NAME_METADATA: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe/.well-known/openid-configuration'
+      ARGO_WORKFLOWS_URL: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
+      ARGO_CD_URL: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"
     type: "manifests"
 
 argo-workflows:
-  enabled: false
+  enabled: true
   chartName: argo-workflows
   namespace: argo
   releaseName: argo-workflows
@@ -142,17 +177,17 @@ argo-workflows:
   valuesObject:
     server:
       sso:
-        issuer: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe"
-        redirectUrl: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback"
+        issuer: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe'
+        redirectUrl: '{{ if eq .metadata.labels.path_routing "true"  }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback'
       ingress:
         hosts:
-        - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
+        - '{{ if eq .metadata.labels.path_routing "true"  }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
         paths: 
-        -  "/{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}"
+        -  '/{{ if eq .metadata.labels.path_routing "true"  }}argo-workflows{{ end }}'
         tls:
         - hosts:
-          - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
-          secretName: argo-workflows-prod-tls
+          - '{{ if eq .metadata.labels.path_routing "true"  }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+          secretName: '{{ if eq .metadata.labels.path_routing "false"  }}argo-workflows-prod-tls{{ end }}'
   additionalResources:
     path: true
     manifestPath: "manifests"

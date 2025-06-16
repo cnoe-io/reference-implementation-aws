@@ -1,0 +1,70 @@
+# Used for bootstraping hub cluster with ArgoCD, ESO and Addon Appset chart
+valueFiles:
+  - "."
+
+syncPolicyAppSet:
+  preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
+  
+
+addons-appset:
+  enabled: true
+  chartName: addons
+  namespace: argocd
+  releaseName: addons
+  type: chart
+  path: appset-chart
+  selector:
+    matchExpressions:
+      - key: clusterName
+        operator: In
+        values: ['hub']
+
+argocd:
+  enabled: true
+  chartName: argo-cd
+  namespace: argocd
+  releaseName: argocd
+  defaultVersion: "8.0.14"
+  chartRepository: "https://argoproj.github.io/argo-helm"
+  additionalResources:
+    path: true
+    manifestPath: "manifests"
+    type: "manifests"
+  selector:
+    matchExpressions:
+      - key: clusterName
+        operator: In
+        values: ['hub']
+
+external-secrets:
+  enabled: true
+  enableAckPodIdentity: false
+  namespace: external-secrets
+  chartName: external-secrets
+  defaultVersion: "0.17.0"
+  chartRepository: "https://charts.external-secrets.io"
+  # additionalResources:
+  #   path: "charts/fleet-secret"
+  #   type: "ecr-token"
+  #   helm:
+  #    releaseName: ecr-token
+  additionalResources:
+    path: true
+    manifestPath: "manifests"
+    type: "manifests"
+  selector:
+    matchExpressions:
+      - key: clusterName
+        operator: In
+        values: ['hub']
+  # selector:
+  #   matchExpressions:
+  #     - key: enable_external_secrets
+  #       operator: In
+  #       values: ['true']
+  # valuesObject:
+  #   installCRDs:  '{{default toBool(true) toBool((index .metadata.labels "use_external_secrets"))}}'
+  #   serviceAccount:
+  #     name: "external-secrets-sa"
+  #     annotations:
+  #       eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "external_secrets_iam_role_arn")}}'
