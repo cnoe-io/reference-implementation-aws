@@ -1,23 +1,9 @@
-# Used for bootstraping hub cluster with ArgoCD, ESO and Addon Appset chart
+# Used for bootstraping hub cluster with ArgoCD and ESO
 valueFiles:
   - "."
 
 syncPolicyAppSet:
   preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
-  
-
-addons-appset:
-  enabled: true
-  chartName: addons
-  namespace: argocd
-  releaseName: addons
-  type: chart
-  path: appset-chart
-  selector:
-    matchExpressions:
-      - key: clusterName
-        operator: In
-        values: ['hub']
 
 argocd:
   enabled: true
