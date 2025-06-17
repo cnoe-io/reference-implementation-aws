@@ -17,7 +17,7 @@ argocd:
     type: "manifests"
 
 aws-load-balancer-controller:
-  enabled: false
+  enabled: true
   # enableAckPodIdentity: true
   namespace: kube-system
   defaultVersion: "1.13.2"
@@ -48,7 +48,7 @@ aws-load-balancer-controller:
   #       operator: In
   #       values: ['true']
 ingress-nginx:
-  enabled: false
+  enabled: true
   chartName: ingress-nginx
   namespace: ingress-nginx
   releaseName: ingress-nginx
@@ -56,7 +56,7 @@ ingress-nginx:
   chartRepository: "https://kubernetes.github.io/ingress-nginx"
 
 external-dns:
-  enabled: false
+  enabled: true
   releaseName: external-dns
   namespace: external-dns
   chartName: external-dns
@@ -97,7 +97,7 @@ external-secrets:
   #       eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "external_secrets_iam_role_arn")}}'
 
 cert-manager:
-  enabled: false
+  enabled: true
   chartName: cert-manager
   namespace: cert-manager
   releaseName: cert-manager
