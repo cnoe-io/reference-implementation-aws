@@ -7,40 +7,40 @@ syncPolicyAppSet:
   
 argocd:
   enabled: true
-  chartName: argo-cd
-  namespace: argocd
-  releaseName: argocd
-  defaultVersion: "8.0.14"
-  chartRepository: "https://argoproj.github.io/argo-helm"
-  valuesObject:
-    global:
-      domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
-    server:
-      ingress:
-        annotations: 
-          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
-        path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
-    params:
-      server.basehref: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+  # chartName: argo-cd
+  # namespace: argocd
+  # releaseName: argocd
+  # defaultVersion: "8.0.14"
+  # chartRepository: "https://argoproj.github.io/argo-helm"
+  # valuesObject:
+  #   global:
+  #     domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
+  #   server:
+  #     ingress:
+  #       annotations: 
+  #         cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+  #       path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+  #   params:
+  #     server.basehref: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
   additionalResources:
-  - path: true
-    manifestPath: "manifests"
-    type: "manifests"
+  # - path: true
+  #   manifestPath: "manifests"
+  #   type: "manifests"
   - path: true
     manifestPath: "path-routing"
     type: "manifests"
 
 cert-manager:
   enabled: true
-  chartName: cert-manager
-  namespace: cert-manager
-  releaseName: cert-manager
-  defaultVersion: "1.17.2"
-  chartRepository: "https://charts.jetstack.io"
+  # chartName: cert-manager
+  # namespace: cert-manager
+  # releaseName: cert-manager
+  # defaultVersion: "1.17.2"
+  # chartRepository: "https://charts.jetstack.io"
   additionalResources:
-  - path: true
-    manifestPath: "manifests"
-    type: "manifests"
+  # - path: true
+  #   manifestPath: "manifests"
+  #   type: "manifests"
   - path: true
     manifestPath: "path-routing"
     type: "manifests"

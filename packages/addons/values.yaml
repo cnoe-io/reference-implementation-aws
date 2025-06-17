@@ -11,6 +11,16 @@ argocd:
   releaseName: argocd
   defaultVersion: "8.0.14"
   chartRepository: "https://argoproj.github.io/argo-helm"
+  valuesObject:
+    global:
+      domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
+    server:
+      ingress:
+        annotations: 
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+        path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+    params:
+      server.basehref: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
   additionalResources:
   - path: true
     manifestPath: "manifests"
