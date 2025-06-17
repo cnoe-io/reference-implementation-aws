@@ -21,7 +21,8 @@ argocd:
         path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
     configs:
       params:
-        'server.basehref' : '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+        'server.basehref': '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+        'server.rootpath': '{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
   additionalResources:
   - path: true
     manifestPath: "manifests"
