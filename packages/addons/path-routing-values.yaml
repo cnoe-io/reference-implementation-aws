@@ -1,6 +1,4 @@
 # This file contains overriding values for addons based on "path_routing" label on cluster secret
-valueFiles:
-  - "path-routing-values.yaml"
 
 syncPolicyAppSet:
   preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
