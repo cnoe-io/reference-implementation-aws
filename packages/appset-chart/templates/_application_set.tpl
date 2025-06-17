@@ -32,7 +32,6 @@ Template to generate additional resources configuration
   {{- end }}
 {{- end }}
 {{- end }}
-{{- end }}
 
 
 {{/*
