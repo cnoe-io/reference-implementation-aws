@@ -162,9 +162,7 @@ spec:
             "chartName" ($chartConfig.chartName | default $nameNormalize)
             "valueFiles" $valueFiles
             "chartConfig" $chartConfig
-            "values" $values
-            "additionalResourcesType" $chartConfig.additionalResources.type
-            "additionalResourcesPath" $chartConfig.additionalResources.path ) | nindent 6 }}
+            "values" $values) | nindent 6 }}
           {{- end}}
         {{- end }}
       destination:

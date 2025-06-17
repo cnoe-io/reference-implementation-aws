@@ -10,7 +10,7 @@ argocd:
   defaultVersion: "8.0.14"
   chartRepository: "https://argoproj.github.io/argo-helm"
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
   selector:
@@ -32,7 +32,7 @@ external-secrets:
   #   helm:
   #    releaseName: ecr-token
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
   selector:
