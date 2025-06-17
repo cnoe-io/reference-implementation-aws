@@ -96,7 +96,7 @@ kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd application
 echo -e "${GREEN}✅ addons-appset is now healthy!${NC}"
 
 echo -e "${YELLOW}⏳ Waiting for all Argo CD apps on the hub Cluster to be Healthy...${NC}"
-sleep 60 # Wait 1 minute before checking the status
+sleep 180 # Wait 3 minute before checking the status as the apps on hub cluster will take some time to create
 kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd --all applications --kubeconfig $KUBECONFIG_FILE --timeout=-30m
 echo -e "${BOLD}${GREEN}✅ All Argo CD apps are now healthy!${NC}"
 

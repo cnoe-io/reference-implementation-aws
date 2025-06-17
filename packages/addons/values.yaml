@@ -127,12 +127,22 @@ cert-manager:
     type: "manifests"
 
 keycloak:
-  enabled: false
+  enabled: true
   chartName: keycloak
   namespace: keycloak
   releaseName: keycloak
   defaultVersion: "24.7.3"
   chartRepository: "https://charts.bitnami.com/bitnami"
+  valuesObject:
+    httpRelativePath: '/{{ if eq .metadata.labels.path_routing "true" }}keycloak/{{ end }}'
+    ingress:
+      hostname: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      annotations: 
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+      extraTls:
+      - hosts:
+        - '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+        secretName: keycloak-server-tls
   additionalResources:
   - path: true
     manifestPath: "manifests"
