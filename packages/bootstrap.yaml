@@ -17,7 +17,7 @@ spec:
       path: "appset-chart"
       helm:
         valueFiles:
-          - $values/bootstrap/values.yaml
+          - $values/bootstrap/argocd-eso-values.yaml
     - repoURL: cnoe://
       targetRevision: HEAD
       ref: values

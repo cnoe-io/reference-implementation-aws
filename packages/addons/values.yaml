@@ -1,5 +1,11 @@
-valueFiles:
-  - "."
+# valueFiles:
+#   - "."
+
+syncPolicy:
+  automated:
+    selfHeal: true
+    allowEmpty: true
+    prune: false
 
 syncPolicyAppSet:
   preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources

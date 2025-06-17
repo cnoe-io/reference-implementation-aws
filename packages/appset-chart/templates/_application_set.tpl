@@ -44,12 +44,16 @@ Define the values path for reusability
 {{- $chartType := .chartType -}}
 {{- $values := .values -}}
 {{- with .valueFiles }}
-- $values/{{ $values.repoURLGitBasePath }}/{{ $nameNormalize }}{{ if $chartType }}/{{ $chartType }}{{ end }}/values.yaml
 {{- range . }}
-- $values/{{ $values.repoURLGitBasePath }}/{{ $nameNormalize }}{{ if $chartType }}/{{ $chartType }}{{ end }}/{{ if $chartConfig.valuesFileName }}{{ $chartConfig.valuesFileName }}{{ else }}values.yaml{{ end }}
+- $values/{{ $values.repoURLGitBasePath }}/{{ $nameNormalize }}{{ if $chartType }}/{{ $chartType }}{{ end }}/{{ if $chartConfig.valuesFileName }}{{ $chartConfig.valuesFileName }}{{ else }}{{ . }}{{ end }}
 {{- if $values.useValuesFilePrefix }}
 - $values/{{ $values.repoURLGitBasePath }}/{{ if $values.useValuesFilePrefix }}{{ $values.valuesFilePrefix }}{{ end }}{{ . }}/{{ $nameNormalize }}{{ if $chartType }}/{{ $chartType }}{{ end }}/{{ if $chartConfig.valuesFileName }}{{ $chartConfig.valuesFileName }}{{ else }}values.yaml{{ end }}
 {{- end }}
+{{- end }}
+{{- end }}
+{{- with $chartConfig.valueFiles }}
+{{- range . }}
+- $values/{{ $values.repoURLGitBasePath }}/{{ $nameNormalize }}{{ if $chartType }}/{{ $chartType }}{{ end }}/{{ if $chartConfig.valuesFileName }}{{ $chartConfig.valuesFileName }}{{ else }}{{ . }}{{ end }}
 {{- end }}
 {{- end }}
 {{- end }}

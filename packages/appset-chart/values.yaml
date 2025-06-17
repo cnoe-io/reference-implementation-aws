@@ -1,3 +1,6 @@
+valueFiles:
+  - "values.yaml"
+
 syncPolicy:
   automated:
     selfHeal: false
