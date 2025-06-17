@@ -26,6 +26,17 @@ argocd:
           cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
         path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
     configs:
+      cm:
+        oidc.config: |
+          name: Keycloak
+          issuer: https://{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe
+          clientID: argocd
+          enablePKCEAuthentication: true
+          requestedScopes:
+            - openid
+            - profile
+            - email
+            - groups
       params:
         'server.basehref': '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
         'server.rootpath': '{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'

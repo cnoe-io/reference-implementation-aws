@@ -338,24 +338,24 @@ configs:
 #     #         - name: your-github-org
 
     # OIDC configuration as an alternative to dex (optional).
-    oidc.config: |
-      name: Keycloak
-      issuer: https://keycloak.advaitt.people.aws.dev/realms/cnoe
-      clientID: argocd
-      # clientSecret: $oidc.azuread.clientSecret
-      # rootCA: |
-      #   -----BEGIN CERTIFICATE-----
-      #   ... encoded certificate data here ...
-      #   -----END CERTIFICATE-----
-      # requestedIDTokenClaims:
-      #   groups:
-      #     essential: true
-      enablePKCEAuthentication: true
-      requestedScopes:
-        - openid
-        - profile
-        - email
-        - groups
+    # oidc.config: |
+    #   name: Keycloak
+    #   issuer: https://keycloak.advaitt.people.aws.dev/realms/cnoe
+    #   clientID: argocd
+    #   # clientSecret: $oidc.azuread.clientSecret
+    #   # rootCA: |
+    #   #   -----BEGIN CERTIFICATE-----
+    #   #   ... encoded certificate data here ...
+    #   #   -----END CERTIFICATE-----
+    #   # requestedIDTokenClaims:
+    #   #   groups:
+    #   #     essential: true
+    #   enablePKCEAuthentication: true
+    #   requestedScopes:
+    #     - openid
+    #     - profile
+    #     - email
+    #     - groups
 
 #     # Extension Configuration
 #     ## Ref: https://argo-cd.readthedocs.io/en/latest/developer-guide/extensions/proxy-extensions/
