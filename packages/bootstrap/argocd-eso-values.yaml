@@ -24,7 +24,7 @@ argocd:
       cm:
         oidc.config: |
           name: Keycloak
-          issuer: https://{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak/{{ end }}/realms/cnoe
+          issuer: https://{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe
           clientID: argocd
           enablePKCEAuthentication: true
           requestedScopes:
@@ -52,8 +52,8 @@ argocd:
         values: ['true']
 
 external-secrets:
-  enabled: false
-  enableAckPodIdentity: false
+  enabled: true
+  # enableAckPodIdentity: false
   namespace: external-secrets
   chartName: external-secrets
   defaultVersion: "0.17.0"

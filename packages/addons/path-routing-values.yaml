@@ -18,11 +18,6 @@ cert-manager:
   - path: true
     manifestPath: "path-routing"
     type: "manifests"
-  # selector:
-  #   matchExpressions:
-  #     - key: path_routing
-  #       operator: In
-  #       values: ['true']
 
 keycloak:
   enabled: true
@@ -35,27 +30,13 @@ keycloak:
     type: "manifests"
 
 backstage:
-  enabled: false
-  chartName: backstage
-  namespace: backstage
-  releaseName: backstage
-  type: chart
-  path: packages/backstage/chart
-  valuesObject:
-    ingress:
-      annotations: 
-        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
-      tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
-      path: '/{{ if eq .metadata.labels.path_routing "true" }}backstage{{ end }}'
-    env: 
-      BACKSTAGE_FRONTEND_URL: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/backstage{{ end }}'
-      BACKSTAGE_DOMAIN: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
-      KEYCLOAK_NAME_METADATA: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe/.well-known/openid-configuration'
-      ARGO_WORKFLOWS_URL: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
-      ARGO_CD_URL: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
+  enabled: true
   additionalResources:
   - path: true
     manifestPath: "manifests"
+    type: "manifests"
+  - path: true
+    manifestPath: "path-routing"
     type: "manifests"
 
 argo-workflows:
@@ -83,162 +64,3 @@ argo-workflows:
   - path: true
     manifestPath: "manifests"
     type: "manifests"
-# iam-chart:
-#   enabled: false
-#   enableAckPodIdentity: false 
-#   namespace: ack-system
-#   defaultVersion: "1.3.13"
-#   chartNamespace: aws-controllers-k8s
-#   chartRepository: public.ecr.aws
-#   selector:
-#     matchExpressions:
-#       - key: enable_ack_iam
-#         operator: In
-#         values: ['true']
-#   environments:
-#   - selector:
-#       environment: staging
-#       tenant: tenant1
-#     chartVersion: "7.6.12"
-#   valuesObject:
-#     aws:
-#       region: '{{.metadata.annotations.aws_region}}'
-#     serviceAccount:
-#       name: '{{.metadata.annotations.ack_iam_service_account}}'
-# ack-eks:
-#   enabled: false
-#   enableAckPodIdentity: false 
-#   namespace: ack-system
-#   chartName: eks-chart
-#   defaultVersion: "1.5.1"
-#   chartNamespace: aws-controllers-k8s
-#   chartRepository: public.ecr.aws
-#   selector:
-#     matchExpressions:
-#       - key: enable_ack_eks
-#         operator: In
-#         values: ['true']
-#   valuesObject:
-#     aws:
-#       region: '{{.metadata.annotations.aws_region}}'
-#     serviceAccount:
-#       name: '{{.metadata.annotations.ack_eks_service_account}}'
-# ack-acm:
-#   enabled: true
-#   enableAckPodIdentity: true
-#   namespace: ack-system
-#   chartName: acm-chart
-#   defaultVersion: "1.0.2"
-#   chartNamespace: aws-controllers-k8s
-#   chartRepository: public.ecr.aws
-#   selector:
-#     matchExpressions:
-#       - key: enable_ack_acm
-#         operator: In
-#         values: ['true']
-#   valuesObject:
-#     aws:
-#       region: '{{.metadata.annotations.aws_region}}'
-#     serviceAccount:
-#       name:  'ack-acm-controller'
-#       annotations:
-#         eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "ack_acm_role_arn")}}'
-# route53-chart:
-#   enabled: false
-#   enableAckPodIdentity: false
-#   namespace: ack-system
-#   chartName: route53-chart
-#   defaultVersion: "0.0.20"
-#   chartNamespace: aws-controllers-k8s
-#   chartRepository: public.ecr.aws
-#   selector:
-#     matchExpressions:
-#       - key: enable_route53_controller
-#         operator: In
-#         values: ['true']
-#   valuesObject:
-#     aws:
-#       region: '{{.metadata.annotations.aws_region}}'
-#     serviceAccount:
-#       name:  'route53-controller'
-#       annotations:
-#         eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "ack_route53_controller_role_arn")}}'
-
-# metrics-server:
-#   enabled: false
-#   namespace: kube-system
-#   defaultVersion: "3.11.0"
-#   chartRepository: "https://kubernetes-sigs.github.io/metrics-server"
-#   selector:
-#     matchExpressions:
-#       - key: enable_metrics_server
-#         operator: In
-#         values: ['true']
-# karpenter:
-#   enabled: false
-#   enableAckPodIdentity: false
-#   releaseName: karpenter
-#   namespace: 'karpenter'
-#   chartName: karpenter/karpenter
-#   chartRepository: public.ecr.aws
-#   defaultVersion: "1.0.4"
-#   selector:
-#     matchExpressions:
-#       - key: enable_karpenter
-#         operator: In
-#         values: ['true']
-#   valuesObject:
-#     settings:
-#       clusterName: '{{.metadata.annotations.aws_cluster_name}}'
-#       interruptionQueue: '{{.metadata.annotations.karpenter_sqs_queue_name}}'
-#     serviceAccount:
-#       name: '{{.metadata.annotations.karpenter_service_account}}'
-#       annotations:
-#         eks.amazonaws.com/role-arn: '{{.metadata.annotations.karpenter_iam_role_arn}}'
-# aws_efs_csi_driver:
-#   enabled: false
-#   enableAckPodIdentity: false
-#   releaseName: aws-efs-csi-driver
-#   namespace: "kube-sytem"
-#   chartName: aws-efs-csi-driver
-#   chartRepository: https://kubernetes-sigs.github.io/aws-efs-csi-driver
-#   defaultVersion: "3.0.7"
-#   selector:
-#     matchExpressions:
-#       - key: enable_aws_efs_csi_driver
-#         operator: In
-#         values: ['true']
-#   valuesObject:
-#     controller:
-#       serviceAccount:
-#         name: '{{default "" (index  .metadata.annotations aws_efs_csi_driver_controller_service_account)}}'
-#         annotations:
-#           eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations aws_efs_csi_driver_iam_role_arn)}}'
-#     node:
-#       serviceAccount:
-#         name: '{{.metadata.annotations.aws_efs_csi_driver_node_service_account}}'
-#         annotations:
-#           eks.amazonaws.com/role-arn: '{{.metadata.annotations.aws_efs_csi_driver_iam_role_arn}}'
-# kro:
-#   enabled: false
-#   namespace: kro-system
-#   defaultVersion: "0.2.1"
-#   chartName: kro
-#   chartNamespace: kro
-#   chartRepository: ghcr.io/kro-run
-#   selector:
-#     matchExpressions:
-#       - key: enable_kro
-#         operator: In
-#         values: ['true']
-# kro-resource-groups:
-#   enabled: false
-#   type: manifest
-#   namespace: kro-resource-groups
-#   defaultVersion: "0.1.0"
-#   path: kro/resource-groups
-#   selector:
-#     matchExpressions:
-#       - key: enable_kro_resource_groups
-#         operator: In
-#         values: ['true']
