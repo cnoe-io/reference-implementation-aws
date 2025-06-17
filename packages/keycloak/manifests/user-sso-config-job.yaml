@@ -303,7 +303,7 @@ spec:
               # USER1_PASSWORD=$(cat /var/secrets/USER1_PASSWORD)
               HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -X POST -H "Content-Type: application/x-www-form-urlencoded" \
                 --data-urlencode "username=cnoe-admin" \
-                --data-urlencode "password=${ADMIN_PASSWORD}" \
+                --data-urlencode "password=${KEYCLOAK_ADMIN_PASSWORD}" \
                 --data-urlencode "grant_type=password" \
                 --data-urlencode "client_id=admin-cli" \
                 ${KEYCLOAK_URL}/realms/cnoe/protocol/openid-connect/token)
