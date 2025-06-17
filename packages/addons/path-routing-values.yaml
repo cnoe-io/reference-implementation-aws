@@ -1,27 +1,8 @@
-# This file contains overriding values for addons based on "path_routing" label on cluster secret
-
-syncPolicyAppSet:
-  preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
-  
+# This file contains overriding values for addons based on "path_routing" label on cluster secret  
 argocd:
   enabled: true
-  # chartName: argo-cd
-  # namespace: argocd
-  # releaseName: argocd
-  # defaultVersion: "8.0.14"
-  # chartRepository: "https://argoproj.github.io/argo-helm"
-  # valuesObject:
-  #   global:
-  #     domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
-  #   server:
-  #     ingress:
-  #       annotations: 
-  #         cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
-  #       path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
-  #   params:
-  #     server.basehref: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
   additionalResources:
-  - path: true
+  - path: true # This duplciation is required as helm values for slices are not merged
     manifestPath: "manifests"
     type: "manifests"
   - path: true
@@ -30,15 +11,10 @@ argocd:
 
 cert-manager:
   enabled: true
-  # chartName: cert-manager
-  # namespace: cert-manager
-  # releaseName: cert-manager
-  # defaultVersion: "1.17.2"
-  # chartRepository: "https://charts.jetstack.io"
   additionalResources:
-  # - path: true
-  #   manifestPath: "manifests"
-  #   type: "manifests"
+  - path: true
+    manifestPath: "manifests"
+    type: "manifests"
   - path: true
     manifestPath: "path-routing"
     type: "manifests"
