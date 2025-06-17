@@ -12,7 +12,7 @@ argocd:
   defaultVersion: "8.0.14"
   chartRepository: "https://argoproj.github.io/argo-helm"
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 
@@ -81,7 +81,7 @@ external-secrets:
   #   helm:
   #    releaseName: ecr-token
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
   # selector:
@@ -104,7 +104,7 @@ cert-manager:
   defaultVersion: "1.17.2"
   chartRepository: "https://charts.jetstack.io"
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 
@@ -116,7 +116,7 @@ keycloak:
   defaultVersion: "24.7.3"
   chartRepository: "https://charts.bitnami.com/bitnami"
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 
@@ -128,7 +128,7 @@ backstage:
   type: chart
   path: packages/backstage/chart
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 
@@ -154,7 +154,7 @@ argo-workflows:
           - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
           secretName: argo-workflows-prod-tls
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 # iam-chart:

@@ -88,7 +88,7 @@ stringData:
 EOF
 
 echo -e "${BOLD}${GREEN}🔄 Running idpbuilder to apply packages...${NC}"
-idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/" -c "argocd:${CLUSTER_SECRET_FILE}"
+idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages" -c "argocd:${CLUSTER_SECRET_FILE}"
 
 echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
 sleep 60 # Wait 1 minute before checking the status

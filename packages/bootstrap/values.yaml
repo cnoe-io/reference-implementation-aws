@@ -2,9 +2,6 @@
 valueFiles:
   - "."
 
-syncPolicyAppSet:
-  preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
-
 argocd:
   enabled: true
   chartName: argo-cd

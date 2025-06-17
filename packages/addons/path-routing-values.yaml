@@ -1,3 +1,4 @@
+# This file contains overriding values for addons based on "path_routing" label on cluster secret
 valueFiles:
   - "."
 
@@ -19,93 +20,15 @@ argocd:
         annotations: 
           cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
         path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
-        tls: '{{ if eq .metadata.labels.path_routing "false" }}true{{ else }}false{{ end }}'
     params:
       server.basehref: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
-
-aws-load-balancer-controller:
-  enabled: true
-  # enableAckPodIdentity: true
-  namespace: kube-system
-  defaultVersion: "1.13.2"
-  chartRepository: "https://aws.github.io/eks-charts"
-  # selector:
-  #   matchExpressions:
-  #     - key: enable_aws_load_balancer_controller
-  #       operator: In
-  #       values: ['true']
-  valuesObject:
-    serviceAccount:
-      name:  "aws-load-balancer-controller"
-    # vpcId: '{{.metadata.annotations.aws_vpc_id}}'
-    clusterName: '{{ .name }}'
-  ignoreDifferences:
-    - kind: Secret
-      name: aws-load-balancer-tls
-      jsonPointers: [/data]
-    - group: admissionregistration.k8s.io
-      kind: MutatingWebhookConfiguration
-      jqPathExpressions: ['.webhooks[].clientConfig.caBundle']
-    - group: admissionregistration.k8s.io
-      kind: ValidatingWebhookConfiguration
-      jqPathExpressions: ['.webhooks[].clientConfig.caBundle']
-  # selector:
-  #   matchExpressions:
-  #     - key: enable_argocd
-  #       operator: In
-  #       values: ['true']
-ingress-nginx: # For no PathRouting
-  enabled: true
-  chartName: ingress-nginx
-  namespace: ingress-nginx
-  releaseName: ingress-nginx
-  defaultVersion: "4.7.0"
-  chartRepository: "https://kubernetes.github.io/ingress-nginx"
-
-external-dns:
-  enabled: true
-  releaseName: external-dns
-  namespace: external-dns
-  chartName: external-dns
-  chartRepository: https://kubernetes-sigs.github.io/external-dns
-  defaultVersion: "1.16.1"
-  # selector:
-  #   matchExpressions:
-  #     - key: enable_external_dns
-  #       operator: In
-  #       values: ['true']
-
-external-secrets:
-  enabled: true
-  enableAckPodIdentity: false
-  namespace: external-secrets
-  chartName: external-secrets
-  defaultVersion: "0.17.0"
-  chartRepository: "https://charts.external-secrets.io"
-  # additionalResources:
-  #   path: "charts/fleet-secret"
-  #   type: "ecr-token"
-  #   helm:
-  #    releaseName: ecr-token
-  additionalResources:
-    path: true
-    manifestPath: "manifests"
+  - path: true
+    manifestPath: "path-routing"
     type: "manifests"
-  # selector:
-  #   matchExpressions:
-  #     - key: enable_external_secrets
-  #       operator: In
-  #       values: ['true']
-  # valuesObject:
-  #   installCRDs:  '{{default toBool(true) toBool((index .metadata.labels "use_external_secrets"))}}'
-  #   serviceAccount:
-  #     name: "external-secrets-sa"
-  #     annotations:
-  #       eks.amazonaws.com/role-arn: '{{default "" (index .metadata.annotations "external_secrets_iam_role_arn")}}'
 
 cert-manager:
   enabled: true
@@ -115,8 +38,11 @@ cert-manager:
   defaultVersion: "1.17.2"
   chartRepository: "https://charts.jetstack.io"
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
+    type: "manifests"
+  - path: true
+    manifestPath: "path-routing"
     type: "manifests"
   # selector:
   #   matchExpressions:
@@ -125,7 +51,7 @@ cert-manager:
   #       values: ['true']
 
 keycloak:
-  enabled: true
+  enabled: false
   chartName: keycloak
   namespace: keycloak
   releaseName: keycloak
@@ -139,12 +65,12 @@ keycloak:
       annotations: 
         cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 
 backstage:
-  enabled: true
+  enabled: false
   chartName: backstage
   namespace: backstage
   releaseName: backstage
@@ -163,12 +89,12 @@ backstage:
       ARGO_WORKFLOWS_URL: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
       ARGO_CD_URL: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 
 argo-workflows:
-  enabled: true
+  enabled: false
   chartName: argo-workflows
   namespace: argo
   releaseName: argo-workflows
@@ -189,7 +115,7 @@ argo-workflows:
           - '{{ if eq .metadata.labels.path_routing "true"  }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
           secretName: '{{ if eq .metadata.labels.path_routing "false"  }}argo-workflows-prod-tls{{ end }}'
   additionalResources:
-    path: true
+  - path: true
     manifestPath: "manifests"
     type: "manifests"
 # iam-chart:

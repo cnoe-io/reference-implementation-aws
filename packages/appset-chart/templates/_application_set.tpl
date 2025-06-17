@@ -5,29 +5,22 @@ Template to generate additional resources configuration
 {{- $chartName := .chartName -}}
 {{- $chartConfig := .chartConfig -}}
 {{- $valueFiles := .valueFiles -}}
-{{- $additionalResourcesType := .additionalResourcesType -}}
-{{- $additionalResourcesPath := .path -}}
 {{- $values := .values -}}
-{{- if $chartConfig.additionalResources.path }}
+
+{{- range $resource := $chartConfig.additionalResources }}
 - repoURL: {{ $values.repoURLGit | squote }}
   targetRevision: {{ $values.repoURLGitRevision | squote }}
-  path: {{- if eq $additionalResourcesType "manifests" }}
-    '{{ $values.repoURLGitBasePath }}/{{ $chartName }}{{ if $values.useValuesFilePrefix }}{{ $values.valuesFilePrefix }}{{ end }}/{{ $chartConfig.additionalResources.manifestPath }}'
+  path: {{- if eq $resource.type "manifests" }}
+    '{{ $values.repoURLGitBasePath }}/{{ $chartName }}{{ if $values.useValuesFilePrefix }}{{ $values.valuesFilePrefix }}{{ end }}/{{ $resource.manifestPath }}'
   {{- else }}
-    {{ $chartConfig.additionalResources.path | squote }}
+    {{ $resource.path | squote }}
   {{- end}}
-{{- end }}
-{{- if $chartConfig.additionalResources.chart }}
-- repoURL: '{{$chartConfig.additionalResources.repoURL}}'
-  chart: '{{$chartConfig.additionalResources.chart}}'
-  targetRevision: '{{$chartConfig.additionalResources.chartVersion }}'
-{{- end }}
-{{- if $chartConfig.additionalResources.helm }}
+  {{- if $resource.helm }}
   helm:
-    releaseName: '{{`{{ .name }}`}}-{{ $chartConfig.additionalResources.helm.releaseName }}'
-    {{- if $chartConfig.additionalResources.helm.valuesObject }}
+    releaseName: '{{`{{ .name }}`}}-{{ $resource.helm.releaseName }}'
+    {{- if $resource.helm.valuesObject }}
     valuesObject:
-    {{- $chartConfig.additionalResources.helm.valuesObject | toYaml | nindent 6 }}
+    {{- $resource.helm.valuesObject | toYaml | nindent 6 }}
     {{- end }}
     ignoreMissingValueFiles: true
     valueFiles:
@@ -35,7 +28,9 @@ Template to generate additional resources configuration
       "nameNormalize" $chartName
       "valueFiles" $valueFiles
       "values" $values
-      "chartType" $additionalResourcesType) | nindent 6 }}
+      "chartType" $resource.type) | nindent 6 }}
+  {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 

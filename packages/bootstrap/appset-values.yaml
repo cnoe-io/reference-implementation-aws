@@ -1,9 +1,7 @@
 # Used for bootstraping hub cluster with Addon Appset chart
 valueFiles:
   - "."
-
-syncPolicyAppSet:
-  preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
+  - "path-routing-values.yaml" # For path-routing
   
 addons-appset:
   enabled: true
@@ -11,7 +9,7 @@ addons-appset:
   namespace: argocd
   releaseName: addons
   type: chart
-  path: appset-chart
+  path: packages/appset-chart # This path is relative to Github repo root
   selector:
     matchExpressions:
       - key: clusterName
