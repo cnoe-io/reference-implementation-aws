@@ -300,7 +300,6 @@ spec:
               
               # Get Keycloak token for initial Admin user
               # ADMIN_PASSWORD=$(cat /var/secrets/KEYCLOAK_ADMIN_PASSWORD)
-              KEYCLOAK_URL=http://keycloak.keycloak.svc.cluster.local:80
               # USER1_PASSWORD=$(cat /var/secrets/USER1_PASSWORD)
               HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -X POST -H "Content-Type: application/x-www-form-urlencoded" \
                 --data-urlencode "username=cnoe-admin" \
