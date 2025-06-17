@@ -19,7 +19,7 @@ argocd:
         annotations: 
           cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
         path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
-    cm:
+    configs:
       params:
         server.basehref: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
   additionalResources:
