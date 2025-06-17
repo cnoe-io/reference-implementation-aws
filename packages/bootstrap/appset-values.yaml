@@ -1,7 +1,6 @@
 # Used for bootstraping hub cluster with Addon Appset chart
 valueFiles:
   - "."
-  - "path-routing-values.yaml" # For path-routing
   
 addons-appset:
   enabled: true
@@ -15,3 +14,4 @@ addons-appset:
       - key: clusterName
         operator: In
         values: ['hub']
+  valuesFileName: path-routing-values.yaml

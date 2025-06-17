@@ -44,6 +44,7 @@ Define the values path for reusability
 {{- $chartType := .chartType -}}
 {{- $values := .values -}}
 {{- with .valueFiles }}
+- $values/{{ $values.repoURLGitBasePath }}/{{ $nameNormalize }}{{ if $chartType }}/{{ $chartType }}{{ end }}/values.yaml
 {{- range . }}
 - $values/{{ $values.repoURLGitBasePath }}/{{ $nameNormalize }}{{ if $chartType }}/{{ $chartType }}{{ end }}/{{ if $chartConfig.valuesFileName }}{{ $chartConfig.valuesFileName }}{{ else }}values.yaml{{ end }}
 {{- if $values.useValuesFilePrefix }}
