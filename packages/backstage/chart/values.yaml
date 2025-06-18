@@ -15,8 +15,8 @@ ingress:
 # Backstage deployment configuration
 backstage:
   image:
-    repository: public.ecr.aws/cnoe-io/backstage
-    tag: v0.0.2
+    repository: ghcr.io/cnoe-io/backstage-app
+    tag: sha256-f96950b9eae5d46a890e16621d2ca3dc6f94eac86b8f6c208bde3eb6b122d78f
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
