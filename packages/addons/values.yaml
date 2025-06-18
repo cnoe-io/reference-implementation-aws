@@ -182,7 +182,7 @@ backstage:
     type: "manifests"
 
 argo-workflows:
-  enabled: false
+  enabled: true
   chartName: argo-workflows
   namespace: argo
   releaseName: argo-workflows
@@ -190,18 +190,21 @@ argo-workflows:
   chartRepository: "https://argoproj.github.io/argo-helm"
   valuesObject:
     server:
+      baseHref: '/{{ if eq .metadata.labels.path_routing "true" }}argo-workflows{{ end }}'
       sso:
-        issuer: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe"
-        redirectUrl: "{{ if .metadata.annotations.path_routing }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback"
+        issuer: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe'
+        redirectUrl: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback'
       ingress:
+        annotations: 
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
         hosts:
-        - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
+        - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
         paths: 
-        -  "/{{ if .metadata.annotations.path_routing }}argo-workflows{{ end }}"
+        -  '/{{ if eq .metadata.labels.path_routing "true" }}argo-workflows{{ end }}'
         tls:
         - hosts:
-          - "{{ if .metadata.annotations.path_routing }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}"
-          secretName: argo-workflows-prod-tls
+          - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+          secretName: argo-workflows-server-tls
   additionalResources:
   - path: true
     manifestPath: "manifests"

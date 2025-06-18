@@ -40,27 +40,11 @@ backstage:
     type: "manifests"
 
 argo-workflows:
-  enabled: false
-  chartName: argo-workflows
-  namespace: argo
-  releaseName: argo-workflows
-  defaultVersion: "0.45.18"
-  chartRepository: "https://argoproj.github.io/argo-helm"
-  valuesObject:
-    server:
-      sso:
-        issuer: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe'
-        redirectUrl: '{{ if eq .metadata.labels.path_routing "true"  }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback'
-      ingress:
-        hosts:
-        - '{{ if eq .metadata.labels.path_routing "true"  }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
-        paths: 
-        -  '/{{ if eq .metadata.labels.path_routing "true"  }}argo-workflows{{ end }}'
-        tls:
-        - hosts:
-          - '{{ if eq .metadata.labels.path_routing "true"  }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
-          secretName: '{{ if eq .metadata.labels.path_routing "false"  }}argo-workflows-prod-tls{{ end }}'
+  enabled: true
   additionalResources:
   - path: true
     manifestPath: "manifests"
+    type: "manifests"
+  - path: true
+    manifestPath: "path-routing"
     type: "manifests"

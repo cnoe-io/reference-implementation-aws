@@ -6,8 +6,6 @@ workflow:
 server:
   ingress:
     enabled: true
-    annotations:
-      cert-manager.io/cluster-issuer: 'letsencrypt-prod'
     ingressClassName: 'nginx'
   sso:
     enabled: true
