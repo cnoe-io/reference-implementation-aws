@@ -4,6 +4,8 @@ controller:
   service:
     type: LoadBalancer
     annotations:
+      argocd.argoproj.io/sync-wave: '-1' # Adding to ensure service is created before actual deployment
+      service.beta.kubernetes.io/aws-load-balancer-internal: 'false'
       service.beta.kubernetes.io/aws-load-balancer-name: cnoe
       service.beta.kubernetes.io/aws-load-balancer-type: external
       service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
