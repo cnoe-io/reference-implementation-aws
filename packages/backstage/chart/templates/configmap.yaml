@@ -10,11 +10,13 @@ data:
   app-config.yaml: |
     app:
       title: {{ .Values.backstage.config.app.title }}
-      baseUrl: ${BACKSTAGE_FRONTEND_URL}
+      # baseUrl: ${BACKSTAGE_FRONTEND_URL}
+      baseUrl: /backstage
     organization:
       name: {{ .Values.backstage.config.organization.name }}
     backend:
-      baseUrl: ${BACKSTAGE_FRONTEND_URL}
+      # baseUrl: ${BACKSTAGE_FRONTEND_URL}
+      baseUrl: /backstage
       listen:
         port: {{ .Values.backstage.config.backend.listen.port }}
       csp:
