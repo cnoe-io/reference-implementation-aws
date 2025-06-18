@@ -71,7 +71,7 @@ data:
             metadataUrl: ${KEYCLOAK_NAME_METADATA}
             clientId: {{ .Values.backstage.config.auth.providers.keycloakoidc.development.clientId }}
             clientSecret: ${BACKSTAGE_CLIENT_SECRET}
-            # scope: {{ .Values.backstage.config.auth.providers.keycloakoidc.development.scope | quote }}
+            scope: {{ .Values.backstage.config.auth.providers.keycloakoidc.development.scope | quote }}
             prompt: {{ .Values.backstage.config.auth.providers.keycloakoidc.development.prompt }}
 
     scaffolder:
