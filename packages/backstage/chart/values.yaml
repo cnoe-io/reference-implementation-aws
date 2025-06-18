@@ -16,7 +16,7 @@ ingress:
 backstage:
   image:
     repository: ghcr.io/cnoe-io/backstage-app
-    tag: sha256-f96950b9eae5d46a890e16621d2ca3dc6f94eac86b8f6c208bde3eb6b122d78f
+    tag: 135c0cb26f3e004a27a11edb6a4779035aff9805
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
