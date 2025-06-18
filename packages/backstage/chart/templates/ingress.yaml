@@ -13,7 +13,7 @@ spec:
   tls:
     - hosts:
         - {{ .Values.env.BACKSTAGE_DOMAIN | quote }}
-      secretName: backstage-prod-tls
+      secretName: backstage-server-tls
   {{- end }}
   rules:
     - host: {{ .Values.env.BACKSTAGE_DOMAIN | quote }}

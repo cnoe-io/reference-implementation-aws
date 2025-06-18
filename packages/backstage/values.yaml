@@ -12,7 +12,7 @@ ingress:
   enabled: true
   # annotations: {}
   # path: /
-  # tls: false
+  tls: true
 
 # Backstage deployment configuration
 backstage:
