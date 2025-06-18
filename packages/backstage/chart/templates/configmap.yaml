@@ -14,13 +14,13 @@ data:
     organization:
       name: {{ .Values.backstage.config.organization.name }}
     backend:
-      baseUrl: http://backstage.backstage.svc.cluster.local
+      baseUrl: https://advaitt.people.aws.dev/backstage
       listen:
         port: {{ .Values.backstage.config.backend.listen.port }}
       csp:
         connect-src: {{.Values.backstage.config.backend.csp.connectsrc | toJson }}
       cors:
-        origin: ${BACKSTAGE_FRONTEND_URL}
+        origin: https://advaitt.people.aws.dev
         methods: {{ .Values.backstage.config.backend.cors.methods | toJson }}
         credentials: {{ .Values.backstage.config.backend.cors.credentials }}
       database:
