@@ -93,5 +93,15 @@ data:
         type: {{ .Values.backstage.config.kubernetes.serviceLocatorMethod.type | quote }}
       clusterLocatorMethods:
         - $include: k8s-config.yaml
+    argocd:
+      username: admin
+      password: ${ARGOCD_ADMIN_PASSWORD}
+      appLocatorMethods:
+        - type: 'config'
+          instances:
+            - name: in-cluster
+              url: ${ARGO_CD_URL}
+              username: admin
+              password: ${ARGOCD_ADMIN_PASSWORD}
     argoWorkflows:
         baseUrl: ${ARGO_WORKFLOWS_URL}
