@@ -91,9 +91,24 @@ echo -e "${BOLD}${GREEN}🔄 Running idpbuilder to apply packages...${NC}"
 idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages" -c "argocd:${CLUSTER_SECRET_FILE}"
 
 echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
-sleep 60 # Wait 1 minute before checking the status
+# sleep 60 # Wait 1 minute before checking the status
 kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd applications/addons-appset --timeout=15m
 echo -e "${GREEN}✅ addons-appset is now healthy!${NC}"
+
+START_TIME=$(date +%s)
+TIMEOUT=180 # 3 minute timeout for moving to checking the status of application 
+while [ $(kubectl get applications.argoproj.io -n argocd  --no-headers --kubeconfig $KUBECONFIG_FILE 2>/dev/null | wc -l) -lt 2 ]; do
+  CURRENT_TIME=$(date +%s)
+  ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+  
+  if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
+    echo -e "${YELLOW}⚠️ Timeout reached while waiting for applications to be created by the AppSet chart...${NC}"
+    break
+  fi
+  
+  echo -e "${YELLOW}⏳ Still waiting for ${BOLD}argocd apps from Appset chart${NC} ${YELLOW}AppSet to be created... (${ELAPSED_TIME}s elapsed)${NC}"
+  sleep 10
+done
 
 echo -e "${YELLOW}⏳ Waiting for all Argo CD apps on the hub Cluster to be Healthy...${NC}"
 sleep 180 # Wait 3 minute before checking the status as the apps on hub cluster will take some time to create
