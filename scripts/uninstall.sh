@@ -98,7 +98,7 @@ echo -e "${GREEN}✅ ${BOLD}argocd${NC} ${GREEN}successfully removed!${NC}"
 echo -e "${CYAN}🗑️  Deleting PVCs for ${BOLD}keycloak${NC}...${NC}"
 kubectl delete pvc -n keycloak data-keycloak-postgresql-0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
 kubectl delete pvc -n backstage data-postgresql-0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
-echo -e "${GREEN}✅ Keycloak PVCs removed!${NC}"
+echo -e "${GREEN}✅ Keycloak & Backstage Postgres PVCs removed!${NC}"
 
 echo -e "\n${BOLD}${GREEN}🎉 Uninstallation Complete! 🎉${NC}"
 echo -e "${CYAN}🧹 All resources have been successfully removed.${NC}"
