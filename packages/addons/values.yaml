@@ -197,7 +197,7 @@ argo-workflows:
       ingress:
         annotations: 
           cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
-          nginx.ingress.kubernetes.io/use-regex: '{{ if eq .metadata.labels.path_routing "true" }}true{{ end }}'
+          nginx.ingress.kubernetes.io/use-regex: "{{ if eq .metadata.labels.path_routing 'true' }}true{{ end }}"
           nginx.ingress.kubernetes.io/rewrite-target: '{{ if eq .metadata.labels.path_routing "true" }}/$2{{ end }}'
         hosts:
         - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
