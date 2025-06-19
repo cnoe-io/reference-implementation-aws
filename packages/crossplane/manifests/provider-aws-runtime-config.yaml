@@ -12,6 +12,6 @@ spec:
               args:
                 - --debug
                 - --enable-management-policies
-              securityContext:
-                fsGroup: 2000
+          securityContext:
+            fsGroup: 2000
 

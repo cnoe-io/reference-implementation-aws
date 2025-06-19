@@ -1,8 +1,6 @@
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
   name: provider-family-aws
 spec:
   package: xpkg.upbound.io/upbound/provider-family-aws:v1.23.0
@@ -12,8 +10,6 @@ apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
   name: provider-aws-s3
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   package: xpkg.upbound.io/upbound/provider-aws-s3:v1.23.0
   runtimeConigRef:
