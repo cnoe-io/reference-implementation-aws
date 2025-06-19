@@ -14,3 +14,12 @@ spec:
   package: xpkg.upbound.io/upbound/provider-aws-s3:v1.23.0
   runtimeConfigRef:
     name: provider-aws-runtime-config
+---
+# This is required for the provider-aws to use pod identity. Otherwise, crossplane generates random name for provider pod.
+# Also, Pod identity currently does not wildcard service account names like IRSA https://github.com/aws/containers-roadmap/issues/2233.
+apiVersion: pkg.crossplane.io/v1
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: provider-aws
+  namespace: crossplane-system
