@@ -5,9 +5,9 @@ metadata:
 spec:
   deploymentTemplate:
     spec:
+      selector: {} # Required to specify by CRD spec
       template:
         spec:
-          selector: {} # Required to specify by CRD spec
           containers:
             - name: package-runtime
               args:
