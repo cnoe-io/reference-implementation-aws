@@ -8,6 +8,7 @@ spec:
       selector: {} # Required to specify by CRD spec
       template:
         spec:
+          serviceAccountName: provider-aws
           containers:
             - name: package-runtime
               args:
