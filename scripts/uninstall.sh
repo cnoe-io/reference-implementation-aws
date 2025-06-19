@@ -38,6 +38,7 @@ aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig
 
 # Addons to be deleted
 ADDONS=(
+  crossplane
   argo-workflows
   backstage
   keycloak
@@ -50,11 +51,11 @@ ADDONS=(
 
 # Remove addons-appset applicationset and corresponding appset-chart applicationset with orphan deletion policy. 
 # The addons will be removed in specific order later.
-echo -e "${CYAN}🗑️  Deleting ${BOLD}addons-appset${NC} ${CYAN}ApplicationSet...${NC}"
-kubectl delete applicationsets.argoproj.io -n argocd addons-appset --cascade=orphan --kubeconfig $KUBECONFIG_FILE  > /dev/null 2>&1
+# echo -e "${CYAN}🗑️  Deleting ${BOLD}addons-appset${NC} ${CYAN}ApplicationSet...${NC}"
+# kubectl delete applicationsets.argoproj.io -n argocd addons-appset --cascade=orphan --kubeconfig $KUBECONFIG_FILE  > /dev/null 2>&1
 
-echo -e "${CYAN}🗑️  Deleting ${BOLD}appset-chart${NC} ${CYAN}ApplicationSet...${NC}"
-kubectl delete applications.argoproj.io -n argocd -l addonName=addons-appset --cascade=orphan --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+# echo -e "${CYAN}🗑️  Deleting ${BOLD}appset-chart${NC} ${CYAN}ApplicationSet...${NC}"
+# kubectl delete applications.argoproj.io -n argocd -l addonName=addons-appset --cascade=orphan --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 
 # Start removing addons in order
 echo -e "${BOLD}${YELLOW}📦 Removing add-ons in sequence...${NC}"
