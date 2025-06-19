@@ -12,5 +12,5 @@ metadata:
   name: provider-aws-s3
 spec:
   package: xpkg.upbound.io/upbound/provider-aws-s3:v1.23.0
-  runtimeConigRef:
+  runtimeConfigRef:
     name: provider-aws-runtime-config
