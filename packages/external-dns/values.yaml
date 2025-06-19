@@ -5,7 +5,7 @@ provider: aws
 txtOwnerId: cnoe-external-dns
 registry: txt
 interval: 2m
-policy: sync
+policy: upsert-only
 extraArgs:
   - --aws-zone-type=public
   - --aws-zones-cache-duration=1h

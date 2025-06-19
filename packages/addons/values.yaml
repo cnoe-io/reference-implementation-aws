@@ -209,6 +209,18 @@ argo-workflows:
   - path: true
     manifestPath: "manifests"
     type: "manifests"
+
+crossplane:
+  enabled: true
+  chartName: crossplane
+  namespace: crossplane-system
+  releaseName: crossplane
+  defaultVersion: "1.20.0"
+  chartRepository: "https://charts.crossplane.io/stable"
+  additionalResources:
+  - path: true
+    manifestPath: "manifests"
+    type: "manifests"
 # iam-chart:
 #   enabled: false
 #   enableAckPodIdentity: false 

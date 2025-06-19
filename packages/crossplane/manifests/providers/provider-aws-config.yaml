@@ -7,4 +7,4 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   credentials:
-    source: IRSA
+    source: PodIdentity

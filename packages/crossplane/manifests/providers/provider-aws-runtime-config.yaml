@@ -1,0 +1,17 @@
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: provider-aws-runtime-config
+spec:
+  deploymentTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: package-runtime
+              args:
+                - --debug
+                - --enable-management-policies
+              securityContext:
+                fsGroup: 2000
+
