@@ -23,7 +23,7 @@ argocd:
     server:
       ingress:
         annotations: 
-          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
         path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
     configs:
       cm:
@@ -149,7 +149,7 @@ keycloak:
     ingress:
       hostname: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
       annotations: 
-        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
       extraTls:
       - hosts:
         - '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
@@ -169,7 +169,7 @@ backstage:
   valuesObject:
     ingress:
       annotations: 
-        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
     env: 
       BACKSTAGE_FRONTEND_URL: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
       BACKSTAGE_DOMAIN: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
@@ -196,9 +196,9 @@ argo-workflows:
         redirectUrl: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback'
       ingress:
         annotations: 
-          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}"letsencrypt-prod"{{ end }}'
-          nginx.ingress.kubernetes.io/use-regex: '{{ if eq .metadata.labels.path_routing "true" }}"true"{{ end }}'
-          nginx.ingress.kubernetes.io/rewrite-target: '{{ if eq .metadata.labels.path_routing "true" }}"/$2"{{ end }}'
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
+          nginx.ingress.kubernetes.io/use-regex: '{{ if eq .metadata.labels.path_routing "true" }}true{{ end }}'
+          nginx.ingress.kubernetes.io/rewrite-target: '{{ if eq .metadata.labels.path_routing "true" }}/$2{{ end }}'
         hosts:
         - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
         paths: 
