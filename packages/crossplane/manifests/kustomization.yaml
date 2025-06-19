@@ -1,6 +1,8 @@
 namespace: crossplane-system
 resources:
-  - . # install all files from the directory
+  - provider-aws-config.yaml
+  - provider-aws-runtime-config.yaml
+  - provider-aws.yaml
   - https://github.com/awslabs/crossplane-on-eks/compositions/upbound-aws-provider/s3
 
 commonAnnotations:
