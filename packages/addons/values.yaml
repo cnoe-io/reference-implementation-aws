@@ -202,7 +202,7 @@ argo-workflows:
         hosts:
         - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
         paths: 
-        -  '/{{ if eq .metadata.labels.path_routing "true" }}argo-workflows(/|$)(.*){{ end }}'
+        -  '/{{ if eq .metadata.labels.path_routing "true" }}argo-workflows/?(.*){{ end }}'
         tls:
         - hosts:
           - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
