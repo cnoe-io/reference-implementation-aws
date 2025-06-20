@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+  labels:
+    env: dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: cnoe
+  sources:
+    - chart: external-dns
+      repoURL: https://kubernetes-sigs.github.io/external-dns/
+      targetRevision: 1.16.1
+      helm:
+        releaseName: external-dns
+        valueFiles:
+          - $values/packages/external-dns/values.yaml
+    - repoURL: https://github.com/punkwalker/reference-implementation-aws
+      targetRevision: ref-impl-v2
+      ref: values
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: external-dns
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

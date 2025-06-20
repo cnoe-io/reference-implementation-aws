@@ -1,0 +1,13 @@
+sources:
+  - service
+  - ingress
+provider: aws
+txtOwnerId: cnoe-external-dns
+registry: txt
+interval: 2m
+policy: upsert-only
+extraArgs:
+  - --aws-zone-type=public
+  - --aws-zones-cache-duration=1h
+domainFilters:
+  - advaitt.people.aws.dev

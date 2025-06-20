@@ -1,8 +1,0 @@
-workflow:
-  serviceAccount:
-    create: false
-  rbac:
-    create: false
-server:
-  extraArgs:
-    - --auth-mode=client

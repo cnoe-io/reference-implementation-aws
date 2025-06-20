@@ -1,0 +1,30 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: cnoe-ref-impl
+  region: us-west-2
+  version: "1.32"
+vpc:
+  cidr: "10.0.0.0/16"
+  nat:
+    gateway: Single
+managedNodeGroups:
+  - name: managed-ng-1
+    instanceType: m5.large
+    minSize: 3
+    maxSize: 6
+    desiredCapacity: 4
+    volumeSize: 100
+    ssh:
+      allow: false
+    labels:
+      role: general-purpose
+iam:
+  withOIDC: true
+addons:
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies:
+      ebsCSIController: true
+  - name: coredns
+  - name: kube-proxy
+  - name: vpc-cni
