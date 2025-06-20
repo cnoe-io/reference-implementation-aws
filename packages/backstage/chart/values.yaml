@@ -124,7 +124,7 @@ userRbac:
   backstageUsersGroup: backstage-users
 
 # Environment variables for Backstage
-# TODO: convert these env variable for more nestes values
+# TODO: convert these env variable for more nested values
 env:
   # These will be stored in a secret
   POSTGRES_HOST: postgresql.backstage.svc.cluster.local

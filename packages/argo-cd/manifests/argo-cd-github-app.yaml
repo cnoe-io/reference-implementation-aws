@@ -1,5 +1,4 @@
-# TODO: Use ExternalSecret to create the auth token using Github App 
-# Ref: https://external-secrets.io/latest/api/generator/github/
+# Github App Secret for ArgoCD
 ---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret

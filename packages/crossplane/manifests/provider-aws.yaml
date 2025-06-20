@@ -17,7 +17,6 @@ spec:
 ---
 # This is required for the provider-aws to use pod identity. Otherwise, crossplane generates random name for provider pod.
 # Also, Pod identity currently does not wildcard service account names like IRSA https://github.com/aws/containers-roadmap/issues/2233.
-apiVersion: pkg.crossplane.io/v1
 apiVersion: v1
 kind: ServiceAccount
 metadata:
