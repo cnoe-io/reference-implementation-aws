@@ -106,7 +106,7 @@ while [ $(kubectl get applications.argoproj.io -n argocd  --no-headers --kubecon
     break
   fi
   
-  echo -e "${YELLOW}⏳ Still waiting for ${BOLD}argocd apps from Appset chart${NC} ${YELLOW} to be created on hub cluster... (${ELAPSED_TIME}s elapsed)${NC}"
+  echo -e "${YELLOW}⏳ Still waiting for ${BOLD}argocd apps from Appset chart${NC} ${YELLOW}to be created on hub cluster... (${ELAPSED_TIME}s elapsed)${NC}"
   sleep 30
 done
 
