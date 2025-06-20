@@ -3,7 +3,7 @@ resources:
   - provider-aws-config.yaml
   - provider-aws-runtime-config.yaml
   - provider-aws.yaml
-  - https://github.com/awslabs/crossplane-on-eks/compositions/upbound-aws-provider/s3
+  # - https://github.com/awslabs/crossplane-on-eks/compositions/upbound-aws-provider/s3
 
-commonAnnotations:
-  argocd.argoproj.io/sync-wave: "1" # Added to ensure the xrd is removed before crossplane controller is deleted
+# commonAnnotations:
+  # argocd.argoproj.io/sync-wave: "1" # Added to ensure the xrd is removed before crossplane controller is deleted
