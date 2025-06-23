@@ -8,11 +8,11 @@ addons-appset: # for path routing
   path: packages/appset-chart # This path is relative to Github repo root
   valueFiles: 
   - "path-routing-values.yaml" # this should be commented if not using path routing
-  selector:
-    matchExpressions:
-      - key: clusterName
-        operator: In
-        values: ['hub']
-      - key: path_routing
-        operator: In # this should be commented if not using path routing
-        values: ['true']
+  # selector:
+  #   matchExpressions:
+  #     - key: clusterName
+  #       operator: In
+  #       values: ['hub']
+  #     - key: path_routing
+  #       operator: In # this should be commented if not using path routing
+  #       values: ['true']

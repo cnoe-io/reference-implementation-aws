@@ -42,14 +42,14 @@ argocd:
   - path: true 
     manifestPath: "path-routing" # this should be commented if not using path routing
     type: "manifests"
-  selector:
-    matchExpressions:
-      - key: clusterName
-        operator: In
-        values: ['hub']
-      - key: path_routing # this should be commented if not using path routing
-        operator: In
-        values: ['true']
+  # selector:
+  #   matchExpressions:
+  #     - key: clusterName
+  #       operator: In
+  #       values: ['hub']
+  #     - key: path_routing # this should be commented if not using path routing
+  #       operator: In
+  #       values: ['true']
 
 external-secrets:
   enabled: true
@@ -67,11 +67,11 @@ external-secrets:
   - path: true
     manifestPath: "manifests"
     type: "manifests"
-  selector:
-    matchExpressions:
-      - key: clusterName
-        operator: In
-        values: ['hub']
+  # selector:
+  #   matchExpressions:
+  #     - key: clusterName
+  #       operator: In
+  #       values: ['hub']
   # selector:
   #   matchExpressions:
   #     - key: enable_external_secrets
