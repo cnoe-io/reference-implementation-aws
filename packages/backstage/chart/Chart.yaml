@@ -1,3 +1,5 @@
+# TODO: Tidy up backstage helm chart
+
 apiVersion: v2
 name: backstage
 description: A Helm chart for Backstage

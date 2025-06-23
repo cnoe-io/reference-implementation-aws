@@ -60,7 +60,7 @@ aws-load-balancer-controller:
     serviceAccount:
       name:  "aws-load-balancer-controller"
     # vpcId: '{{.metadata.annotations.aws_vpc_id}}'
-    clusterName: '{{ .name }}'
+    clusterName: '{{ .metadata.labels.cluster_name }}'
   ignoreDifferences:
     - kind: Secret
       name: aws-load-balancer-tls
@@ -76,6 +76,7 @@ aws-load-balancer-controller:
   #     - key: enable_argocd
   #       operator: In
   #       values: ['true']
+
 ingress-nginx:
   enabled: true
   chartName: ingress-nginx
