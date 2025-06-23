@@ -13,9 +13,6 @@ cert-manager:
   enabled: true
   additionalResources:
   - path: true
-    manifestPath: "manifests"
-    type: "manifests"
-  - path: true
     manifestPath: "path-routing"
     type: "manifests"
 

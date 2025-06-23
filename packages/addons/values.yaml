@@ -132,10 +132,6 @@ cert-manager:
   releaseName: cert-manager
   defaultVersion: "1.17.2"
   chartRepository: "https://charts.jetstack.io"
-  additionalResources:
-  - path: true
-    manifestPath: "manifests"
-    type: "manifests"
 
 keycloak:
   enabled: true
