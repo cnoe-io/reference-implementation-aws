@@ -189,7 +189,7 @@ argo-workflows:
     server:
       baseHref: '/{{ if eq .metadata.labels.path_routing "true" }}argo-workflows/{{ end }}'
       sso:
-        issuer: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/{{ .metadata.annotations.oidc_provider }}{{ else }}https://{{ .metadata.annotations.oidc_provider }}.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe'
+        issuer: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/keycloak{{ else }}https://keycloak.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe'
         redirectUrl: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback'
       ingress:
         annotations: 

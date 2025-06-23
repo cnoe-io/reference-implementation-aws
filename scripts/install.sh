@@ -67,7 +67,7 @@ metadata:
     addons_repo_revision: "HEAD" 
     addons_repo_basepath: "." 
     domain: advaitt.people.aws.dev # TODO: Fetch config values here
-    oidc_provider: keycloak
+    # oidc_provider: keycloak
 type: Opaque
 stringData:
   name: hub
