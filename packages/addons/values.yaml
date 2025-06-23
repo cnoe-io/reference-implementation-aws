@@ -218,10 +218,21 @@ crossplane:
   releaseName: crossplane
   defaultVersion: "1.20.0"
   chartRepository: "https://charts.crossplane.io/stable"
-  # additionalResources:
-  # - path: true
-  #   manifestPath: "manifests"
-  #   type: "manifests"
+
+crossplane-upbound-providers:
+  enabled: true
+  chartName: crossplane-aws-upbound
+  namespace: crossplane-system
+  releaseName: crossplane-upbound-providers
+  defaultVersion: "3.0.0"
+  chartRepository: "https://gitops-bridge-dev.github.io/gitops-bridge-helm-charts"
+
+crossplane-compositions:
+  enabled: true
+  namespace: crossplane-system
+  type: manifest
+  path: packages/crossplane-compositions
+
 # iam-chart:
 #   enabled: false
 #   enableAckPodIdentity: false 
