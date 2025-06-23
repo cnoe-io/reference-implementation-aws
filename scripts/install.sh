@@ -59,7 +59,7 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: cluster 
     clusterClass: "control-plane"
-    clusterName: "hub"
+    clusterName: "eks-krew"
     environment: "control-plane"
     path_routing: "true" # Set to false to disable path routing # TODO: Fetch config values here
   annotations:

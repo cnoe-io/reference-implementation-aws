@@ -60,7 +60,7 @@ aws-load-balancer-controller:
     serviceAccount:
       name:  "aws-load-balancer-controller"
     # vpcId: '{{.metadata.annotations.aws_vpc_id}}'
-    clusterName: '{{ .metadata.labels.cluster_name }}'
+    clusterName: '{{ .metadata.labels.clusterName }}'
   ignoreDifferences:
     - kind: Secret
       name: aws-load-balancer-tls
