@@ -421,6 +421,7 @@ spec:
                 ARGO_WORKFLOWS_CLIENT_SECRET: ${ARGO_WORKFLOWS_CLIENT_SECRET}
                 ARGOCD_SESSION_TOKEN: ${ARGOCD_SESSION_TOKEN}
                 BACKSTAGE_CLIENT_SECRET: ${BACKSTAGE_CLIENT_SECRET}
+                ARGOCD_ADMIN_PASSWORD: ${ARGOCD_PASSWORD}
               " > /tmp/secret.yaml
               
               ./kubectl apply -f /tmp/secret.yaml
