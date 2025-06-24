@@ -2,7 +2,6 @@ installCRDs: true
 global:
   leaderElection:
     namespace: cert-manager
-
 extraObjects:
   - |
     apiVersion: cert-manager.io/v1
@@ -18,3 +17,22 @@ extraObjects:
           - http01:
               ingress:
                 ingressClassName: nginx
+  - |
+    {{ if eq .Values.global.pathRouting "true"}}
+    # This resource is to create default certificate of the base domain
+    apiVersion: cert-manager.io/v1
+    kind: Certificate
+    metadata:
+      name: default-cert
+      namespace: cert-manager
+      annotations:
+        argocd.argoproj.io/sync-wave: "1"
+    spec:
+      secretName: default-tls-prod
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+      dnsNames:
+      - {{ .Values.global.domainName }}
+    {{ end }}
+ 

@@ -5,8 +5,11 @@ export REPO_ROOT=$(git rev-parse --show-toplevel)
 
 source ${REPO_ROOT}/scripts/utils.sh
 
+# Fetch config values
 CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
 AWS_REGION=$(yq '.region' config.yaml)
+DOMAIN_NAME=$(yq '.domain_name' config.yaml)
+PATH_ROUTING=$(yq '.path_routing' config.yaml)
 
 # Additional colors
 export BLUE='\033[0;34m'
@@ -26,7 +29,7 @@ yq '... comments=""' ${REPO_ROOT}/config.yaml
 echo -e "${YELLOW}----------------------------------------------------${NC}"
 
 echo -e "${BOLD}${PURPLE}\n🎯 Targets:${NC}"
-echo -e "${CYAN}🔶 Kubernetes cluster:${NC} $(kubectl config current-context)"
+echo -e "${CYAN}🔶 Kubernetes cluster:${NC} $CLUSTER_NAME"
 echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
 echo -e "${CYAN}🔶 AWS account number:${NC} $(aws sts get-caller-identity --query "Account" --output text)"
 
@@ -54,23 +57,22 @@ cat << EOF > "$CLUSTER_SECRET_FILE"
 apiVersion: v1
 kind: Secret
 metadata:
-  name: hub
+  name: "$CLUSTER_NAME-cluster-secret"
   namespace: argocd
   labels:
     argocd.argoproj.io/secret-type: cluster 
     clusterClass: "control-plane"
-    clusterName: "eks-krew"
+    clusterName: "$CLUSTER_NAME"
     environment: "control-plane"
-    path_routing: "true" # Set to false to disable path routing # TODO: Fetch config values here
+    path_routing: "$PATH_ROUTING"
   annotations:
     addons_repo_url: "http://cnoe.localtest.me:8443/gitea/giteaAdmin/idpbuilder-localdev-bootstrap-appset-packages.git"
     addons_repo_revision: "HEAD" 
     addons_repo_basepath: "." 
-    domain: advaitt.people.aws.dev # TODO: Fetch config values here
-    # oidc_provider: keycloak
+    domain: "$DOMAIN_NAME"
 type: Opaque
 stringData:
-  name: hub
+  name: "$CLUSTER_NAME"
   server: $SERVER_URL
   clusterResources: "true"
   config: |

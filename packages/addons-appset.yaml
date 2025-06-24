@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   destination:
-    name: hub
+    name: eks-krew #TODO: Find a way to replace this with clusterName from config.yaml
     namespace: argocd
   sources:
     - repoURL: cnoe://

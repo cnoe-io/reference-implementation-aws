@@ -105,6 +105,9 @@ external-secrets:
   chartName: external-secrets
   defaultVersion: "0.17.0"
   chartRepository: "https://charts.external-secrets.io"
+  valuesObject:
+    domainFilters:
+      - '{{ .metadata.annotations.domain }}'
   # additionalResources:
   #   path: "charts/fleet-secret"
   #   type: "ecr-token"
@@ -133,6 +136,10 @@ cert-manager:
   releaseName: cert-manager
   defaultVersion: "1.17.2"
   chartRepository: "https://charts.jetstack.io"
+  valuesObject:
+    global:
+      domainName: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ end }}'
+      pathRouting: '{{ if eq .metadata.labels.path_routing "true" }}true{{ else }}false{{ end }}'
 
 keycloak:
   enabled: true
