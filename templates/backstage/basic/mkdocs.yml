@@ -1,0 +1,6 @@
+site_name: 'Argo Spark Example'
+nav:
+  - Home: index.md
+  - idpBuilder: idpbuilder.md
+plugins:
+  - techdocs-core

@@ -1,0 +1,40 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{values.name | dump}}
+  description: This is an example Backstage component representing the use of Argo Workflows and Spark Operator.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-label-selector: 'entity-id=${{values.name}}'
+    backstage.io/kubernetes-namespace: argo
+    argocd/app-name: ${{values.name | dump}}
+    argo-workflows.cnoe.io/label-selector: env=dev,entity-id=${{values.name}}
+    argo-workflows.cnoe.io/cluster-name: local
+    apache-spark.cnoe.io/label-selector: env=dev,entity-id=${{values.name}}
+    apache-spark.cnoe.io/cluster-name: local
+  links:
+    - url: https://github.com/cnoe-punkwalker
+      title: Repo URL
+      icon: github
+spec:
+  owner: guests
+  lifecycle: experimental
+  type: service
+  system: ${{values.name | dump}}
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: ${{values.name | dump}}
+  description: An example system for demonstration purposes
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://github.com/cnoe-punkwalker/my-reference-implementation-aws
+      title: CNOE Repo
+      icon: github
+spec:
+  owner: guests
+  lifecycle: experimental
+  type: service
