@@ -18,6 +18,22 @@ export REGION="us-west-2"
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
 
+## Create Crossplane Permissions Boundary Policy
+
+Create the permissions boundary policy for Crossplane:
+
+```bash
+# Create the permissions boundary policy
+aws iam create-policy \
+  --policy-name crossplane-permissions-boundary \
+  --policy-document file://bootstrap/iam-policies/crossplane-permissions-boundry.json
+
+# Capture the policy ARN
+export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
+  --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary \
+  --query 'Policy.Arn' --output text)
+```
+
 ## Create Cluster
 
 ```bash
@@ -65,7 +81,11 @@ The cluster creation will provision the following AWS resources:
 To delete the cluster and all associated resources:
 
 ```bash
+# Delete the EKS cluster
 eksctl delete cluster --name $CLUSTER_NAME --region $REGION
+
+# Delete the permissions boundary policy
+aws iam delete-policy --policy-arn $CROSSPLANE_BOUNDARY_POLICY_ARN
 ```
 
 This will automatically clean up:
@@ -75,5 +95,6 @@ This will automatically clean up:
 - IAM roles and policies created by eksctl
 - VPC and networking resources (if created by eksctl)
 - EKS addons
+- Crossplane permissions boundary policy
 
 **Note**: Manual cleanup may be required for any resources created outside of eksctl or if the deletion process encounters errors.
