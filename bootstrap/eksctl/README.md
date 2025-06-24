@@ -23,23 +23,24 @@ export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output tex
 Create the permissions boundary policy for Crossplane:
 
 ```bash
-# Create the permissions boundary policy
+# Create the permissions boundary policy and capture ARN
+export CROSSPLANE_BOUNDARY_POLICY_ARN=$(cat bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst | \
 aws iam create-policy \
   --policy-name crossplane-permissions-boundary \
-  --policy-document file://bootstrap/iam-policies/crossplane-permissions-boundry.json
-
-# Capture the policy ARN
-export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
-  --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary \
+  --policy-document file:///dev/stdin \
   --query 'Policy.Arn' --output text)
 ```
 
-## Create Cluster
+## Create Cluster 
 
+### Without Auto Mode
 ```bash
 cat bootstrap/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
 ```
-
+### With Auto Mode
+```bash
+cat bootstrap/eksctl/cluster-config-auto.yaml | envsubst | eksctl create cluster -f -
+```
 ## AWS Resources Created
 
 The cluster creation will provision the following AWS resources:

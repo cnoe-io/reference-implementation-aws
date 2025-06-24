@@ -41,7 +41,7 @@ if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
 fi
 
 echo -e "\n${BOLD}${BLUE}🚀 Starting installation process...${NC}"
-
+yq -i '.spec.destination.name = "'"$CLUSTER_NAME"'"' packages/addons-appset.yaml # To set the Remote EKS Cluster name in Addon AppSet chart
 echo -e "${CYAN}📡 Connecting to cluster:${NC} ${BOLD}${CLUSTER_NAME}${NC} in ${BOLD}${AWS_REGION}${NC}"
 
 KUBECONFIG_FILE=$(mktemp)

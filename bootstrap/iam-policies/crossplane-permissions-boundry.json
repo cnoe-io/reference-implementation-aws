@@ -11,7 +11,7 @@
           "iam:SetDefaultPolicyVersion"
         ],
         "Resource": [
-          "arn:aws:iam::ACCOUNT_ID:policy/crossplaneBoundary"
+          "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary"
         ]
       },
       {
@@ -22,12 +22,12 @@
           "iam:DeleteRolePermissionsBoundary"
         ],
         "Resource": [
-          "arn:aws:iam::ACCOUNT_ID:user/*",
-          "arn:aws:iam::ACCOUNT_ID:role/*"
+          "arn:aws:iam::${AWS_ACCOUNT_ID}:user/*",
+          "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*"
         ],
         "Condition": {
           "StringEquals": {
-            "iam:PermissionsBoundary": "arn:aws:iam::ACCOUNT_ID:policy/crossplaneBoundary"
+            "iam:PermissionsBoundary": "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary"
           }
         }
       },

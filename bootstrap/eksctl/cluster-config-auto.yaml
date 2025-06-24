@@ -35,7 +35,7 @@ iam:
               - "secretsmanager:DescribeSecret"
               - "secretsmanager:ListSecretVersionIds"
             Resource:
-              - "arn:aws:secretsmanager:us-west-2:${AWS_ACCOUNT_ID}:secret:cnoe-reference-implemntation-aws"
+              - "arn:aws:secretsmanager:us-west-2:${AWS_ACCOUNT_ID}:secret:cnoe-reference-implemntation-aws*"
     - namespace: external-dns
       serviceAccountName: external-dns
       wellKnownPolicies:

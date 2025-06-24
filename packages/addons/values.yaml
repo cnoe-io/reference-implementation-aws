@@ -46,7 +46,7 @@ argocd:
     type: "manifests"
 
 aws-load-balancer-controller:
-  enabled: true
+  enabled: false
   # enableAckPodIdentity: true
   namespace: kube-system
   defaultVersion: "1.13.2"
