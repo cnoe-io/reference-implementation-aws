@@ -33,7 +33,7 @@ provider:
     annotations: {}
     labels: {}
   package:
-    registry: xpkg.upbound.io/upbound
+    registry: xpkg.crossplane.io/crossplane-contrib
     version: v1.23.0
 
 providerConfig:
