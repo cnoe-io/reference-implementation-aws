@@ -1,40 +1,79 @@
-# EKS Cluster eksctl Configuration
+# EKS Cluster Setup with eksctl
 
-This directory contains eksctl configuration to create an EKS cluster. There is an equivalent Terraform configuration in the `bootstrap/terraform` directory.
+This directory contains the configuration to create an EKS cluster with pod identity associations for various AWS services.
 
 ## Prerequisites
 
-- eksctl CLI tool
-- AWS CLI configured with appropriate credentials
-- kubectl (for interacting with the cluster after creation)
+- AWS CLI configured with appropriate permissions
+- eksctl installed
+- kubectl installed
 
-## Configuration
+## Environment Variables
 
-The main configuration is defined in `cluster-config.yaml`.
-
-## Usage
+Set the following environment variables before creating the cluster:
 
 ```bash
-# Create the cluster
-eksctl create cluster -f cluster-config.yaml
-
-# Delete the cluster
-eksctl delete cluster -f cluster-config.yaml
+export CLUSTER_NAME="cnoe-ref-impl"
+export REGION="us-west-2"
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
 
-## Features
-
-- Creates an EKS cluster with version 1.32
-- Sets up a managed node group with m5.large instances
-- Configures autoscaling with min=3, max=6, desired=4 nodes
-- Enables OIDC for the cluster
-- Installs multiple EKS addons (aws-ebs-csi-driver, coredns, kube-proxy, vpc-cni)
-- Creates a VPC with NAT gateway
-
-## Connecting to the Cluster
-
-After the cluster is created, you can configure kubectl to connect to it:
+## Create Cluster
 
 ```bash
-aws eks update-kubeconfig --region us-west-2 --name cnoe-ref-impl
+cat bootstrap/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
 ```
+
+## AWS Resources Created
+
+The cluster creation will provision the following AWS resources:
+
+### EKS Cluster
+- EKS cluster with Kubernetes version 1.33
+- VPC with CIDR 10.0.0.0/16
+- Single NAT Gateway
+- Public and private subnets across availability zones
+- EKS cluster security groups
+- OIDC identity provider
+
+### Managed Node Group
+- Managed node group with 3-6 m5.large instances
+- Desired capacity: 4 nodes
+- 100GB EBS volumes per node
+- Node IAM role with required policies
+
+### EKS Addons
+- eks-pod-identity-agent
+- aws-ebs-csi-driver with EBS CSI controller policies
+- vpc-cni (default)
+- coredns (default)
+- kube-proxy (default)
+
+### Pod Identity Associations
+- **crossplane-system/provider-aws**: AdministratorAccess + permissions boundary
+- **external-secrets/external-secrets**: Secrets Manager access policies
+- **kube-system/aws-load-balancer-controller**: AWS Load Balancer Controller policies
+- **external-dns/external-dns**: Route 53 DNS management policies
+
+### IAM Resources
+- IAM roles for pod identity associations
+- IAM policies for service-specific permissions
+- OIDC identity provider for the cluster
+
+## Cleanup
+
+To delete the cluster and all associated resources:
+
+```bash
+eksctl delete cluster --name $CLUSTER_NAME --region $REGION
+```
+
+This will automatically clean up:
+- EKS cluster
+- Managed node groups
+- Pod identity associations
+- IAM roles and policies created by eksctl
+- VPC and networking resources (if created by eksctl)
+- EKS addons
+
+**Note**: Manual cleanup may be required for any resources created outside of eksctl or if the deletion process encounters errors.

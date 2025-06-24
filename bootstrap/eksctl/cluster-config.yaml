@@ -1,9 +1,9 @@
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 metadata:
-  name: cnoe-ref-impl
-  region: us-west-2
-  version: "1.32"
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "1.33"
 vpc:
   cidr: "10.0.0.0/16"
   nat:
@@ -18,13 +18,89 @@ managedNodeGroups:
     ssh:
       allow: false
     labels:
-      role: general-purpose
-iam:
-  withOIDC: true
+      pool: system
+addonsConfig:
+  autoApplyPodIdentityAssociations: true
 addons:
+  - name: eks-pod-identity-agent
   - name: aws-ebs-csi-driver
     wellKnownPolicies:
       ebsCSIController: true
-  - name: coredns
-  - name: kube-proxy
-  - name: vpc-cni
+iam:
+  withOIDC: true
+  podIdentityAssociations:
+    - namespace: crossplane-system
+      serviceAccountName: provider-aws
+      permissionPolicyARNs:
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+      permissionPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "DenyPermBoundaryIAMPolicyAlteration"
+            Effect: "Deny"
+            Action:
+              - "iam:DeletePolicy"
+              - "iam:DeletePolicyVersion"
+              - "iam:CreatePolicyVersion"
+              - "iam:SetDefaultPolicyVersion"
+            Resource:
+              - "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplaneBoundary*"
+          - Sid: "DenyRemovalOfPermBoundaryFromAnyUserOrRole"
+            Effect: "Deny"
+            Action:
+              - "iam:DeleteUserPermissionsBoundary"
+              - "iam:DeleteRolePermissionsBoundary"
+            Resource:
+              - "arn:aws:iam::${AWS_ACCOUNT_ID}:user/*"
+              - "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*"
+            Condition:
+              StringEquals:
+                "iam:PermissionsBoundary": "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplaneBoundary*"
+          - Effect: "Deny"
+            Action:
+              - "iam:CreateUser"
+              - "iam:AddUserToGroup"
+              - "iam:AttachUserPolicy"
+              - "iam:ChangePassword"
+              - "iam:CreateAccessKey"
+              - "iam:*AccountAlias"
+              - "iam:CreateGroup"
+              - "iam:*LoginProfile"
+              - "iam:*IDConnectProvider*"
+              - "iam:*SAMLProvider*"
+              - "iam:CreateServiceSpecificCredential"
+              - "iam:*MFA*"
+              - "iam:UpdateUser"
+            Resource:
+              - "*"
+          - Effect: "Allow"
+            Action:
+              - "*"
+            Resource:
+              - "*"
+    - namespace: external-secrets
+      serviceAccountName: external-secrets
+      permissionPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "secretsmanager:ListSecrets"
+              - "secretsmanager:BatchGetSecretValue"
+            Effect: "Allow"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "secretsmanager:GetResourcePolicy"
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:DescribeSecret"
+              - "secretsmanager:ListSecretVersionIds"
+            Resource:
+              - "arn:aws:secretsmanager:us-west-2:${AWS_ACCOUNT_ID}:secret:cnoe-reference-implemntation-aws"
+    - namespace: kube-system
+      serviceAccountName: aws-load-balancer-controller
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+    - namespace: external-dns
+      serviceAccountName: external-dns
+      wellKnownPolicies:
+        externalDNS: true
