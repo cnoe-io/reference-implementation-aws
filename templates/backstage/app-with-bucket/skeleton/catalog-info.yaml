@@ -20,7 +20,7 @@ metadata:
     backstage.io/kubernetes-namespace: default
     argocd/app-name: ${{values.name | dump}}
   links:
-    - url: https://github.com/cnoe-punkwalker/${{values.name}}
+    - url: ${{values.remoteUrl}}
       title: Repo URL
       icon: github
 spec:
@@ -39,7 +39,7 @@ metadata:
   annotations:
     backstage.io/techdocs-ref: dir:.
   links:
-    - url: https://github.com/cnoe-punkwalker/my-reference-implementation-aws
+    - url: ${{values.remoteUrl}}
       title: CNOE Repo
       icon: github
 spec:
