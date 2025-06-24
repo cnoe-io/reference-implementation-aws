@@ -75,7 +75,7 @@ backstage:
         - allow: [Component, System, API, Resource, Location, Template]
       locations:
         - type: url
-          target: https://github.com/punkwalker/reference-implementation-aws/blob/main/templates/backstage/catalog-info.yaml
+          target: https://github.com/punkwalker/reference-implementation-aws/blob/ref-impl-v2/templates/backstage/catalog-info.yaml
     kubernetes:
       serviceLocatorMethod:
         type: 'multiTenant'
