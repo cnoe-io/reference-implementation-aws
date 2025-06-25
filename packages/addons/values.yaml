@@ -236,8 +236,6 @@ crossplane-compositions:
   namespace: crossplane-system
   type: manifest
   path: packages/crossplane-compositions
-  annotationsApp:
-    argocd.argoproj.io/compare-options: ServerSideDiff=true
 
 # iam-chart:
 #   enabled: false
