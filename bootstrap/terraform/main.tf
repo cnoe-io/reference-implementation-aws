@@ -2,96 +2,199 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+}
+
+data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 
-locals {
-  azs = slice(data.aws_availability_zones.available.names, 0, var.vpc_subnet_count)
-
-  # Calculate subnet CIDRs dynamically based on the VPC CIDR
-  vpc_cidr_prefix = split("/", var.vpc_cidr)[1]
-  newbits         = 8 - (tonumber(local.vpc_cidr_prefix) - 16)
-
-  # Generate private subnet CIDRs
-  private_subnets = [
-    for i in range(var.vpc_subnet_count) :
-    cidrsubnet(var.vpc_cidr, local.newbits, i)
-  ]
-
-  # Generate public subnet CIDRs
-  public_subnets = [
-    for i in range(var.vpc_subnet_count) :
-    cidrsubnet(var.vpc_cidr, local.newbits, i + var.vpc_subnet_count)
-  ]
+data "template_file" "crossplane_boundary_policy" {
+  template = file("${path.module}/../iam-policies/crossplane-permissions-boundry.json")
+  vars = {
+    AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
+  }
 }
+
+locals {
+  name   = var.cluster_name
+  region = var.region
+
+  vpc_cidr = "10.0.0.0/16"
+  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+
+  tags = {
+    Blueprint  = local.name
+    GithubRepo = "github.com/cnoe-io/reference-implementation-aws"
+  }
+}
+
+################################################################################
+# Cluster
+################################################################################
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.0"
+
+  cluster_name                   = local.name
+  cluster_version                = "1.33"
+  cluster_endpoint_public_access = true
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  enable_irsa = true
+
+  eks_managed_node_groups = {
+    initial = {
+      instance_types = ["m5.large"]
+      
+      min_size     = 3
+      max_size     = 6
+      desired_size = 4
+
+      disk_size = 100
+      
+      labels = {
+        pool = "system"
+      }
+    }
+  }
+
+  cluster_addons = {
+    coredns                = {}
+    eks-pod-identity-agent = {}
+    kube-proxy             = {}
+    vpc-cni                = {}
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_pod_identity.iam_role_arn
+    }
+  }
+
+  tags = local.tags
+}
+
+
+################################################################################
+# IAM Policies
+################################################################################
+
+resource "aws_iam_policy" "crossplane_boundary" {
+  name   = "crossplane-permissions-boundary"
+  policy = data.template_file.crossplane_boundary_policy.rendered
+
+  tags = local.tags
+}
+
+################################################################################
+# Pod Identity
+################################################################################
+
+module "crossplane_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 1.0"
+
+  name = "crossplane-provider-aws"
+
+  additional_policy_arns   = {
+    admin = "arn:aws:iam::aws:policy/AdministratorAccess"
+  }
+  permissions_boundary_arn = aws_iam_policy.crossplane_boundary.arn
+
+  associations = {
+    crossplane = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "crossplane-system"
+      service_account = "provider-aws"
+    }
+  }
+
+  tags = local.tags
+}
+
+module "external_secrets_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 1.0"
+
+  name = "external-secrets"
+
+  policy_statements = [
+    {
+      actions = [
+        "secretsmanager:ListSecrets",
+        "secretsmanager:BatchGetSecretValue"
+      ]
+      resources = ["*"]
+    },
+    {
+      actions = [
+        "secretsmanager:GetResourcePolicy",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:ListSecretVersionIds"
+      ]
+      resources = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:cnoe-reference-implemntation-aws"]
+    }
+  ]
+
+  associations = {
+    external_secrets = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "external-secrets"
+      service_account = "external-secrets"
+    }
+  }
+
+  tags = local.tags
+}
+
+module "ebs_csi_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 1.0"
+
+  name = "ebs-csi-controller"
+
+  attach_aws_ebs_csi_policy = true
+
+  associations = {
+    ebs_csi = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "ebs-csi-controller-sa"
+    }
+  }
+
+  tags = local.tags
+}
+
+################################################################################
+# Supporting Resources
+################################################################################
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
 
-  name = "${var.cluster_name}-vpc"
-  cidr = var.vpc_cidr
+  name = local.name
+  cidr = local.vpc_cidr
 
   azs             = local.azs
-  private_subnets = local.private_subnets
-  public_subnets  = local.public_subnets
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
+  public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
 
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
+  enable_nat_gateway = true
+  single_nat_gateway = true
   enable_dns_hostnames = true
+  enable_dns_support   = true
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/role/elb" = 1
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-    "kubernetes.io/role/internal-elb"           = "1"
+    "kubernetes.io/role/internal-elb" = 1
   }
 
-  tags = var.tags
-}
-
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.0"
-
-  cluster_name    = var.cluster_name
-  cluster_version = var.cluster_version
-
-  vpc_id                         = module.vpc.vpc_id
-  subnet_ids                     = module.vpc.private_subnets
-  cluster_endpoint_public_access = true
-
-  # Enable OIDC provider for the cluster
-  enable_irsa = true
-
-  # EKS Managed Node Group
-  eks_managed_node_groups = {
-    main = {
-      name           = var.node_group_name
-      instance_types = [var.node_instance_type]
-      min_size       = var.node_min_size
-      max_size       = var.node_max_size
-      desired_size   = var.node_desired_capacity
-      disk_size      = var.node_volume_size
-
-      # Disable remote access to nodes
-      remote_access = {
-        ec2_ssh_key = null
-      }
-
-      labels = {
-        role = "general-purpose"
-      }
-    }
-  }
-
-  # EKS Addons
-  cluster_addons = var.cluster_addons
-
-  # aws-auth configmap
-  manage_aws_auth_configmap = true
-
-  tags = var.tags
+  tags = local.tags
 }

@@ -4,8 +4,6 @@ dex:
 server:
   ingress:
     enabled: true
-    annotations:
-      argocd.argoproj.io/sync-wave: "20"
     ingressClassName: "nginx"
     tls: true
 configs:

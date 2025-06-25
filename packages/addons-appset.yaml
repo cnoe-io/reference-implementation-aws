@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   destination:
-    name: cnoe-ref-impl-1
+    name: cnoe-ref-impl
     namespace: argocd
   sources:
     - repoURL: cnoe://

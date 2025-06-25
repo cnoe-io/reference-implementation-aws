@@ -7,7 +7,7 @@ tags:
   project: "cnoe"
 region: "us-west-2"
 # The name of the EKS cluster you are installing the addons on.
-cluster_name: "cnoe-ref-impl-1"
+cluster_name: "cnoe-ref-impl"
 # Set this to false if you want to manage DNS somewhere else. e.g. manually.
 # enable_dns_management: true
 # If using external DNS, specify the Route53 hosted zone ID. Required if enable_dns_management is set to true

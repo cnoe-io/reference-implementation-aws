@@ -24,8 +24,11 @@ addonsConfig:
 addons:
   - name: eks-pod-identity-agent
   - name: aws-ebs-csi-driver
-    wellKnownPolicies:
-      ebsCSIController: true
+    podIdentityAssociations:
+      - namespace: kube-system
+        serviceAccountName: ebs-csi-controller-sa
+        wellKnownPolicies:
+          ebsCSIController: true
 iam:
   withOIDC: true
   podIdentityAssociations:

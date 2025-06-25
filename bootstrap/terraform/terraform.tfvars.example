@@ -1,0 +1,2 @@
+cluster_name = "cnoe-ref-impl"
+region       = "us-west-2"

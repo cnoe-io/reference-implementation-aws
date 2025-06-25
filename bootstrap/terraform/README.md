@@ -1,81 +1,104 @@
-# EKS Cluster Terraform Configuration
+# EKS Cluster Setup with Terraform
 
-This directory contains Terraform configuration to create an EKS cluster equivalent to the one defined in `bootstrap/eksctl/cluster-config.yaml`.
+This directory contains Terraform configuration to create an EKS cluster with pod identity associations for various AWS services using EKS Blueprints.
 
 ## Prerequisites
 
-- Terraform >= 1.0.0
-- AWS CLI configured with appropriate credentials
-- kubectl (optional, for interacting with the cluster after creation)
+- AWS CLI configured with appropriate permissions
+- Terraform >= 1.0 installed
+- kubectl installed
 
 ## Configuration
 
-The main configuration parameters are defined in `variables.tf`. You can override these by creating a `terraform.tfvars` file or by passing variables on the command line.
-
-### Configuring EKS Addons
-
-You can specify which EKS addons to install and their versions in your `terraform.tfvars` file:
-
-```hcl
-# Use the most recent version of an addon
-cluster_addons = {
-  aws-ebs-csi-driver = {
-    most_recent = true
-  }
-}
-
-# Or specify exact versions
-cluster_addons = {
-  aws-ebs-csi-driver = {
-    addon_version = "v1.43.0-eksbuild.1"
-  }
-  coredns = {
-    addon_version = "v1.10.1-eksbuild.1"
-  }
-}
+1. Copy the example tfvars file:
+```bash
+cp terraform.tfvars.example terraform.tfvars
 ```
 
-## Usage
+2. Update `terraform.tfvars` with your values:
+```hcl
+cluster_name = "cnoe-ref-impl"
+region       = "us-west-2"
+```
+
+## Deploy
 
 ```bash
 # Initialize Terraform
 terraform init
 
-# Preview the changes
+# Plan the deployment
 terraform plan
 
-# Apply the changes
+# Apply the configuration
 terraform apply
+```
 
-# To destroy the resources
+## Configure kubectl
+
+After deployment, configure kubectl to connect to your cluster:
+
+```bash
+aws eks --region us-west-2 update-kubeconfig --name cnoe-ref-impl
+```
+
+## AWS Resources Created
+
+The Terraform configuration will provision the following AWS resources:
+
+### EKS Cluster
+- EKS cluster with Kubernetes version 1.33
+- VPC with CIDR 10.0.0.0/16
+- Single NAT Gateway
+- Public and private subnets across 3 availability zones
+- EKS cluster security groups
+- OIDC identity provider
+
+### Managed Node Group
+- Managed node group with 3-6 m5.large instances
+- Desired capacity: 4 nodes
+- 100GB EBS volumes per node
+- Node IAM role with required policies
+
+### EKS Addons
+- eks-pod-identity-agent
+- aws-ebs-csi-driver with EBS CSI controller policies
+- vpc-cni
+- coredns
+- kube-proxy
+
+### EKS Blueprints Addons
+- AWS Load Balancer Controller
+- External DNS
+
+### Pod Identity Associations
+- **crossplane-system/provider-aws**: AdministratorAccess + permissions boundary
+- **external-secrets/external-secrets**: Secrets Manager access policies
+- **kube-system/aws-load-balancer-controller**: AWS Load Balancer Controller policies (via Blueprints)
+- **external-dns/external-dns**: Route 53 DNS management policies (via Blueprints)
+- **kube-system/ebs-csi-controller-sa**: EBS CSI driver policies
+
+### IAM Resources
+- IAM roles for pod identity associations
+- IAM policies for service-specific permissions
+- OIDC identity provider for the cluster
+
+## Cleanup
+
+To delete the cluster and all associated resources:
+
+```bash
+# Destroy the Terraform-managed resources
 terraform destroy
 ```
 
-## Features
+This will clean up:
+- EKS cluster
+- Managed node groups
+- Pod identity associations
+- IAM roles and policies created by Terraform
+- VPC and networking resources
+- EKS addons
+- Crossplane permissions boundary policy
 
-- Creates an EKS cluster with version 1.32
-- Sets up a managed node group with m5.large instances
-- Configures autoscaling with min=3, max=6, desired=4 nodes
-- Enables OIDC for the cluster
-- Installs multiple EKS addons (aws-ebs-csi-driver, coredns, kube-proxy, vpc-cni)
-- Creates a VPC with public and private subnets across 3 AZs
-- Supports dynamic VPC CIDR and subnet configuration
-- Allows customization of EKS addons and versions
-
-## Outputs
-
-After applying the configuration, Terraform will output several useful values including:
-
-- Cluster endpoint
-- Cluster name
-- VPC ID
-- Subnet IDs
-- Region
-
-## Connecting to the Cluster
-
-After the cluster is created, you can configure kubectl to connect to it:
-
-```bash
-aws eks update-kubeconfig --region us-west-2 --name cnoe-ref-impl
-```
+**Note**: Ensure all workloads are removed from the cluster before destroying to avoid orphaned resources.
