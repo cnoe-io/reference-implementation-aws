@@ -1,0 +1,52 @@
+# Ref: https://github.com/gitops-bridge-dev/gitops-bridge-helm-charts/tree/main/charts
+global:
+  enabled_aws_upbound: true
+
+deploymentRuntimeConfig:
+  enabled: true
+  metadata:
+    name: "upbound-aws-runtime-config"
+    role_arn: ""
+    annotations: {}
+    labels: {}
+  spec:
+    deploymentTemplate:
+      spec:
+        selector: {}
+        template:
+          spec:
+            containers:
+              - name: package-runtime
+                args:
+                - --debug
+            securityContext:
+              fsGroup: 2000
+    serviceAccountTemplate:
+      metadata:
+        annotations: {}
+        labels: {}
+        name: provider-aws
+
+provider:
+  enabled: true
+  metadata:
+    annotations: {}
+    labels: {}
+  package:
+    registry: xpkg.crossplane.io/crossplane-contrib
+    version: v1.23.0
+
+providerConfig:
+  enabled: true
+  default: true
+  metadata:
+    name: "aws-provider-config"
+    annotations: {}
+    labels: {}
+  spec:
+    credentials:
+      source: PodIdentity
+
+providers:
+- dynamodb
+- s3

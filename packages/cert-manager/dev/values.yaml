@@ -1,4 +1,0 @@
-installCRDs: true
-global:
-  leaderElection:
-    namespace: cert-manager

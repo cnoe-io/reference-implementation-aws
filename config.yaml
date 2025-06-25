@@ -1,0 +1,19 @@
+# This is the GITHUB URL where Kubernetes manifests are stored.
+# If you forked this repo, you will need to update this.
+repo_url: "https://github.com/punkwalker/reference-implementation-aws"
+# Tags to apply to AWS resources
+tags: 
+  env: "dev"
+  project: "cnoe"
+region: "us-west-2"
+# The name of the EKS cluster you are installing the addons on.
+cluster_name: "cnoe-ref-impl"
+# Set this to false if you want to manage DNS somewhere else. e.g. manually.
+# enable_dns_management: true
+# If using external DNS, specify the Route53 hosted zone ID. Required if enable_dns_management is set to true
+# hosted_zone_id: Z07667581KDLOA4RSCVFD
+# if external DNS is not used, this value must be provided.
+domain_name: advaitt.people.aws.dev
+
+# To enable path routing set this "true" otherwise "false"
+path_routing: true

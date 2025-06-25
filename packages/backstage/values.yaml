@@ -1,0 +1,6 @@
+# Ref: chart/values.yaml
+namespace: backstage
+ingress:
+  ingressClassName: nginx
+  enabled: true
+  tls: true

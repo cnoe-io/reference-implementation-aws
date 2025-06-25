@@ -1,4 +1,0 @@
-namespace: argo
-resources:
-  - ../base/
-  
