@@ -6,6 +6,8 @@ server:
     enabled: true
     ingressClassName: "nginx"
     tls: true
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
 configs:
   cm:
     accounts.backstage: apiKey
