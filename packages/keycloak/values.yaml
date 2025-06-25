@@ -3,6 +3,9 @@ production: true
 usePasswordFiles: false
 proxyHeaders: "forwarded"
 
+global:
+  defaultStorageClass: gp2
+
 auth:
   adminUser: cnoe-admin
   adminPassword: cnoe-admin
