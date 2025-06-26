@@ -36,12 +36,14 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
+  version = "~> 20.37"
 
   cluster_name                   = local.name
   cluster_version                = "1.33"
   cluster_endpoint_public_access = true
 
+  enable_cluster_creator_admin_permissions = true
+  
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
@@ -64,15 +66,12 @@ module "eks" {
   }
 
   cluster_addons = {
-    coredns                = {}
+    coredns = {}
     eks-pod-identity-agent = {}
-    kube-proxy             = {}
-    vpc-cni                = {}
-    aws-ebs-csi-driver = {
-      service_account_role_arn = module.ebs_csi_pod_identity.iam_role_arn
-    }
+    kube-proxy = {}
+    vpc-cni = {}
+    aws-ebs-csi-driver = {}
   }
-
   tags = local.tags
 }
 
@@ -91,7 +90,37 @@ resource "aws_iam_policy" "crossplane_boundary" {
 ################################################################################
 # Pod Identity
 ################################################################################
+module "external_dns_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 1.0"
 
+  name = "external-dns"
+  attach_external_dns_policy = true
+  external_dns_hosted_zone_arns = [ "*" ]
+  associations = {
+    external_secrets = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "external-dns"
+      service_account = "external-dns"
+    }
+  }
+  tags = local.tags
+}
+module "ebs_csi_driver_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 1.0"
+
+  name = "ebs-csi-driver"
+  attach_aws_ebs_csi_policy = true
+  associations = {
+    external_secrets = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "ebs-csi-controller-sa"
+    }
+  }
+  tags = local.tags
+}
 module "crossplane_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "~> 1.0"
@@ -150,27 +179,8 @@ module "external_secrets_pod_identity" {
   tags = local.tags
 }
 
-module "ebs_csi_pod_identity" {
-  source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "~> 1.0"
-
-  name = "ebs-csi-controller"
-
-  attach_aws_ebs_csi_policy = true
-
-  associations = {
-    ebs_csi = {
-      cluster_name    = module.eks.cluster_name
-      namespace       = "kube-system"
-      service_account = "ebs-csi-controller-sa"
-    }
-  }
-
-  tags = local.tags
-}
-
 ################################################################################
-# Supporting Resources
+# VPC
 ################################################################################
 
 module "vpc" {

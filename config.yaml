@@ -16,7 +16,7 @@ region: "us-west-2"
 # Amazon Route 53 hosted zone name.
 domain_name: advaitt.people.aws.dev
 
-# Set this to true if you want to enable path routing othewise false for domain based routing.
+# Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
 # When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name> 
 # When disabled, the exposed addons will be accessible at https://<addon-name>.<domain_name>
 path_routing: true
