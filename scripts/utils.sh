@@ -1,5 +1,5 @@
 set -e
-# Colors
+
 # Colors
 export RED='\033[38;5;160m'
 export GREEN='\033[38;5;34m'
@@ -11,15 +11,22 @@ export CYAN='\033[38;5;37m'
 export BOLD='\033[1m'
 export ORANGE='\033[38;5;172m'
 
-check_command() {
-  command -v "$1" >/dev/null 2>&1
+# Extract tags from config file
+get_tags_from_config() {
+    yq eval '.tags | to_entries | map("Key=" + .key + ",Value=" + .value) | join(" ")' "$CONFIG_FILE"
 }
 
+# Generate kubeconfig for the EKS cluster
+get_kubeconfig() {
+  export KUBECONFIG_FILE=$(mktemp)
+  echo -e "${PURPLE}🔑 Generating temporary kubeconfig for cluster ${BOLD}${CLUSTER_NAME}${NC}...${NC}"
+  aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+}
 
-# Validation
+# Check if required binaries binaries exists
 clis=("aws" "kubectl"  "yq")
 for cli in "${clis[@]}"; do
-  if check_command "$cli"; then
+  if command -v "$cli" >/dev/null 2>&1 ; then
     continue
   else
     echo -e "${RED}$cli is not installed. Please install it to continue.${NC}"
@@ -27,34 +34,43 @@ for cli in "${clis[@]}"; do
   fi
 done
 
+export CONFIG_FILE="$REPO_ROOT/config.yaml"
+
+# Check if config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo -e "${RED}❌ File $CONFIG_FILE does not exist${NC}"
+    exit 1
+fi
+
 # Fetch config values
-export CLUSTER_NAME=$(yq '.cluster_name' $REPO_ROOT/config.yaml)
-export AWS_REGION=$(yq '.region' $REPO_ROOT/config.yaml)
-export DOMAIN_NAME=$(yq '.domain_name' $REPO_ROOT/config.yaml)
-export PATH_ROUTING=$(yq '.path_routing' $REPO_ROOT/config.yaml)
+export CLUSTER_NAME=$(yq '.cluster_name' "$CONFIG_FILE")
+export AWS_REGION=$(yq '.region' "$CONFIG_FILE")
+export DOMAIN_NAME=$(yq '.domain_name' "$CONFIG_FILE")
+export PATH_ROUTING=$(yq '.path_routing' "$CONFIG_FILE")
 
 # Header
 echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}"
 echo -e "${BOLD}${CYAN}📦       CNOE AWS Reference Implementation    📦${NC}"
 echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}\n"
 
-echo -e "${CYAN}📋 Configuration Details:${NC}"
-echo -e "${YELLOW}----------------------------------------------------${NC}"
-yq '... comments=""' ${REPO_ROOT}/config.yaml
-echo -e "${YELLOW}----------------------------------------------------${NC}"
-
 echo -e "${BOLD}${PURPLE}\n🎯 Targets:${NC}"
-echo -e "${CYAN}🔶 Kubernetes cluster:${NC} ${BOLD}$CLUSTER_NAME${NC} in ${BOLD}$AWS_REGION${NC}"
-echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
 echo -e "${CYAN}🔶 AWS account number:${NC} $(aws sts get-caller-identity --query "Account" --output text)"
+echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
+echo -e "${CYAN}🔶 Kubernetes cluster:${NC} ${BOLD}$CLUSTER_NAME${NC} in ${BOLD}$AWS_REGION${NC}"
 
 if [ $PHASE = "install" ]; then
+  echo -e "${CYAN}📋 Configuration Details:${NC}"
+  echo -e "${YELLOW}----------------------------------------------------${NC}"
+  yq '... comments=""' "$CONFIG_FILE"
+  echo -e "${YELLOW}----------------------------------------------------${NC}"
+
   echo -e "\n${BOLD}${GREEN}❓ Are you sure you want to continue with installation?${NC}"
   read -p '(yes/no): ' response
   if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
     echo -e "${YELLOW}⚠️  Installation cancelled.${NC}"
     exit 0
   fi
+  get_kubeconfig
 fi
 
 if [ $PHASE = "uninstall" ]; then
@@ -65,6 +81,7 @@ if [ $PHASE = "uninstall" ]; then
     echo -e "${YELLOW}⚠️  Uninstallation cancelled.${NC}"
     exit 0
   fi
+  get_kubeconfig
 fi
 
 if [ $PHASE = "crd-uninstall" ]; then
@@ -75,6 +92,7 @@ if [ $PHASE = "crd-uninstall" ]; then
     echo -e "${YELLOW}⚠️ CRD Uninstallation cancelled.${NC}"
     exit 0
   fi
+  get_kubeconfig
 fi
 
 if [ $PHASE = "create-update-secrets" ]; then
@@ -85,8 +103,3 @@ if [ $PHASE = "create-update-secrets" ]; then
     exit 0
   fi
 fi
-
-# Generate kubeconfig for the EKS cluster
-export KUBECONFIG_FILE=$(mktemp)
-echo -e "${PURPLE}🔑 Generating temporary kubeconfig for cluster ${BOLD}${CLUSTER_NAME}${NC}...${NC}"
-aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1

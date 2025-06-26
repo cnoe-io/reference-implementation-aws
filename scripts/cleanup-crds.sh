@@ -20,7 +20,7 @@ TIMEOUT=60
 
 cleanup_resources() {
     local crd=$1
-    local kind=$(kubectl get crd $crd -o jsonpath='{.spec.names.kind}' --kubeconfig $KUBECONFIG_FILE 2>&1 /dev/null || echo "")
+    local kind=$(kubectl get crd $crd -o jsonpath='{.spec.names.kind}' --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || echo "")
     
     if [[ -z "$kind" ]]; then
         return
@@ -29,7 +29,7 @@ cleanup_resources() {
     echo -e "${CYAN}🔄 Cleaning up resources for CRD:${NC} ${BOLD}$crd${NC} ${CYAN}(Kind: $kind)${NC}"
     
     # Get all resources of this kind
-    local resources=$(kubectl get $kind --all-namespaces -o name --kubeconfig $KUBECONFIG_FILE 2>&1 /dev/null || true)
+    local resources=$(kubectl get $kind --all-namespaces -o name --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true)
     
     if [[ -z "$resources" ]]; then
         return
@@ -39,10 +39,10 @@ cleanup_resources() {
     echo "$resources" | while read resource; do
         if [[ -n "$resource" ]]; then
             echo -e "${YELLOW}🗑️  Deleting${NC} $resource"
-            kubectl delete $resource --timeout=${TIMEOUT}s --kubeconfig $KUBECONFIG_FILE 2>&1/dev/null || {
+            kubectl delete $resource --timeout=${TIMEOUT}s --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || {
                 echo -e "${YELLOW}⏳ Timeout reached, force deleting${NC} $resource"
-                kubectl patch $resource -p '{"metadata":{"finalizers":[]}}' --type=merge --kubeconfig $KUBECONFIG_FILE 2>&1/dev/null || true
-                kubectl delete $resource --force --grace-period=0 --kubeconfig $KUBECONFIG_FILE 2>&1/dev/null || true
+                kubectl patch $resource -p '{"metadata":{"finalizers":[]}}' --type=merge --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
+                kubectl delete $resource --force --grace-period=0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
             }
         fi
     done
@@ -51,10 +51,10 @@ cleanup_resources() {
 delete_crd() {
     local crd=$1
     echo -e "${RED}🗑️  Deleting CRD:${NC} ${BOLD}$crd${NC}"
-    kubectl delete crd $crd --timeout=${TIMEOUT}s --kubeconfig $KUBECONFIG_FILE 2>&1/dev/null || {
+    kubectl delete crd $crd --timeout=${TIMEOUT}s --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || {
         echo -e "${YELLOW}⏳ Timeout reached, removing finalizers for CRD${NC} ${BOLD}$crd${NC}"
-        kubectl patch crd $crd -p '{"metadata":{"finalizers":[]}}' --type=merge --kubeconfig $KUBECONFIG_FILE 2>/dev/null || true
-        kubectl delete crd $crd --force --grace-period=0 --kubeconfig $KUBECONFIG_FILE 2>&1 /dev/null || true
+        kubectl patch crd $crd -p '{"metadata":{"finalizers":[]}}' --type=merge --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
+        kubectl delete crd $crd --force --grace-period=0 --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1 || true
     }
 }
 

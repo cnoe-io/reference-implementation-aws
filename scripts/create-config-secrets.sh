@@ -5,9 +5,8 @@ export REPO_ROOT=$(git rev-parse --show-toplevel)
 PHASE="create-update-secrets"
 source ${REPO_ROOT}/scripts/utils.sh
 
-SECRET_NAME_PREFIX="cnoe-reference-implementation-aws"
+SECRET_NAME_PREFIX="cnoe-ref-impl"
 PRIVATE_DIR="$REPO_ROOT/private"
-CONFIG_FILE="$REPO_ROOT/config.yaml"
 
 echo -e "\n${BOLD}${BLUE}🔐 Starting secret creation process...${NC}"
 echo -e "${CYAN}📂 Reading files from:${NC} ${BOLD}${PRIVATE_DIR}${NC}"
@@ -21,10 +20,12 @@ fi
 # Create or update secret
 create_update_secret() {
    echo -e "\n${PURPLE}🚀 Creating/updating Secret for $1...${NC}"
+   TAGS=$(get_tags_from_config)
    if aws secretsmanager create-secret \
       --name "$SECRET_NAME_PREFIX/$1" \
       --secret-string file://"$TEMP_SECRET_FILE" \
       --description "Secret created for $1 of CNOE AWS Reference Implementation" \
+      --tags $TAGS \
       --region $AWS_REGION >/dev/null 2>&1; then
       echo -e "${GREEN}✅ Secret '${BOLD}$SECRET_NAME_PREFIX/$1${NC}${GREEN}' created successfully!${NC}"
     else
@@ -81,14 +82,9 @@ fi
 echo "" >> "$TEMP_SECRET_FILE"
 echo "}" >> "$TEMP_SECRET_FILE"
 
-create_update_secret "github-app-secrets"
+create_update_secret "github-app"
 
 # Build JSON for Config secret
-if [ ! -d "$PRIVATE_DIR" ]; then
-    echo -e "${RED}❌ Directory $PRIVATE_DIR does not exist${NC}"
-    exit 1
-fi
-
 TEMP_SECRET_FILE=$(mktemp)
 yq -o=json eval '.' "$CONFIG_FILE" > "$TEMP_SECRET_FILE"
 create_update_secret "config"

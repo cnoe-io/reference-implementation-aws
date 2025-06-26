@@ -24,8 +24,9 @@ locals {
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = {
-    Blueprint  = local.name
-    GithubRepo = "github.com/cnoe-io/reference-implementation-aws"
+    githubRepo = "github.com/cnoe-io/reference-implementation-aws"
+    env = "dev"
+    project = "cnoe"
   }
 }
 
@@ -134,7 +135,7 @@ module "external_secrets_pod_identity" {
         "secretsmanager:DescribeSecret",
         "secretsmanager:ListSecretVersionIds"
       ]
-      resources = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:cnoe-reference-implemntation-aws"]
+      resources = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:cnoe-ref-impl/*"]
     }
   ]
 

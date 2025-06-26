@@ -1,9 +1,11 @@
-# This is the GITHUB URL of the fork in Github Org that you have created.
+### Config for CNOE AWS Reference Implementation ###
+# Source: "https://github.com/cnoe/reference-implementation-aws"
+
+# Details of your repository fork
 repo: 
-  url: "https://github.com/punkwalker/reference-implementation-aws"
-  revision: "ref-impl-v2"
-  basepath: "packages"
-  org: "https://github.com/cnoe-punkwalker" # TODO: Org can be removed once repo url is from same GH org
+  url: "https://github.com/cnoe-punkwalker/reference-implementation-aws" # This is the GITHUB URL of the fork in Github Org that you have created.
+  revision: "ref-impl-v2" # Branch or Tag which should be used for Argo CD Apps
+  basepath: "packages" # Directory in which configuration of addons is stored
 
 # The name of the EKS cluster you are installing the reference implementation on.
 cluster_name: "cnoe-ref-impl"
@@ -20,6 +22,7 @@ domain_name: advaitt.people.aws.dev
 path_routing: true
 
 # Tags for AWS resources
-tags: 
+tags:
+  githubRepo: "github.com/cnoe-io/reference-implementation-aws"
   env: "dev"
   project: "cnoe"
