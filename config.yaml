@@ -1,19 +1,25 @@
-# This is the GITHUB URL where Kubernetes manifests are stored.
-# If you forked this repo, you will need to update this.
-repo_url: "https://github.com/punkwalker/reference-implementation-aws"
-# Tags to apply to AWS resources
+# This is the GITHUB URL of the fork in Github Org that you have created.
+repo: 
+  url: "https://github.com/punkwalker/reference-implementation-aws"
+  revision: "ref-impl-v2"
+  basepath: "packages"
+  org: "https://github.com/cnoe-punkwalker" # TODO: Org can be removed once repo url is from same GH org
+
+# The name of the EKS cluster you are installing the reference implementation on.
+cluster_name: "cnoe-ref-impl"
+
+# AWS Region of the EKS cluster and cnoe-reference-implementation-aws config secret
+region: "us-west-2"
+
+# Amazon Route 53 hosted zone name.
+domain_name: advaitt.people.aws.dev
+
+# Set this to true if you want to enable path routing othewise false for domain based routing.
+# When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name> 
+# When disabled, the exposed addons will be accessible at https://<addon-name>.<domain_name>
+path_routing: true
+
+# Tags for AWS resources
 tags: 
   env: "dev"
   project: "cnoe"
-region: "us-west-2"
-# The name of the EKS cluster you are installing the addons on.
-cluster_name: "cnoe-ref-impl"
-# Set this to false if you want to manage DNS somewhere else. e.g. manually.
-# enable_dns_management: true
-# If using external DNS, specify the Route53 hosted zone ID. Required if enable_dns_management is set to true
-# hosted_zone_id: Z07667581KDLOA4RSCVFD
-# if external DNS is not used, this value must be provided.
-domain_name: advaitt.people.aws.dev
-
-# To enable path routing set this "true" otherwise "false"
-path_routing: true

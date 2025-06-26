@@ -2,54 +2,15 @@
 set -e -o pipefail
 
 export REPO_ROOT=$(git rev-parse --show-toplevel)
-
+PHASE="install"
 source ${REPO_ROOT}/scripts/utils.sh
-
-# Fetch config values
-CLUSTER_NAME=$(yq '.cluster_name' config.yaml)
-AWS_REGION=$(yq '.region' config.yaml)
-DOMAIN_NAME=$(yq '.domain_name' config.yaml)
-PATH_ROUTING=$(yq '.path_routing' config.yaml)
-
-# Additional colors
-export BLUE='\033[0;34m'
-export YELLOW='\033[0;33m'
-export CYAN='\033[0;36m'
-export BOLD='\033[1m'
-
-# Header
-echo -e "${BOLD}${BLUE}✨ ========================================== ✨${NC}"
-echo -e "${BOLD}${BLUE}📦       CNOE AWS Reference Implementation    📦${NC}"
-echo -e "${BOLD}${BLUE}✨ ========================================== ✨${NC}\n"
-
-echo -e "${BOLD}${GREEN}🔧 Installing with the following options: ${NC}"
-echo -e "${CYAN}📋 Configuration Details:${NC}"
-echo -e "${YELLOW}----------------------------------------------------${NC}"
-yq '... comments=""' ${REPO_ROOT}/config.yaml
-echo -e "${YELLOW}----------------------------------------------------${NC}"
-
-echo -e "${BOLD}${PURPLE}\n🎯 Targets:${NC}"
-echo -e "${CYAN}🔶 Kubernetes cluster:${NC} $CLUSTER_NAME"
-echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
-echo -e "${CYAN}🔶 AWS account number:${NC} $(aws sts get-caller-identity --query "Account" --output text)"
-
-echo -e "\n${BOLD}${GREEN}❓ Are you sure you want to continue?${NC}"
-read -p '(yes/no): ' response
-if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
-  echo -e "${YELLOW}⚠️  Installation cancelled.${NC}"
-  exit 0
-fi
 
 echo -e "\n${BOLD}${BLUE}🚀 Starting installation process...${NC}"
 yq -i '.spec.destination.name = "'"$CLUSTER_NAME"'"' packages/addons-appset.yaml # To set the Remote EKS Cluster name in Addon AppSet chart
 echo -e "${CYAN}📡 Connecting to cluster:${NC} ${BOLD}${CLUSTER_NAME}${NC} in ${BOLD}${AWS_REGION}${NC}"
 
-KUBECONFIG_FILE=$(mktemp)
-echo -e "${PURPLE}🔑 Generating temporary kubeconfig for cluster ${BOLD}${CLUSTER_NAME}${NC}...${NC}"
-aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
-KUBECONFIG=$(kubectl config --kubeconfig $KUBECONFIG_FILE view --raw -o json)
-SERVER_URL=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster.server')
-CA_DATA=$(echo $KUBECONFIG | jq -r '.clusters[0].cluster."certificate-authority-data"')
+SERVER_URL=$(cat "$KUBECONFIG_FILE" | yq -r '.clusters[0].cluster.server')
+CA_DATA=$(cat "$KUBECONFIG_FILE" | yq -r '.clusters[0].cluster."certificate-authority-data"')
 
 echo -e "${CYAN}📝 Creating cluster secret file...${NC}"
 CLUSTER_SECRET_FILE=$(mktemp)
