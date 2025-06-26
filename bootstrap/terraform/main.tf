@@ -16,6 +16,12 @@ data "template_file" "crossplane_boundary_policy" {
   }
 }
 
+data "template_file" "external_secret_policy" {
+  template = file("${path.module}/../iam-policies/external-secrets.json")
+  vars = {
+    AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
+  }
+}
 locals {
   name   = var.cluster_name
   region = var.region
@@ -43,7 +49,7 @@ module "eks" {
   cluster_endpoint_public_access = true
 
   enable_cluster_creator_admin_permissions = true
-  
+
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
@@ -148,26 +154,8 @@ module "external_secrets_pod_identity" {
   version = "~> 1.0"
 
   name = "external-secrets"
-
-  policy_statements = [
-    {
-      actions = [
-        "secretsmanager:ListSecrets",
-        "secretsmanager:BatchGetSecretValue"
-      ]
-      resources = ["*"]
-    },
-    {
-      actions = [
-        "secretsmanager:GetResourcePolicy",
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:ListSecretVersionIds"
-      ]
-      resources = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:cnoe-ref-impl/*"]
-    }
-  ]
-
+  attach_custom_policy = true
+  override_policy_documents = [data.template_file.external_secret_policy.rendered]
   associations = {
     external_secrets = {
       cluster_name    = module.eks.cluster_name
