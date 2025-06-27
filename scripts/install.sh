@@ -26,6 +26,7 @@ metadata:
     clusterName: "$CLUSTER_NAME"
     environment: "control-plane"
     path_routing: "$PATH_ROUTING"
+    auto_mode: "$AUTO_MODE"
   annotations:
     addons_repo_url: "http://cnoe.localtest.me:8443/gitea/giteaAdmin/idpbuilder-localdev-bootstrap-appset-packages.git"
     addons_repo_revision: "HEAD" 

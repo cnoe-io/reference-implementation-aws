@@ -47,6 +47,7 @@ export CLUSTER_NAME=$(yq '.cluster_name' "$CONFIG_FILE")
 export AWS_REGION=$(yq '.region' "$CONFIG_FILE")
 export DOMAIN_NAME=$(yq '.domain' "$CONFIG_FILE")
 export PATH_ROUTING=$(yq '.path_routing' "$CONFIG_FILE")
+export PATH_ROUTING=$(yq '.auto_mode' "$CONFIG_FILE")
 
 # Header
 echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}"
@@ -56,6 +57,7 @@ echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}
 echo -e "${BOLD}${PURPLE}\n🎯 Targets:${NC}"
 echo -e "${CYAN}🔶 AWS account number:${NC} $(aws sts get-caller-identity --query "Account" --output text)"
 echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
+echo -e "${CYAN}🔶 AWS region:${NC} ${AWS_REGION}"
 echo -e "${CYAN}🔶 Kubernetes cluster:${NC} ${BOLD}$CLUSTER_NAME${NC} in ${BOLD}$AWS_REGION${NC}"
 
 if [ $PHASE = "install" ]; then
@@ -96,6 +98,8 @@ if [ $PHASE = "crd-uninstall" ]; then
 fi
 
 if [ $PHASE = "create-update-secrets" ]; then
+  echo -e "${CYAN}🔐 Secret names:${NC} ${BOLD}${SECRET_NAME_PREFIX}/config & ${SECRET_NAME_PREFIX}/github-app ${NC}"
+  echo -e "\n${BOLD}${RED}⚠️  WARNING: This will update the secrets if already they exists!!{NC}"
   echo -e "${BOLD}${GREEN}❓ Are you sure you want to continue?${NC}"
   read -p '(yes/no): ' response
   if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then

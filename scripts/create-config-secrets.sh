@@ -2,15 +2,14 @@
 set -e -o pipefail
 
 export REPO_ROOT=$(git rev-parse --show-toplevel)
+SECRET_NAME_PREFIX="cnoe-ref-impl"
 PHASE="create-update-secrets"
 source ${REPO_ROOT}/scripts/utils.sh
 
-SECRET_NAME_PREFIX="cnoe-ref-impl"
 PRIVATE_DIR="$REPO_ROOT/private"
 
 echo -e "\n${BOLD}${BLUE}🔐 Starting secret creation process...${NC}"
 echo -e "${CYAN}📂 Reading files from:${NC} ${BOLD}${PRIVATE_DIR}${NC}"
-echo -e "${CYAN}🏷️  Secret name:${NC} ${BOLD}${SECRET_NAME_PREFIX}${NC}"
 
 if [ ! -d "$PRIVATE_DIR" ]; then
     echo -e "${RED}❌ Directory $PRIVATE_DIR does not exist${NC}"
