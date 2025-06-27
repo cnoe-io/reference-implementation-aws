@@ -27,27 +27,27 @@ spec:
     remoteRef:
       conversionStrategy: Default # TODO: Remove when figured out how to avoid Diffs for CR defaults
       decodingStrategy: None
-      key: cnoe-ref-impl/github-apps
+      key: cnoe-ref-impl/github-app
       metadataPolicy: None
       property: argocd-github.appId
   - secretKey: installationId
     remoteRef:
       conversionStrategy: Default
       decodingStrategy: None
-      key: cnoe-ref-impl/github-apps
+      key: cnoe-ref-impl/github-app
       metadataPolicy: None
       property: argocd-github.installationId
   - secretKey: privateKey
     remoteRef:
       conversionStrategy: Default
       decodingStrategy: None
-      key: cnoe-ref-impl/github-apps
+      key: cnoe-ref-impl/github-app
       metadataPolicy: None
       property: argocd-github.privateKey
   - secretKey: repoURL
     remoteRef:
       conversionStrategy: Default
       decodingStrategy: None
-      key: cnoe-ref-impl/github-apps
+      key: cnoe-ref-impl/github-app
       metadataPolicy: None
       property: argocd-github.url

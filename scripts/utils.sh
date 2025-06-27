@@ -45,7 +45,7 @@ fi
 # Fetch config values
 export CLUSTER_NAME=$(yq '.cluster_name' "$CONFIG_FILE")
 export AWS_REGION=$(yq '.region' "$CONFIG_FILE")
-export DOMAIN_NAME=$(yq '.domain_name' "$CONFIG_FILE")
+export DOMAIN_NAME=$(yq '.domain' "$CONFIG_FILE")
 export PATH_ROUTING=$(yq '.path_routing' "$CONFIG_FILE")
 
 # Header
