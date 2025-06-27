@@ -1,44 +1,51 @@
+# CNOE AWS Reference Implementation
+This project contains a [CNOE](cnoe.io) reference implemntation for AWS. Using this project you can bring up an Internal Developer Platform on EKS with all the tools configured and ready to use. It will install addons on an EKS cluster as Argo CD apps using GitOps Bridge App of ApplicationSets pattern. Check out [Getting Started](#getting-started) guide for installing this solution on EKS cluster.
 
-> [!CAUTION]
-> The current version of the AWS reference implementation is no longer maintained. A new version is currently work in progress. Find more information about the new version in issue [#49](https://github.com/cnoe-io/reference-implementation-aws/issues/49).
+>[! NOTE ]
+> Applications deployed in this repository are not meant or configured for production.
+
+### Architecture Overview
 
 ![overview](docs/images/overview.png)
 
-> **_NOTE:_**  Applications deployed in this repository are not meant or configured for production.
+### Addons
+All the addons are helm charts with static values configured in `packages/<addon-name>/values.yaml` and dynamic values based on Argo CD cluster secret label/annotations values in `packages/addons/values.yaml`. 
 
+| Name | Purpose | Version | Chart |
+| ---------- | ---------- | ---------- | ---------- | 
+| Argo CD | Installation and management of addon Argo CD application | Version | Chart |
+| Argo Workflows | Workflow tool for continuous integration tasks  | Version | Chart |
+| Backstage | Self-Service Web UI (Developer Portal) for developers | Version | Custom Chart stored at packages/backstage/chart |
+| Cert Manager | Certificate managed for addons and developer applications using Lets Enctrypt | Version | Chart |
+| Crossplane | IaC controller for provisiong infrastructure  | Version | Chart |
+| External DNS | Domain management using Route 53 | Version | Chart |
+| External Secrets | Secret Management using AWS Secret Manager and AWS Systems Manager Parameter Store  | Version | Chart |
+| Ingress NGINX | Ingress controller for L7 network traffic routing  | Version | Chart |
+| Keycloak | Identity provider for User Authentication | Version | Chart |
 
-# Installation
+Check out more details about the [installation flow](docs/installation_flow.md).
+ 
+## Getting Started
+### Step 1. Create EKS Cluster
+The reference implemntation can be installed on new EKS cluster which can be created with following tools:
 
-- Installation script must be used with a EKS cluster because we use IRSA to talk to AWS services.
-- Components are installed as ArgoCD Applications.
-- Files under the `/packages` directory are meant to be usable without any modifications. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD's Helm parameters.
+  * eksctl: Follow the [instructions](cluster/eksctl/)
+  * terraform: Follow the [instructions](cluster/eksctl/)  
 
-## Basic installation flow
+This will create all the pre-requisite AWS Resources required for the reference implementation. Which includes:
+  * EKS cluster with Auto Mode or Without Auto Mode (Managed Node Group with 4 nodes)
+  * Pod Identity Associations for following Addons:
+    | Name | Namespace | Service Account Name | Permissions |
+    | ----- | --------- | -------------------- | ---------- |
+    | Crossplane | crossplane-system | provider-aws | Admin Permissions but with [permission boundry](cluster/iam-policies/crossplane-permissions-boundry.json) |
+    | External Secrets | external-secrets | external-secrets | Permissions |
+    | External DNS | external-dns | external-dns | Permissions |
+    | AWS Load Balancer Controller (Only for w/o Auto Mode) | kube-system | aws-load-balancer-controller | Permissions |
+    | AWS EBS CSI Controller (Only for w/o Auto Mode) | kube-system | ebs-csi-controller-sa | Permissions |
+  
 
-The installation process follows the following pattern. 
-
-1. Create a GitHub App for Backstage integration.
-2. Install ArgoCD and configure it to be able to monitor your GitHub Organization.
-3. Run Terraform. Terraform is responsible for:
-    - Managing AWS resources necessary for the Kubernetes operators to function. Mostly IAM Roles.
-    - Install components as ArgoCD applications. Pass IAM role information where necessary.
-    - Apply Kubernetes manifests such as secrets and ingress where information cannot easily be passed to ArgoCD.
-    - Run all the above in an order because installation order matters for many of these components. For example, Keycloak must be installed and ready before Backstage can be installed and configured.
-
-```mermaid
----
-title: Installation Process
----
-erDiagram
-  "Local Machine" ||--o{ "ArgoCD" : "1. installs"
-  "Local Machine" ||--o{ "Terraform" : "2. invokes"
-  "Terraform" ||--o{ "AWS Resources" : "3. creates"
-  "Terraform" ||--o{ "ArgoCD" : "4. create ArgoCD Apps"
-  "ArgoCD" ||--o{ "This Repo" : "pulls manifests"
-  "ArgoCD" ||--o{ "Components" : "installs to the cluster"
-```
-
-This installation pattern where some Kubernetes manifests are handled in Terraform while others are handled in GitOps manner may not be suitable for many organizations. If you can be certain about parameters such as domain name and certificate handling, it is better to utilize GitOps approach where these information are committed to a repository. The reason it is handled this way is to allow for customization for different organizations without forking this repository and committing organization specific information into the repository. 
+> [! Using Existing EKS Cluster ]
+> The reference implentation can be installed on existing EKS Cluster only if above pre-requisites are satisfied.
 
 ## Secret handling
 

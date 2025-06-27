@@ -1,4 +1,6 @@
 # Ref: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd
+cnoe_ref_impl:
+  auto_mode: '"true"'
 dex:
   enabled: false
 server:
