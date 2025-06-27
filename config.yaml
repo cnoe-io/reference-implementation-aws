@@ -19,6 +19,7 @@ domain: advaitt.people.aws.dev
 # Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
 # When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name> 
 # When disabled, the exposed addons will be accessible at https://<addon-name>.<domain_name>
+# !!! Note: This is string value as it is passed on to the Argo CD cluster secret label
 path_routing: "true"
 
 # Tags for AWS resources
