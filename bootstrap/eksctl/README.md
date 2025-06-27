@@ -7,18 +7,6 @@ This directory contains the configuration to create an EKS cluster with pod iden
 - AWS CLI configured with appropriate permissions
 - eksctl installed
 
-
-## Create Crossplane Permissions Boundary Policy
-
-Create the permissions boundary policy for Crossplane:
-
-```bash
-# Create the permissions boundary policy
-aws iam create-policy \
-  --policy-name crossplane-permissions-boundary \
-  --policy-document file://bootstrap/iam-policies/crossplane-permissions-boundry.json
-```
-
 ## Environment Variables
 
 Set the following environment variables before creating the cluster:
@@ -27,6 +15,23 @@ Set the following environment variables before creating the cluster:
 export CLUSTER_NAME="cnoe-ref-impl"
 export REGION="us-west-2"
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+```
+
+## Create Crossplane Permissions Boundary Policy
+
+Create the permissions boundary policy for Crossplane:
+
+```bash
+TEMPFILE=$(mktemp)
+cat bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst > "$TEMPFILE"
+
+# Create the permissions boundary policy
+cat bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst | \                                           
+aws iam create-policy \
+  --policy-name crossplane-permissions-boundary \
+  --policy-document file:///"$TEMPFILE"
+
+# Capture the policy ARN
 export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
   --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary \
   --query 'Policy.Arn' --output text)
