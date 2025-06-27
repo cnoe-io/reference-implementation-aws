@@ -40,7 +40,7 @@ spec:
     metadata:
       name: data
     spec:
-      storageClassName: gp2 # TODO; Make this configurable
+      storageClassName: gp3
       accessModes:
       - ReadWriteOnce
       resources:

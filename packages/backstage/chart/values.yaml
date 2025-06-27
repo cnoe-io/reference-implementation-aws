@@ -95,7 +95,7 @@ postgresql:
       memory: 300Mi
   persistence:
     enabled: true
-    storageClass: gp2
+    storageClass: gp3
     size: 1Gi
   env:
     POSTGRES_USER: backstage
