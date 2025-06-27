@@ -6,7 +6,6 @@ This directory contains Terraform configuration to create an EKS cluster with po
 
 - AWS CLI configured with appropriate permissions
 - Terraform >= 1.0 installed
-- kubectl installed
 
 ## Environment Variables
 
@@ -24,11 +23,11 @@ export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output tex
 # Initialize Terraform
 terraform init
 
-# Plan the deployment with variables
-terraform plan -var="cluster_name=${TF_VAR_cluster_name}" -var="region=${TF_VAR_region}"
+# Plan the deployment
+terraform plan
 
-# Apply the configuration with variables
-terraform apply -var="cluster_name=${TF_VAR_cluster_name}" -var="region=${TF_VAR_region}"
+# Apply the configuration
+terraform apply
 ```
 
 ## Configure kubectl
@@ -86,7 +85,7 @@ To delete the cluster and all associated resources:
 
 ```bash
 # Destroy the Terraform-managed resources
-terraform destroy -var="cluster_name=${TF_VAR_cluster_name}" -var="region=${TF_VAR_region}"
+terraform destroy
 ```
 
 This will clean up:
