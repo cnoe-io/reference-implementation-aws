@@ -15,7 +15,7 @@ argocd:
   valuesObject:
   valuesObject:
     cnoe_ref_impl: # Specific values for reference CNOE implementation to control extraObjects.
-      auto_mode: '{{ if eq .metadata.labels.auto_mode "true" }}"true"{{ else }}"false"{{ end }}'
+      auto_mode: auto_mode: '{{ if eq .metadata.labels.auto_mode "true" }}true{{ else }}false{{ end }}'
     global:
       domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
     server:
