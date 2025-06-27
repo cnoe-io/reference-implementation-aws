@@ -1,6 +1,6 @@
 # EKS Cluster Setup with Terraform
 
-This directory contains Terraform configuration to create an EKS cluster with pod identity associations for various AWS services using EKS Blueprints.
+This directory contains Terraform configuration to create an EKS cluster with pod identity associations for various AWS services.
 
 ## Prerequisites
 
@@ -8,17 +8,14 @@ This directory contains Terraform configuration to create an EKS cluster with po
 - Terraform >= 1.0 installed
 - kubectl installed
 
-## Configuration
+## Environment Variables
 
-1. Copy the example tfvars file:
+Set the following environment variables before creating the cluster:
+
 ```bash
-cp terraform.tfvars.example terraform.tfvars
-```
-
-2. Update `terraform.tfvars` with your values:
-```hcl
-cluster_name = "cnoe-ref-impl"
-region       = "us-west-2"
+export TF_VAR_cluster_name="cnoe-ref-impl"
+export TF_VAR_region="us-west-2"
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
 
 ## Deploy
@@ -27,11 +24,11 @@ region       = "us-west-2"
 # Initialize Terraform
 terraform init
 
-# Plan the deployment
-terraform plan
+# Plan the deployment with variables
+terraform plan -var="cluster_name=${TF_VAR_cluster_name}" -var="region=${TF_VAR_region}"
 
-# Apply the configuration
-terraform apply
+# Apply the configuration with variables
+terraform apply -var="cluster_name=${TF_VAR_cluster_name}" -var="region=${TF_VAR_region}"
 ```
 
 ## Configure kubectl
@@ -39,7 +36,7 @@ terraform apply
 After deployment, configure kubectl to connect to your cluster:
 
 ```bash
-aws eks --region us-west-2 update-kubeconfig --name cnoe-ref-impl
+aws eks --region $TF_VAR_region update-kubeconfig --name $TF_VAR_cluster_name
 ```
 
 ## AWS Resources Created
@@ -67,29 +64,29 @@ The Terraform configuration will provision the following AWS resources:
 - coredns
 - kube-proxy
 
-### EKS Blueprints Addons
-- AWS Load Balancer Controller
-- External DNS
-
 ### Pod Identity Associations
 - **crossplane-system/provider-aws**: AdministratorAccess + permissions boundary
 - **external-secrets/external-secrets**: Secrets Manager access policies
-- **kube-system/aws-load-balancer-controller**: AWS Load Balancer Controller policies (via Blueprints)
-- **external-dns/external-dns**: Route 53 DNS management policies (via Blueprints)
+- **kube-system/aws-load-balancer-controller**: AWS Load Balancer Controller policies
+- **external-dns/external-dns**: Route 53 DNS management policies
 - **kube-system/ebs-csi-controller-sa**: EBS CSI driver policies
 
 ### IAM Resources
 - IAM roles for pod identity associations
 - IAM policies for service-specific permissions
 - OIDC identity provider for the cluster
+- Crossplane permissions boundary policy
 
 ## Cleanup
+
+> [!CAUTION]
+> Ensure all workloads are removed from the cluster before destroying to avoid orphaned resources.
 
 To delete the cluster and all associated resources:
 
 ```bash
 # Destroy the Terraform-managed resources
-terraform destroy
+terraform destroy -var="cluster_name=${TF_VAR_cluster_name}" -var="region=${TF_VAR_region}"
 ```
 
 This will clean up:
@@ -101,4 +98,6 @@ This will clean up:
 - EKS addons
 - Crossplane permissions boundary policy
 
-**Note**: Ensure all workloads are removed from the cluster before destroying to avoid orphaned resources.
+
+> [!NOTE]
+> Manual cleanup may be required for any resources created outside of eksctl or if the deletion process encounters errors.

@@ -6,17 +6,7 @@ This directory contains the configuration to create an EKS cluster with pod iden
 
 - AWS CLI configured with appropriate permissions
 - eksctl installed
-- kubectl installed
 
-## Environment Variables
-
-Set the following environment variables before creating the cluster:
-
-```bash
-export CLUSTER_NAME="cnoe-ref-impl"
-export REGION="us-west-2"
-export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-```
 
 ## Create Crossplane Permissions Boundary Policy
 
@@ -27,8 +17,16 @@ Create the permissions boundary policy for Crossplane:
 aws iam create-policy \
   --policy-name crossplane-permissions-boundary \
   --policy-document file://bootstrap/iam-policies/crossplane-permissions-boundry.json
+```
 
-# Capture the policy ARN
+## Environment Variables
+
+Set the following environment variables before creating the cluster:
+
+```bash
+export CLUSTER_NAME="cnoe-ref-impl"
+export REGION="us-west-2"
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
   --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary \
   --query 'Policy.Arn' --output text)
@@ -36,9 +34,16 @@ export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
 
 ## Create Cluster 
 
+## Without Auto Mode
 ```bash
 cat bootstrap/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
 ```
+
+## With Auto Mode
+```bash
+cat bootstrap/eksctl/cluster-config-auto.yaml | envsubst | eksctl create cluster -f -
+```
+
 ## AWS Resources Created
 
 The cluster creation will provision the following AWS resources:
@@ -77,6 +82,9 @@ The cluster creation will provision the following AWS resources:
 
 ## Cleanup
 
+> [!CAUTION]
+> Ensure all workloads are removed from the cluster before destroying to avoid orphaned resources.
+
 To delete the cluster and all associated resources:
 
 ```bash
@@ -96,4 +104,5 @@ This will automatically clean up:
 - EKS addons
 - Crossplane permissions boundary policy
 
-**Note**: Manual cleanup may be required for any resources created outside of eksctl or if the deletion process encounters errors.
+> [!NOTE]
+> Manual cleanup may be required for any resources created outside of eksctl or if the deletion process encounters errors.
