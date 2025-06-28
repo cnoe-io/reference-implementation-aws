@@ -1,7 +1,7 @@
 # CNOE AWS Reference Implementation
 This project contains a [CNOE](cnoe.io) reference implemntation for AWS. Using this project you can bring up an Internal Developer Platform on EKS with all the tools configured and ready to use. It will install addons on an EKS cluster as Argo CD apps using GitOps Bridge App of ApplicationSets pattern. Check out [Getting Started](#getting-started) guide for installing this solution on EKS cluster.
 
->[! NOTE ]
+> [!NOTE]
 > Applications deployed in this repository are not meant or configured for production.
 
 ### Architecture Overview
@@ -44,7 +44,7 @@ This will create all the pre-requisite AWS Resources required for the reference 
     | AWS EBS CSI Controller (Only for w/o Auto Mode) | kube-system | ebs-csi-controller-sa | Permissions |
   
 
-> [! Using Existing EKS Cluster ]
+> [!Using Existing EKS Cluster]
 > The reference implentation can be installed on existing EKS Cluster only if above pre-requisites are satisfied.
 
 ## Secret handling
