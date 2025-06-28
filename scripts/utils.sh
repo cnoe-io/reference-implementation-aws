@@ -58,7 +58,7 @@ echo -e "${BOLD}${PURPLE}\n🎯 Targets:${NC}"
 echo -e "${CYAN}🔶 AWS account number:${NC} $(aws sts get-caller-identity --query "Account" --output text)"
 echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
 echo -e "${CYAN}🔶 AWS region:${NC} ${AWS_REGION}"
-echo -e "${CYAN}🔶 Kubernetes cluster:${NC} ${BOLD}$CLUSTER_NAME${NC} in ${BOLD}$AWS_REGION${NC}"
+echo -e "${CYAN}🔶 Kubernetes cluster:${NC} ${BOLD}$CLUSTER_NAME${NC}"
 
 if [ $PHASE = "install" ]; then
   echo -e "${CYAN}📋 Configuration Details:${NC}"

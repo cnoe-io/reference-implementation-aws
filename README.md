@@ -29,7 +29,7 @@ Check out more details about the [installation flow](docs/installation_flow.md).
 ### Step 1. Create EKS Cluster
 The reference implemntation can be installed on new EKS cluster which can be created with following tools:
 
-  * eksctl: Follow the [instructions](cluster/eksctl/)
+  * eksctl: Follow the [instructions](cluster/eksctl)
   * terraform: Follow the [instructions](cluster/eksctl/)  
 
 This will create all the pre-requisite AWS Resources required for the reference implementation. Which includes:
@@ -47,7 +47,7 @@ This will create all the pre-requisite AWS Resources required for the reference 
 > [!NOTE]
 > **Using Existing EKS Cluster**
 > 
-> The reference implentation can be installed on existing EKS Cluster only if above pre-requisites are satisfied.
+> The reference implentation can be installed on existing EKS Cluster only if above pre-requisites are completed.
 
 ## Secret handling
 
