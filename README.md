@@ -44,7 +44,8 @@ This will create all the pre-requisite AWS Resources required for the reference 
     | AWS EBS CSI Controller (Only for w/o Auto Mode) | kube-system | ebs-csi-controller-sa | Permissions |
   
 
-> [!Using Existing EKS Cluster]
+> [!NOTE]
+> **Using Existing EKS Cluster**
 > The reference implentation can be installed on existing EKS Cluster only if above pre-requisites are satisfied.
 
 ## Secret handling
