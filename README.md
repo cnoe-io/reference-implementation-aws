@@ -46,6 +46,7 @@ This will create all the pre-requisite AWS Resources required for the reference 
 
 > [!NOTE]
 > **Using Existing EKS Cluster**
+> 
 > The reference implentation can be installed on existing EKS Cluster only if above pre-requisites are satisfied.
 
 ## Secret handling
