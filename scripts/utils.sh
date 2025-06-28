@@ -47,7 +47,7 @@ export CLUSTER_NAME=$(yq '.cluster_name' "$CONFIG_FILE")
 export AWS_REGION=$(yq '.region' "$CONFIG_FILE")
 export DOMAIN_NAME=$(yq '.domain' "$CONFIG_FILE")
 export PATH_ROUTING=$(yq '.path_routing' "$CONFIG_FILE")
-export PATH_ROUTING=$(yq '.auto_mode' "$CONFIG_FILE")
+export AUTO_MODE=$(yq '.auto_mode' "$CONFIG_FILE")
 
 # Header
 echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}"
