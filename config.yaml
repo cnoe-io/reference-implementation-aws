@@ -15,10 +15,10 @@ auto_mode: "true"
 # AWS Region of the EKS cluster and cnoe-reference-implementation-aws config secret
 region: "us-west-2"
 
-# Base Domain name used for exposing services.
+# Base Domain name used for exposing services. It should be a subdomain or main domain of the Route53 hosted zone.
 domain: idp.advaitt.people.aws.dev
 
-# Route53 hosted zone ID for configuring extern-dns
+# Route53 hosted zone ID for configuring external-dns
 route53_hosted_zone_id: Z07667581KDLOA4RSCVFD
 
 # Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
