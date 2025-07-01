@@ -66,17 +66,9 @@ spec:
                   type: string
                   default: default
                 tags:
-                  items:
-                    properties:
-                      key:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                      - key
-                      - value
-                    type: object
-                  type: array
+                  type: object
+                  additionalProperties:
+                    type: string
               required:
                 - region
               type: object
