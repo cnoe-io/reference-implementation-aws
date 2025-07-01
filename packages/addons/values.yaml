@@ -94,6 +94,9 @@ external-dns:
   chartName: external-dns
   chartRepository: https://kubernetes-sigs.github.io/external-dns
   defaultVersion: "1.16.1"
+  valuesObject:
+    domainFilters:
+      - '{{ .metadata.annotations.domain }}'
   # selector:
   #   matchExpressions:
   #     - key: enable_external_dns
@@ -107,9 +110,6 @@ external-secrets:
   chartName: external-secrets
   defaultVersion: "0.17.0"
   chartRepository: "https://charts.external-secrets.io"
-  valuesObject:
-    domainFilters:
-      - '{{ .metadata.annotations.domain }}'
   # additionalResources:
   #   path: "charts/fleet-secret"
   #   type: "ecr-token"
