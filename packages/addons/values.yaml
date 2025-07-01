@@ -95,8 +95,8 @@ external-dns:
   chartRepository: https://kubernetes-sigs.github.io/external-dns
   defaultVersion: "1.16.1"
   valuesObject:
-    domainFilters:
-      - '{{ .metadata.annotations.domain }}'
+    zoneIdFilters:
+      - '{{ .metadata.annotations.route53_hosted_zone_id }}'
   # selector:
   #   matchExpressions:
   #     - key: enable_external_dns

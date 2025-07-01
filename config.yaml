@@ -15,8 +15,11 @@ auto_mode: "true"
 # AWS Region of the EKS cluster and cnoe-reference-implementation-aws config secret
 region: "us-west-2"
 
-# Amazon Route 53 hosted zone name.
-domain: advaitt.people.aws.dev
+# Base Domain name used for exposing services.
+domain: idp.advaitt.people.aws.dev
+
+# Route53 hosted zone ID for configuring extern-dns
+route53_hosted_zone_id: Z07667581KDLOA4RSCVFD
 
 # Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
 # When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name> 
