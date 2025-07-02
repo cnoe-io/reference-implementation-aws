@@ -30,7 +30,7 @@ Check out more details about the [installation flow](docs/installation_flow.md).
 ## Getting Started
 
 > [!NOTE]
-> The installation requires AWS credentials to access the EKS cluster to deploy kubernetes resources. Therefore, the installation steps can be executed on local machine or on an EC2 instance with IAM instance role. If using local machine, please use [`aws-vault`](https://github.com/99designs/aws-vault) command to run local EC2 credentials server. Find more information about this requirements in [installation flow](docs/installation_flow.md) document.
+> The installation requires AWS credentials to access the EKS cluster to deploy kubernetes resources. Therefore, the installation steps can be executed on local machine or on an EC2 instance with IAM instance role. If using local machine, please use [`aws-vault`](https://github.com/99designs/aws-vault) command to run local EC2 credentials server. Find more information about this requirement in [installation flow](docs/installation_flow.md) document.
 
 ### Step 1. ☸️ Create EKS Cluster
 
@@ -197,7 +197,7 @@ All the addons are configured with Keycloak SSO USER1 and the user password for 
 kubectl get secrets -n keycloak keycloak-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
 ``` 
 Once, all the Argo CD apps on EKS cluster are reporting healthy status, try out [examples](docs/examples/) to create new application through Backstage.
-For troubleshooting, refer to the [troubleshooting guide](docs/TROUBLESHOOTING.md).
+For troubleshooting, refer to the [troubleshooting guide](docs/troubleshooting.md).
 
 ## Cleanup
 > [!WARNING]

@@ -13,21 +13,28 @@ This diagram illustrates the high-level installation flow for the CNOE AWS Refer
 flowchart TD
     subgraph "Local Environment"
         config["config.yaml"]
-        secrets["GitHub App Credentials\n(private/*.yaml)"]
+        secrets["GitHub App Credentials
+        (private/*.yaml)"]
         create_secrets["create-config-secrets.sh"]
         install["install.sh"]
-        idpbuilder["idpbuilder\n(Local Kind Cluster)"]
-        local_argocd["Argo CD\n(in Kind Cluster)"]
-        local_gitea["Gitea\n(in Kind Cluster)"]
+        idpbuilder["idpbuilder
+        (Local Kind Cluster)"]
+        local_argocd["Argo CD
+        (Kind Cluster)"]
+        local_gitea["Gitea
+        (Kind Cluster)"]
     end
 
     subgraph "AWS"
-        aws_secrets["AWS Secrets Manager\n- cnoe-ref-impl/config\n- cnoe-ref-impl/github-app"]
+        aws_secrets["AWS Secrets Manager
+        - cnoe-ref-impl/config
+        - cnoe-ref-impl/github-app"]
         
         subgraph "EKS Cluster"
             eks_argocd["Argo CD"]
             eso["External Secret Operator"]
-            appset["addons-appset\nApplicationSet"]
+            appset["addons-appset
+            (ApplicationSet)"]
             
             subgraph "Addons"
                 backstage["Backstage"]
@@ -57,7 +64,7 @@ flowchart TD
     
     aws_secrets -- "Provides configuration" --> eso
     
-    appset -- "Creates Argo CD Apps" --> Addons
+    appset -- "Creates Argo CD Addon ApplicationSets" --> Addons
     
     eks_argocd -- "Manages" --> Addons
     eso -- "Provides secrets to" --> Addons
@@ -79,28 +86,26 @@ The installation process follows these steps:
 
 1. **Configuration Setup**:
    - The `config.yaml` file is used to configure the installation
-   - AWS Secrets Manager secrets are created to store configuration and GitHub App credentials
-   - The `create-config-secrets.sh` script creates/updates these secrets
+   - AWS Secrets Manager secrets are created to store configuration and GitHub App credentials using `create-config-secrets.sh` script
 
 2. **Local Environment Preparation**:
-   - `idpbuilder` creates a local Kind cluster with Argo CD and Gitea
-   - This local environment serves as a bootstrap mechanism for the remote EKS cluster
+   - `install.sh` script reads the `config.yaml` and based on the specified cluster name, builds a Argo CD cluster secret from eks kubeconfig.
+   - `idpbuilder` creates a local Kind cluster with Argo CD, Gitea and Argo CD cluster secret for EKS cluster.
+   - This local environment serves as a bootstrap mechanism for the remote EKS cluster using Argo CD in Kind cluster.
 
 3. **EKS Cluster Bootstrap**:
-   - `idpbuilder` applies Argo CD applications from the packages directory to the local Kind cluster
-   - Argo CD in the Kind cluster installs Argo CD and External Secret Operator on the EKS cluster
-   - A cluster secret is created in Argo CD to connect to the EKS cluster
+   - `idpbuilder` applies Argo CD applications from the root of `packages` directory to the local Kind cluster, mainly `boostrap.yaml` and `addons-appset.yaml`.
+   - Argo CD in the Kind cluster installs Argo CD and External Secret Operator on the EKS cluster. It will use AWS credentials to authenticate with EKS cluster.
 
 4. **Addons Deployment**:
    - The `addons-appset.yaml` creates an ApplicationSet in the EKS cluster's Argo CD
-   - This ApplicationSet creates individual Argo CD applications for each addon
+   - This ApplicationSet creates individual Argo CD applicationSet for each addon using [cluster generator](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Cluster/).
    - Addons are installed in a specific order to handle dependencies
 
 5. **Addon Configuration**:
-   - Addons are configured using values from:
-     - Static values in `packages/<addon-name>/values.yaml`
-     - Dynamic values from Argo CD cluster secret labels/annotations
-     - Configuration from AWS Secrets Manager
+   - Addons are configured using helm values
+   - Static values are stored `packages/<addon-name>/values.yaml`
+   - Dynamic values from Argo CD cluster secret labels/annotations which depend on configuration from AWS Secrets Manager. 
 
 6. **Monitoring and Verification**:
    - The installation script waits for all Argo CD applications to become healthy
