@@ -43,6 +43,7 @@ This will create all the pre-requisite AWS Resources required for the reference 
 
 + EKS cluster with Auto Mode or Without Auto Mode (Managed Node Group with 4 nodes)
 + Pod Identity Associations for following Addons:
+
 | Name | Namespace | Service Account Name | Permissions |
 | ----- | --------- | -------------------- | ---------- |
 | Crossplane | crossplane-system | provider-aws | Admin Permissions but with [permission boundary](cluster/iam-policies/crossplane-permissions-boundry.json) |
