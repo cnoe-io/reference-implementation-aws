@@ -1,32 +1,139 @@
-# Installation
+# Installation Flow
 
-- Installation script must be used with a EKS cluster because we use IRSA to talk to AWS services.
-- Components are installed as ArgoCD Applications.
-- Files under the `/packages` directory are meant to be usable without any modifications. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD's Helm parameters.
+This document describes the installation flow for the CNOE AWS Reference Implementation.
 
-## Basic installation flow
+## Overview
 
-The installation process follows the following pattern. 
+The CNOE AWS Reference Implementation uses a GitOps approach to deploy and manage addons on an EKS cluster. The installation process uses `idpbuilder` to bootstrap the EKS cluster with Argo CD and other addons.
 
-1. Create a GitHub App for Backstage integration.
-2. Install ArgoCD and configure it to be able to monitor your GitHub Organization.
-3. Run Terraform. Terraform is responsible for:
-    - Managing AWS resources necessary for the Kubernetes operators to function. Mostly IAM Roles.
-    - Install components as ArgoCD applications. Pass IAM role information where necessary.
-    - Apply Kubernetes manifests such as secrets and ingress where information cannot easily be passed to ArgoCD.
-    - Run all the above in an order because installation order matters for many of these components. For example, Keycloak must be installed and ready before Backstage can be installed and configured.
+## Flow Diagram
+This diagram illustrates the high-level installation flow for the CNOE AWS Reference Implementation. It shows how the local environment interacts with AWS resources to deploy and configure the platform on an EKS cluster.
 
 ```mermaid
----
-title: Installation Process
----
-erDiagram
-  "Local Machine" ||--o{ "ArgoCD" : "1. installs"
-  "Local Machine" ||--o{ "Terraform" : "2. invokes"
-  "Terraform" ||--o{ "AWS Resources" : "3. creates"
-  "Terraform" ||--o{ "ArgoCD" : "4. create ArgoCD Apps"
-  "ArgoCD" ||--o{ "This Repo" : "pulls manifests"
-  "ArgoCD" ||--o{ "Components" : "installs to the cluster"
+flowchart TD
+    subgraph "Local Environment"
+        config["config.yaml"]
+        secrets["GitHub App Credentials\n(private/*.yaml)"]
+        create_secrets["create-config-secrets.sh"]
+        install["install.sh"]
+        idpbuilder["idpbuilder\n(Local Kind Cluster)"]
+        local_argocd["Argo CD\n(in Kind Cluster)"]
+        local_gitea["Gitea\n(in Kind Cluster)"]
+    end
+
+    subgraph "AWS"
+        aws_secrets["AWS Secrets Manager\n- cnoe-ref-impl/config\n- cnoe-ref-impl/github-app"]
+        
+        subgraph "EKS Cluster"
+            eks_argocd["Argo CD"]
+            eso["External Secret Operator"]
+            appset["addons-appset\nApplicationSet"]
+            
+            subgraph "Addons"
+                backstage["Backstage"]
+                keycloak["Keycloak"]
+                crossplane["Crossplane"]
+                cert_manager["Cert Manager"]
+                external_dns["External DNS"]
+                ingress["Ingress NGINX"]
+                argo_workflows["Argo Workflows"]
+            end
+        end
+    end
+
+    config --> create_secrets
+    secrets --> create_secrets
+    create_secrets --> aws_secrets
+    
+    config --> install
+    install --> idpbuilder
+    
+    idpbuilder --> local_argocd
+    idpbuilder --> local_gitea
+    
+    local_argocd -- "Installs" --> eks_argocd
+    local_argocd -- "Installs" --> eso
+    local_argocd -- "Creates" --> appset
+    
+    aws_secrets -- "Provides configuration" --> eso
+    
+    appset -- "Creates Argo CD Apps" --> Addons
+    
+    eks_argocd -- "Manages" --> Addons
+    eso -- "Provides secrets to" --> Addons
+    
+    classDef aws fill:#FF9900,stroke:#232F3E,color:white;
+    classDef k8s fill:#326CE5,stroke:#254AA5,color:white;
+    classDef tools fill:#4CAF50,stroke:#388E3C,color:white;
+    classDef config fill:#9C27B0,stroke:#7B1FA2,color:white;
+    
+    class aws_secrets,EKS aws;
+    class eks_argocd,eso,appset,backstage,keycloak,crossplane,cert_manager,external_dns,ingress,argo_workflows k8s;
+    class idpbuilder,local_argocd,local_gitea,install,create_secrets tools;
+    class config,secrets config;
 ```
 
-This installation pattern where some Kubernetes manifests are handled in Terraform while others are handled in GitOps manner may not be suitable for many organizations. If you can be certain about parameters such as domain name and certificate handling, it is better to utilize GitOps approach where these information are committed to a repository. The reason it is handled this way is to allow for customization for different organizations without forking this repository and committing organization specific information into the repository.
+## Installation Process
+
+The installation process follows these steps:
+
+1. **Configuration Setup**:
+   - The `config.yaml` file is used to configure the installation
+   - AWS Secrets Manager secrets are created to store configuration and GitHub App credentials
+   - The `create-config-secrets.sh` script creates/updates these secrets
+
+2. **Local Environment Preparation**:
+   - `idpbuilder` creates a local Kind cluster with Argo CD and Gitea
+   - This local environment serves as a bootstrap mechanism for the remote EKS cluster
+
+3. **EKS Cluster Bootstrap**:
+   - `idpbuilder` applies Argo CD applications from the packages directory to the local Kind cluster
+   - Argo CD in the Kind cluster installs Argo CD and External Secret Operator on the EKS cluster
+   - A cluster secret is created in Argo CD to connect to the EKS cluster
+
+4. **Addons Deployment**:
+   - The `addons-appset.yaml` creates an ApplicationSet in the EKS cluster's Argo CD
+   - This ApplicationSet creates individual Argo CD applications for each addon
+   - Addons are installed in a specific order to handle dependencies
+
+5. **Addon Configuration**:
+   - Addons are configured using values from:
+     - Static values in `packages/<addon-name>/values.yaml`
+     - Dynamic values from Argo CD cluster secret labels/annotations
+     - Configuration from AWS Secrets Manager
+
+6. **Monitoring and Verification**:
+   - The installation script waits for all Argo CD applications to become healthy
+   - Addons can be accessed through the configured domain based on path routing settings
+
+## Uninstallation Process
+
+The uninstallation process follows these steps:
+
+1. **Remove idpbuilder Local Cluster**:
+   - The local Kind cluster created by idpbuilder is deleted
+
+2. **Remove Addons**:
+   - Addons are removed in a specific order to handle dependencies
+   - ApplicationSets are deleted with orphan deletion policy
+   - PVCs for stateful applications are cleaned up
+
+3. **CRD Cleanup (Optional)**:
+   - Custom Resource Definitions can be cleaned up using the `cleanup-crds.sh` script
+   - This is optional and useful when you want to completely remove all traces of the installation
+
+## Key Components
+
+1. **idpbuilder**: Creates a local Kind cluster with Argo CD and Gitea, which bootstraps the EKS cluster
+2. **Argo CD**: Manages the deployment of addons on the EKS cluster using GitOps
+3. **External Secret Operator**: Manages secrets from AWS Secrets Manager
+4. **Addons**: Various tools and services that make up the Internal Developer Platform
+
+## AWS Resources
+
+The installation relies on these AWS resources:
+
+1. **EKS Cluster**: The Kubernetes cluster where the platform is deployed
+2. **AWS Secrets Manager**: Stores configuration and GitHub App credentials
+3. **IAM Roles**: For pod identity associations required by various addons
+4. **Route53**: For DNS management via External DNS
