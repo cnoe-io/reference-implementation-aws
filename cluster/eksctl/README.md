@@ -12,6 +12,7 @@ This directory contains the configuration to create an EKS cluster with pod iden
 Set the following environment variables before creating the cluster:
 
 ```bash
+export REPO_ROOT=$(git rev-parse --show-toplevel)
 export CLUSTER_NAME="cnoe-ref-impl"
 export REGION="us-west-2"
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -23,10 +24,10 @@ Create the permissions boundary policy for Crossplane:
 
 ```bash
 TEMPFILE=$(mktemp)
-cat bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst > "$TEMPFILE"
+cat $REPO_ROOT/bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst > "$TEMPFILE"
 
 # Create the permissions boundary policy
-cat bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst | \                                           
+cat $REPO_ROOT/bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst | \                                           
 aws iam create-policy \
   --policy-name crossplane-permissions-boundary \
   --policy-document file:///"$TEMPFILE"
@@ -41,12 +42,12 @@ export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
 
 ## Without Auto Mode
 ```bash
-cat bootstrap/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
+cat $REPO_ROOT/bootstrap/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
 ```
 
 ## With Auto Mode
 ```bash
-cat bootstrap/eksctl/cluster-config-auto.yaml | envsubst | eksctl create cluster -f -
+cat $REPO_ROOT/bootstrap/eksctl/cluster-config-auto.yaml | envsubst | eksctl create cluster -f -
 ```
 
 ## AWS Resources Created
