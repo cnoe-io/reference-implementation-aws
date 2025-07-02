@@ -24,10 +24,10 @@ Create the permissions boundary policy for Crossplane:
 
 ```bash
 TEMPFILE=$(mktemp)
-cat $REPO_ROOT/bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst > "$TEMPFILE"
+cat $REPO_ROOT/cluster/iam-policies/crossplane-permissions-boundry.json | envsubst > "$TEMPFILE"
 
 # Create the permissions boundary policy
-cat $REPO_ROOT/bootstrap/iam-policies/crossplane-permissions-boundry.json | envsubst | \                                           
+cat $REPO_ROOT/cluster/iam-policies/crossplane-permissions-boundry.json | envsubst | \                                           
 aws iam create-policy \
   --policy-name crossplane-permissions-boundary \
   --policy-document file:///"$TEMPFILE"
@@ -42,12 +42,12 @@ export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
 
 ## Without Auto Mode
 ```bash
-cat $REPO_ROOT/bootstrap/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
+cat $REPO_ROOT/cluster/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
 ```
 
 ## With Auto Mode
 ```bash
-cat $REPO_ROOT/bootstrap/eksctl/cluster-config-auto.yaml | envsubst | eksctl create cluster -f -
+cat $REPO_ROOT/cluster/eksctl/cluster-config-auto.yaml | envsubst | eksctl create cluster -f -
 ```
 
 ## AWS Resources Created
