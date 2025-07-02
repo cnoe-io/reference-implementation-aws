@@ -195,3 +195,21 @@ All the addons are configured with Keycloak SSO USER1 and the user password for 
 ```bash
 kubectl get secrets -n keycloak keycloak-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
 ``` 
+Once, all the Argo CD apps on EKS cluster are reporting healthy status, try out [examples](docs/examples/) to create new application through Backstage.
+For troubleshooting, refer to the [troubleshooting guide](docs/TROUBLESHOOTING.md).
+
+## Cleanup
+> [!WARNING]
+> Before proceeding with the cleanup, ensure any Kubernetes resource created outside of the installation process such as Argo CD Apps, deployments, volume etc. 
+
+Run following command to remove all the addons created by this installation:
+
+```
+./scripts/uninstall.sh
+```
+
+This script will only remove resources other than CRDs from the EKS cluster so that the same cluster can used for re-installation which is useful during development. To remove CRDs, use following command:
+
+```
+./scripts/cleanup-crds.sh
+```
