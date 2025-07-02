@@ -201,7 +201,7 @@ For troubleshooting, refer to the [troubleshooting guide](docs/TROUBLESHOOTING.m
 
 ## Cleanup
 > [!WARNING]
-> Before proceeding with the cleanup, ensure any Kubernetes resource created outside of the installation process such as Argo CD Apps, deployments, volume etc. 
+> Before proceeding with the cleanup, ensure any Kubernetes resource created outside of the installation process such as Argo CD Apps, deployments, volume etc. are deleted. 
 
 Run following command to remove all the addons created by this installation:
 
