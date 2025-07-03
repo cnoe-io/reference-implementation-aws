@@ -27,6 +27,145 @@ All the addons are helm charts with static values configured in `packages/<addon
 
 Check out more details about the [installation flow](docs/installation_flow.md).
  
+## Installation Flow Diagram
+This diagram illustrates the high-level installation flow for the CNOE AWS Reference Implementation. It shows how the local environment interacts with AWS resources to deploy and configure the platform on an EKS cluster.
+
++ **Using plain shell script**
+```mermaid
+flowchart TD
+    subgraph "Local Environment"
+        config["config.yaml"]
+        secrets["GitHub App Credentials
+        (private/*.yaml)"]
+        create_secrets["create-config-secrets.sh"]
+        install["install-using-idpbuilder.sh"]
+        helm["helm"]
+    end
+
+    subgraph "AWS"
+        aws_secrets["AWS Secrets Manager
+        - cnoe-ref-impl/config
+        - cnoe-ref-impl/github-app"]
+        
+        subgraph "EKS Cluster"
+            eks_argocd["Argo CD"]
+            eso["External Secret Operator"]
+            appset["addons-appset
+            (ApplicationSet)"]
+            
+            subgraph "Addons"
+                backstage["Backstage"]
+                keycloak["Keycloak"]
+                crossplane["Crossplane"]
+                cert_manager["Cert Manager"]
+                external_dns["External DNS"]
+                ingress["Ingress NGINX"]
+                argo_workflows["Argo Workflows"]
+            end
+        end
+    end
+
+    config --> create_secrets
+    secrets --> create_secrets
+    create_secrets --> aws_secrets
+    
+    config --> install
+    install --> helm
+    
+    helm -- "Installs" --> eks_argocd
+    helm -- "Installs" --> eso
+    helm -- "Creates" --> appset
+    
+    aws_secrets -- "Provides configuration" --> eso
+    
+    appset -- "Creates Argo CD Addon ApplicationSets" --> Addons
+    
+    eks_argocd -- "Manages" --> Addons
+    eso -- "Provides secrets to" --> Addons
+    
+    classDef aws fill:#FF9900,stroke:#232F3E,color:white;
+    classDef k8s fill:#326CE5,stroke:#254AA5,color:white;
+    classDef tools fill:#4CAF50,stroke:#388E3C,color:white;
+    classDef config fill:#9C27B0,stroke:#7B1FA2,color:white;
+    
+    class aws_secrets,EKS aws;
+    class eks_argocd,eso,appset,backstage,keycloak,crossplane,cert_manager,external_dns,ingress,argo_workflows k8s;
+    class helm,install,create_secrets tools;
+    class config,secrets config;
+```
+
++ **Using `idpbuilder`**
+```mermaid
+flowchart TD
+    subgraph "Local Environment"
+        config["config.yaml"]
+        secrets["GitHub App Credentials
+        (private/*.yaml)"]
+        create_secrets["create-config-secrets.sh"]
+        install["install-using-idpbuilder.sh"]
+        idpbuilder["idpbuilder
+        (Local Kind Cluster)"]
+        local_argocd["Argo CD
+        (Kind Cluster)"]
+        local_gitea["Gitea
+        (Kind Cluster)"]
+    end
+
+    subgraph "AWS"
+        aws_secrets["AWS Secrets Manager
+        - cnoe-ref-impl/config
+        - cnoe-ref-impl/github-app"]
+        
+        subgraph "EKS Cluster"
+            eks_argocd["Argo CD"]
+            eso["External Secret Operator"]
+            appset["addons-appset
+            (ApplicationSet)"]
+            
+            subgraph "Addons"
+                backstage["Backstage"]
+                keycloak["Keycloak"]
+                crossplane["Crossplane"]
+                cert_manager["Cert Manager"]
+                external_dns["External DNS"]
+                ingress["Ingress NGINX"]
+                argo_workflows["Argo Workflows"]
+            end
+        end
+    end
+
+    config --> create_secrets
+    secrets --> create_secrets
+    create_secrets --> aws_secrets
+    
+    config --> install
+    install --> idpbuilder
+    
+    idpbuilder --> local_argocd
+    idpbuilder --> local_gitea
+    
+    local_argocd -- "Installs" --> eks_argocd
+    local_argocd -- "Installs" --> eso
+    local_argocd -- "Creates" --> appset
+    
+    aws_secrets -- "Provides configuration" --> eso
+    
+    appset -- "Creates Argo CD Addon ApplicationSets" --> Addons
+    
+    eks_argocd -- "Manages" --> Addons
+    eso -- "Provides secrets to" --> Addons
+    
+    classDef aws fill:#FF9900,stroke:#232F3E,color:white;
+    classDef k8s fill:#326CE5,stroke:#254AA5,color:white;
+    classDef tools fill:#4CAF50,stroke:#388E3C,color:white;
+    classDef config fill:#9C27B0,stroke:#7B1FA2,color:white;
+    
+    class aws_secrets,EKS aws;
+    class eks_argocd,eso,appset,backstage,keycloak,crossplane,cert_manager,external_dns,ingress,argo_workflows k8s;
+    class idpbuilder,local_argocd,local_gitea,install,create_secrets tools;
+    class config,secrets config;
+```
+
 ## Getting Started
 
 > [!NOTE]
