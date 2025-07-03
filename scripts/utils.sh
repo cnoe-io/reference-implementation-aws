@@ -25,10 +25,9 @@ get_kubeconfig() {
 
 # Wait for all Argo CD applications to report healthy status
 wait_for_apps(){
-  
-  APPSET_APP_NAME=$([[ "${PATH_ROUTING}" == "true" ]] && echo "addons-appset-pr" || echo "addons-appset")
+
   echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
-  kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd applications/$APPSET_APP_NAME-$CLUSTER_NAME --timeout=15m --kubeconfig $KUBECONFIG_FILE
+  kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd applications/$APPSET_ADDON_NAME-$CLUSTER_NAME --timeout=15m --kubeconfig $KUBECONFIG_FILE
   echo -e "${GREEN}✅ addons-appset is now healthy!${NC}"
 
   START_TIME=$(date +%s)
@@ -76,6 +75,7 @@ export AWS_REGION=$(yq '.region' "$CONFIG_FILE")
 export DOMAIN_NAME=$(yq '.domain' "$CONFIG_FILE")
 export PATH_ROUTING=$(yq '.path_routing' "$CONFIG_FILE")
 export AUTO_MODE=$(yq '.auto_mode' "$CONFIG_FILE")
+export APPSET_ADDON_NAME=$([[ "${PATH_ROUTING}" == "true" ]] && echo "addons-appset-pr" || echo "addons-appset")
 
 # Header
 echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}"
