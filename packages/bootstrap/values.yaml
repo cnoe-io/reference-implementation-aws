@@ -1,4 +1,5 @@
-# Used for bootstraping hub cluster with Addon Appset chart 
+# Used for bootstraping hub cluster with Addon Appset chart
+# Only used when using plain shell script for installation
 addons-appset: # for non-path routing
   enabled: true
   chartName: addons
@@ -10,7 +11,7 @@ addons-appset: # for non-path routing
     matchExpressions:
       - key: environment
         operator: In
-        values: ['control-plane-bootstrap', 'control-plane']
+        values: ['control-plane']
       - key: path_routing
         operator: In
         values: ['false']
@@ -28,7 +29,7 @@ addons-appset-pr: # for path routing
     matchExpressions:
       - key: environment
         operator: In
-        values: ['control-plane-bootstrap', 'control-plane']
+        values: ['control-plane']
       - key: path_routing
         operator: In
         values: ['true']

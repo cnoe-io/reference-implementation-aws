@@ -18,7 +18,7 @@ spec:
       helm:
         valueFiles:
           - $values/addons/values.yaml
-          - $values/bootstrap/appset-values.yaml
+          - $values/bootstrap/appset-values-idpbuilder.yaml
     - repoURL: cnoe://
       targetRevision: HEAD
       ref: values
