@@ -10,40 +10,6 @@ syncPolicy:
 syncPolicyAppSet:
   preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
 
-addons-appset: # for non-path routing
-  enabled: true
-  chartName: addons
-  namespace: argocd
-  releaseName: addons
-  type: chart
-  path: packages/appset-chart # This path is relative to Github repo root
-  selector:
-    matchExpressions:
-      - key: environment
-        operator: In
-        values: ['control-plane']
-      - key: path_routing
-        operator: In
-        values: ['false']
-
-addons-appset-pr: # for path routing
-  enabled: true
-  chartName: addons
-  namespace: argocd
-  releaseName: addons
-  type: chart
-  path: packages/appset-chart # This path is relative to Github repo root
-  valueFiles: 
-  - "path-routing-values.yaml"
-  selector:
-    matchExpressions:
-      - key: environment
-        operator: In
-        values: ['control-plane']
-      - key: path_routing
-        operator: In
-        values: ['true']
-
 argocd:
   enabled: true
   chartName: argo-cd

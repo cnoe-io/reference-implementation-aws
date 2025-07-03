@@ -1,5 +1,4 @@
 # Used for bootstraping hub cluster with Addon Appset chart 
-# Only required because of the plan shell script which uses this values file via helm install. 
 addons-appset: # for non-path routing
   enabled: true
   chartName: addons
@@ -11,7 +10,7 @@ addons-appset: # for non-path routing
     matchExpressions:
       - key: environment
         operator: In
-        values: ['control-plane']
+        values: ['control-plane-bootstrap', 'control-plane']
       - key: path_routing
         operator: In
         values: ['false']
@@ -29,7 +28,7 @@ addons-appset-pr: # for path routing
     matchExpressions:
       - key: environment
         operator: In
-        values: ['control-plane']
+        values: ['control-plane-bootstrap', 'control-plane']
       - key: path_routing
         operator: In
         values: ['true']

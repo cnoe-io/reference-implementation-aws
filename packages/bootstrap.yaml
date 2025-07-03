@@ -18,6 +18,7 @@ spec:
       helm:
         valueFiles:
           - $values/addons/values.yaml
+          - $values/bootstrap/appset-values.yaml
     - repoURL: cnoe://
       targetRevision: HEAD
       ref: values
