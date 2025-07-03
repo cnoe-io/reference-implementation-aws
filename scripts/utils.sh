@@ -23,6 +23,28 @@ get_kubeconfig() {
   aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 }
 
+# Wait for all Argo CD applications to report healthy status
+wait_for_apps(){
+  START_TIME=$(date +%s)
+  TIMEOUT=600 # 5 minute timeout for moving to checking the status as the apps on hub cluster will take some time to create
+  while [ $(kubectl get applications.argoproj.io -n argocd  --no-headers --kubeconfig $KUBECONFIG_FILE 2>/dev/null | wc -l) -lt 2 ]; do
+    CURRENT_TIME=$(date +%s)
+    ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+    
+    if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
+      echo -e "${YELLOW}⚠️ Timeout reached while waiting for applications to be created by the AppSet chart...${NC}"
+      break
+    fi
+    
+    echo -e "${YELLOW}⏳ Still waiting for ${BOLD}argocd apps from Appset chart${NC} ${YELLOW}to be created on hub cluster... (${ELAPSED_TIME}s elapsed)${NC}"
+    sleep 30
+  done
+
+  echo -e "${YELLOW}⏳ Waiting for all Argo CD apps on the hub Cluster to be Healthy...${NC}"
+  kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd --all applications --kubeconfig $KUBECONFIG_FILE --timeout=-30m
+  echo -e "${BOLD}${GREEN}✅ All Argo CD apps are now healthy!${NC}"
+}
+
 # Check if required binaries binaries exists
 clis=("aws" "kubectl"  "yq")
 for cli in "${clis[@]}"; do

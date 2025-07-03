@@ -7,10 +7,6 @@ source ${REPO_ROOT}/scripts/utils.sh
 
 echo -e "\n${BOLD}${BLUE}🚀 Starting uninstallation process...${NC}"
 
-# Delete idpbuilder local kind cluster instance
-echo -e "${CYAN}🔄 Deleting idpbuilder local kind cluster instance...${NC}"
-idpbuilder delete cluster --name localdev > /dev/null 2>&1
-
 # Addons to be deleted
 ADDONS=(
   crossplane-compositions

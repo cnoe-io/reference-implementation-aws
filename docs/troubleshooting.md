@@ -10,9 +10,14 @@ All adoons are deployed as ArgoCD application in a two-step process.
 Therefore, the best way to investigate and issue is to navigate to respective ArgoCD UI and review any errors in Argo CD application or in logs of the specific addon.
 
 First, switch context to `kind-localdev` cluster (idpbuilder) or EKS cluster and run following command to retrieve passwordof Argo CD.
-```
+
+```bash
+kubectl get secrets -n argocd argocd-initial-admin-secret -oyaml | yq '.data.password' | base64 -d
+
+# OR
+
 idpbuilder get secrets -p argocd -o yaml
-```
+``` 
 
 **To Access **`idpbuilder`** Argo CD:**
 
@@ -42,7 +47,6 @@ External DNS does not delete DNS records during uninstallation. After reinstalla
 
 ### Certificate not issued by Cert Manager
 + Describe the pending certificate challenge. If it shows message similar to:
-
 
 ```
 Reason:      Waiting for HTTP-01 challenge propagation: failed to perform self check GET request 'http://DOMAIN_NAME/.well-known/acme-challenge/6AQ5cRc7J6FNQ9xGOBDI5_G1lHsNM5J5ivbS3iSHd3c': Get "http://DOMAIN_NAME/.well-known/acme-challenge/6AQ5cRc7J6FNQ9xGOBDI5_G1lHsNM5J5ivbS3iSHd3c": dial tcp: lookup argo.DOMAIN_NAME on 10.100.0.10:53: no such host
