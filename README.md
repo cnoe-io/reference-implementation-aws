@@ -94,6 +94,7 @@ The installation requires following binaries in the local environment:
 + [**AWS CLI**](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 + [**Docker**](https://docs.docker.com/engine/install/)
 + [**yq**](https://mikefarah.gitbook.io/yq/v3.x)
++ [**helm**](https://helm.sh/docs/intro/install/) _(Required only if using plain shell script for installation)_
 + [**IDPBuilder**](https://github.com/cnoe-io/idpbuilder) _(Required only if using ipdbuilder for installation)_
 + [**AWS Vault**](https://github.com/99designs/aws-vault?tab=readme-ov-file#installing) _(Required only for local machine installation)_
 
