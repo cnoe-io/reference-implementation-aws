@@ -13,6 +13,7 @@ CA_DATA=$(cat "$KUBECONFIG_FILE" | yq -r '.clusters[0].cluster."certificate-auth
 echo -e "${CYAN}📝 Creating cluster secret file...${NC}"
 CLUSTER_SECRET_FILE=$(mktemp)
 cat << EOF > "$CLUSTER_SECRET_FILE"
+# Remote EKS cluster Argo CD secret
 apiVersion: v1
 kind: Secret
 metadata:
@@ -22,7 +23,7 @@ metadata:
     argocd.argoproj.io/secret-type: cluster 
     clusterClass: "control-plane"
     clusterName: "$CLUSTER_NAME"
-    environment: "control-plane"
+    environment: "control-plane-bootstrap"
     path_routing: "$PATH_ROUTING"
     auto_mode: "$AUTO_MODE"
   annotations:
@@ -49,11 +50,8 @@ stringData:
     }
 EOF
 
-# Update value of destination cluster in Addon Appset Argo CD application
-yq -i '.spec.destination.name = "'"$CLUSTER_NAME"'"' packages/addons-appset.yaml # To set the Remote EKS Cluster name in Addon AppSet chart
-
 echo -e "${BOLD}${GREEN}🔄 Running idpbuilder to apply packages...${NC}"
-idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages" -c "argocd:${CLUSTER_SECRET_FILE}" > /dev/null 2>&1
+idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT" -c "argocd:${CLUSTER_SECRET_FILE}" > /dev/null 2>&1
 
 echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
 # sleep 60 # Wait 1 minute before checking the status

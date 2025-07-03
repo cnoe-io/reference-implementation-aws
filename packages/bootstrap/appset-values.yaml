@@ -1,5 +1,22 @@
-# Used for bootstraping hub cluster with Addon Appset chart  
-addons-appset: # for path routing
+# Used for bootstraping hub cluster with Addon Appset chart 
+# Only required because of the plan shell script which uses this values file via helm install. 
+addons-appset: # for non-path routing
+  enabled: true
+  chartName: addons
+  namespace: argocd
+  releaseName: addons
+  type: chart
+  path: packages/appset-chart # This path is relative to Github repo root
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+      - key: path_routing
+        operator: In
+        values: ['false']
+
+addons-appset-pr: # for path routing
   enabled: true
   chartName: addons
   namespace: argocd
@@ -7,12 +24,12 @@ addons-appset: # for path routing
   type: chart
   path: packages/appset-chart # This path is relative to Github repo root
   valueFiles: 
-  - "path-routing-values.yaml" # this should be commented if not using path routing
-  # selector:
-  #   matchExpressions:
-  #     - key: clusterName
-  #       operator: In
-  #       values: ['hub']
-  #     - key: path_routing
-  #       operator: In # this should be commented if not using path routing
-  #       values: ['true']
+  - "path-routing-values.yaml"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+      - key: path_routing
+        operator: In
+        values: ['true']
