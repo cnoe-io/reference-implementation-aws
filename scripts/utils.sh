@@ -25,6 +25,12 @@ get_kubeconfig() {
 
 # Wait for all Argo CD applications to report healthy status
 wait_for_apps(){
+  
+  APPSET_APP_NAME=$([[ "${PATH_ROUTING}" == "true" ]] && echo "addons-appset-pr" || echo "addons-appset")
+  echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
+  kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd applications/$APPSET_APP_NAME-$CLUSTER_NAME --timeout=15m --kubeconfig $KUBECONFIG_FILE
+  echo -e "${GREEN}✅ addons-appset is now healthy!${NC}"
+
   START_TIME=$(date +%s)
   TIMEOUT=600 # 5 minute timeout for moving to checking the status as the apps on hub cluster will take some time to create
   while [ $(kubectl get applications.argoproj.io -n argocd  --no-headers --kubeconfig $KUBECONFIG_FILE 2>/dev/null | wc -l) -lt 2 ]; do

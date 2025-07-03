@@ -53,10 +53,10 @@ EOF
 echo -e "${BOLD}${GREEN}🔄 Running idpbuilder to apply packages...${NC}"
 idpbuilder create --use-path-routing --protocol http --package "$REPO_ROOT/packages" -c "argocd:${CLUSTER_SECRET_FILE}" > /dev/null 2>&1
 
-echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
+echo -e "${YELLOW}⏳ Waiting for local addons-appset to be healthy...${NC}"
 # sleep 60 # Wait 1 minute before checking the status
-kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd applications/addons-appset --timeout=15m
-echo -e "${GREEN}✅ addons-appset is now healthy!${NC}"
+kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd applications/addons-appset-$CLUSTER_NAME --timeout=15m
+echo -e "${GREEN}✅ local addons-appset is now healthy!${NC}"
 
 # Wait for Argo CD applications to sync
 wait_for_apps

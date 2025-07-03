@@ -85,10 +85,6 @@ helm upgrade --install addons-appset ${REPO_ROOT}/packages/appset-chart \
   --values "$ADDONS_APPSET_STATIC_VALUES_FILE" \
   --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
 
-echo -e "${YELLOW}⏳ Waiting for addons-appset to be healthy...${NC}"
-kubectl wait --for=jsonpath=.status.health.status=Healthy  -n argocd applications/addons-appset-$CLUSTER_NAME --timeout=15m --kubeconfig $KUBECONFIG_FILE
-echo -e "${GREEN}✅ addons-appset is now healthy!${NC}"
-
 # Wait for Argo CD applications to sync
 wait_for_apps
 
