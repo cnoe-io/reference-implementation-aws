@@ -1,5 +1,4 @@
 # Used for bootstraping hub cluster with Addon Appset chart
-# Only used when using plain shell script for installation
 addons-appset: # for non-path routing
   enabled: true
   chartName: addons
