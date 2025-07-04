@@ -1,0 +1,200 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${{ values.name }}-custom
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Welcome to ${{ values.name }}</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f5f5f5;
+                color: #333;
+            }
+            .container {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            h1 {
+                color: #2c3e50;
+                font-size: 2.5em;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-align: center;
+            }
+            .card {
+                width: 80%;
+                max-width: 800px;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                text-align: center;
+                margin: 20px 0;
+            }
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+            .env-card {
+                width: 80%;
+                max-width: 800px;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin: 20px 0;
+            }
+            .env-item {
+                padding: 10px;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            .env-label {
+                font-weight: bold;
+                color: #2c3e50;
+                margin-right: 20px;
+                flex: 0 0 30%;
+            }
+            .env-value {
+                color: #16a085;
+                flex: 1;
+                word-break: break-all;
+            }
+            #loading {
+                text-align: center;
+                padding: 20px;
+            }
+            .search-box {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card">
+                <img src="https://raw.githubusercontent.com/cnoe-io/website/main/static/img/logo.png" 
+                    alt="CNOE Logo"
+                    width="500">
+                <h1 style="font-size: 2.8em; color: #2c3e50; text-align: center; margin: 30px 0; font-weight: 600; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Welcome to ${{ values.name }} </h1>
+                <p style="font-size: 1.4em; font-weight: 500; color: #34495e; margin: 20px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">This is a sample application for CNOE reference implementation!</p>
+                <p style="font-size: 1.2em; color: #2c3e50; margin: 10px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Learn more at <a href="https://cnoe.io" target="_blank" style="color: #3498db; text-decoration: none; font-weight: 600;">cnoe.io</a>.</p>
+            </div>
+            <div class="env-card">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search environment variables...">
+                <div id="loading">Loading environment variables...</div>
+                <div id="envList"></div>
+            </div>
+        </div>
+        <script>
+            async function loadEnvVariables() {
+                try {
+                    const response = await fetch('/env.json');
+                    const envVars = await response.json();
+                    const envList = document.getElementById('envList');
+                    const loading = document.getElementById('loading');
+                    loading.style.display = 'none';
+
+                    const searchBox = document.getElementById('searchBox');
+                    
+                    function displayEnvVars(filter = '') {
+                        envList.innerHTML = '';
+                        const sortedVars = Object.keys(envVars).sort();
+                        
+                        sortedVars.forEach(key => {
+                            if (key.toLowerCase().includes(filter.toLowerCase()) || 
+                                envVars[key].toLowerCase().includes(filter.toLowerCase())) {
+                                const item = document.createElement('div');
+                                item.className = 'env-item';
+                                item.innerHTML = `
+                                    <span class="env-label">${key}</span>
+                                    <span class="env-value">${envVars[key]}</span>
+                                `;
+                                envList.appendChild(item);
+                            }
+                        });
+                    }
+
+                    searchBox.addEventListener('input', (e) => {
+                        displayEnvVars(e.target.value);
+                    });
+
+                    displayEnvVars();
+                } catch (error) {
+                    document.getElementById('loading').innerHTML = 'Error loading environment variables';
+                    console.error('Error:', error);
+                }
+            }
+
+            window.onload = loadEnvVariables;
+        </script>
+    </body>
+    </html>
+  startup.sh: |
+    #!/bin/bash
+    (
+        echo -n "{"
+        first=true
+        env | sort | while IFS= read -r line; do
+            # Skip empty lines
+            [ -z "$line" ] && continue
+            
+            # Split on first = only
+            key="${line%%=*}"
+            value="${line#*=}"
+            
+            # Skip if key is empty
+            [ -z "$key" ] && continue
+            
+            # Add comma for all but first entry
+            if $first; then
+            first=false
+            printf "\n  "
+            else
+            printf ",\n  "
+            fi
+            
+            # Properly escape JSON special characters
+            escaped_value=$(printf '%s' "$value" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\n/\\n/g; s/\r/\\r/g; s/\t/\\t/g')
+            printf '"%s": "%s"' "$key" "$escaped_value"
+        done
+        printf "\n}\n"
+    ) > /tmp/env.json
+
+    nginx -g "daemon off;"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${{ values.name }}-nginx-conf
+data:
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+        
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html;
+        }
+
+        location /env.json {
+            alias /tmp/env.json;
+            default_type application/json;
+        }
+    }

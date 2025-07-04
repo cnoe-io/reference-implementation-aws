@@ -1,0 +1,18 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{values.name | dump}}
+  description: This is for Ray Serve
+  annotations:
+    backstage.io/kubernetes-label-selector: 'entity-id=${{values.name}}'
+    backstage.io/kubernetes-namespace: argo
+    argocd/app-name: ${{values.name | dump}}
+    argo-workflows.cnoe.io/label-selector: env=dev,entity-id=${{values.name}}
+    argo-workflows.cnoe.io/cluster-name: local
+    apache-ray.cnoe.io/label-selector: env=dev,entity-id=${{values.name}}
+    apache-ray.cnoe.io/cluster-name: local
+spec:
+  owner: guest
+  lifecycle: experimental
+  type: service

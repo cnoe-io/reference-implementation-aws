@@ -1,0 +1,144 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  description: Adds a Go application with AWS resources
+  name: app-with-aws-resources
+  title: Add a Go App with AWS resources
+spec:
+  owner: guests
+  type: service
+  parameters:
+    - properties:
+        name:
+          title: Application Name
+          type: string
+          description: Unique name of the component
+          ui:autofocus: true
+        labels:
+          title: Labels
+          type: object
+          additionalProperties:
+            type: string
+          description: Labels to apply to the application
+          ui:autofocus: true
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+      required:
+        - name
+        - repoUrl
+      title: Choose your repository location
+    - description: Configure your bucket
+      properties:
+        apiVersion:
+          default: awsblueprints.io/v1alpha1
+          description: APIVersion for the resource
+          type: string
+        kind:
+          default: ObjectStorage
+          description: Kind for the resource
+          type: string
+        config:
+          description: ObjectStorageSpec defines the desired state of ObjectStorage
+          properties:
+            writeConnectionSecretToRef:
+              description: Name of the secret to store connection details
+              properties:
+                name:
+                  type: string
+                  default: connection-secret
+            resourceConfig:
+              description: ResourceConfig defines general properties of this AWS resource.
+              properties:
+                deletionPolicy:
+                  description: Defaults to Delete
+                  enum:
+                    - Delete
+                    - Orphan
+                  type: string
+                region:
+                  type: string
+                providerConfigName:
+                  type: string
+                  default: default
+                tags:
+                  type: object
+                  additionalProperties:
+                    type: string
+              required:
+                - region
+              type: object
+          required:
+            - resourceConfig
+          title: Bucket configuration options
+          type: object
+  steps:
+    - id: create-repo
+      name: Create Repository
+      action: github:repo:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+    - id: template
+      name: Generating component
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{parameters.name}}
+          labels: ${{ parameters.labels }}
+          repoUrl: ${{ parameters.repoUrl }}
+          owner: ${{ parameters.owner }}
+          remoteUrl: ${{ steps['create-repo'].output.remoteUrl }}
+          secretName: ${{parameters.config.writeConnectionSecretToRef.name}}
+    - action: roadiehq:utils:serialize:yaml
+      id: serialize
+      input:
+        data:
+          apiVersion: awsblueprints.io/v1alpha1
+          kind: ${{ parameters.kind }}
+          metadata:
+            name: ${{ parameters.name }}
+          spec: ${{ parameters.config }}
+      name: serialize
+    - action: roadiehq:utils:fs:write
+      id: write
+      input:
+        content: ${{ steps['serialize'].output.serialized }}
+        path: kustomize/base/${{ parameters.name }}.yaml
+      name: write-to-file
+    - id: init-repo
+      name: Initialize Repository
+      action: github:repo:push
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+    - id: wait
+      name: Waiting for the repo to be ready
+      action: "roadiehq:utils:sleep"
+      input:
+        amount: 5
+    - id: create-argocd-app
+      name: Create ArgoCD App
+      action: cnoe:create-argocd-app
+      input:
+        appName: ${{parameters.name}}
+        appNamespace: default
+        argoInstance: in-cluster
+        projectName: default
+        repoUrl: ${{ steps['create-repo'].output.remoteUrl }}
+        path: "kustomize/base"
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['init-repo'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+  output:
+    links:
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}

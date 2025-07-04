@@ -1,0 +1,34 @@
+# Used for bootstraping hub cluster with Addon Appset chart
+addons-appset: # for non-path routing
+  enabled: true
+  chartName: addons
+  namespace: argocd
+  releaseName: addons
+  type: chart
+  path: packages/appset-chart # This path is relative to Github repo root
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+      - key: path_routing
+        operator: In
+        values: ['false']
+
+addons-appset-pr: # for path routing
+  enabled: true
+  chartName: addons
+  namespace: argocd
+  releaseName: addons
+  type: chart
+  path: packages/appset-chart # This path is relative to Github repo root
+  valueFiles: 
+  - "path-routing-values.yaml"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+      - key: path_routing
+        operator: In
+        values: ['true']

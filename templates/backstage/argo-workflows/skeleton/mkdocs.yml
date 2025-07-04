@@ -1,0 +1,8 @@
+site_name: 'Argo Spark Example'
+nav:
+  - Home: index.md
+  - Argo-Workflows: argo-workflows.md
+  - Apache Spark Operator: spark-operator.md
+plugins:
+  - techdocs-core
+

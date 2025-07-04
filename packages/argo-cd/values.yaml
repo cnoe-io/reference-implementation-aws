@@ -1,0 +1,158 @@
+# Ref: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd
+cnoe_ref_impl:
+  auto_mode: '"true"'
+dex:
+  enabled: false
+server:
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    tls: true
+    annotations:
+      argocd.argoproj.io/sync-wave: "20"
+configs:
+  cm:
+    accounts.backstage: apiKey
+    accounts.backstage.enabled: "true"
+    application.resourceTrackingMethod: annotation
+    resource.exclusions: |
+      - kinds:
+          - ProviderConfigUsage
+        apiGroups:
+          - "*"
+    resource.customizations: |
+      "awsblueprints.io/*":
+          health.lua: |
+            health_status = {
+              status = "Progressing",
+              message = "Provisioning ..."
+            }
+
+            if obj.status == nil or obj.status.conditions == nil then
+              return health_status
+            end
+
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Ready" then
+                if condition.status == "True" then
+                  health_status.status = "Healthy"
+                  health_status.message = "Resource is up-to-date."
+                  return health_status
+                end
+              end
+
+              if condition.type == "LastAsyncOperation" then
+                if condition.status == "False" then
+                  health_status.status = "Degraded"
+                  health_status.message = condition.message
+                  return health_status
+                end
+              end
+
+              if condition.type == "Synced" then
+                if condition.status == "False" then
+                  health_status.status = "Degraded"
+                  health_status.message = condition.message
+                  return health_status
+                end
+              end
+            end
+            return health_status
+      "*.aws.upbound.io/*":
+          health.lua: |
+            health_status = {
+              status = "Progressing",
+              message = "Provisioning ..."
+            }
+
+            if obj.status == nil or obj.status.conditions == nil then
+              return health_status
+            end
+
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Ready" then
+                if condition.status == "True" then
+                  health_status.status = "Healthy"
+                  health_status.message = "Resource is up-to-date."
+                  return health_status
+                end
+              end
+
+              if condition.type == "LastAsyncOperation" then
+                if condition.status == "False" then
+                  health_status.status = "Degraded"
+                  health_status.message = condition.message
+                  return health_status
+                end
+              end
+
+              if condition.type == "Synced" then
+                if condition.status == "False" then
+                  health_status.status = "Degraded"
+                  health_status.message = condition.message
+                  return health_status
+                end
+              end
+            end
+
+            return health_status
+      "*.aws.crossplane.io/*":
+          health.lua: |
+            health_status = {
+              status = "Progressing",
+              message = "Provisioning ..."
+            }
+
+            if obj.status == nil or obj.status.conditions == nil then
+              return health_status
+            end
+
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Ready" then
+                if condition.status == "True" then
+                  health_status.status = "Healthy"
+                  health_status.message = "Resource is up-to-date."
+                  return health_status
+                end
+              end
+
+              if condition.type == "LastAsyncOperation" then
+                if condition.status == "False" then
+                  health_status.status = "Degraded"
+                  health_status.message = condition.message
+                  return health_status
+                end
+              end
+
+              if condition.type == "Synced" then
+                if condition.status == "False" then
+                  health_status.status = "Degraded"
+                  health_status.message = condition.message
+                  return health_status
+                end
+              end
+            end
+            return health_status
+  params:
+    server.insecure: true
+  rbac:
+    policy.csv: |
+      g, superuser, role:admin
+      g, backstage, role:readonly
+
+extraObjects:
+- |
+  # Creates a gp3 storageClass for EBS CSI. 
+  # Sets different provisioner value for EKS Auto Mode based on auto_mode parameter in config file.
+  apiVersion: storage.k8s.io/v1
+  kind: StorageClass
+  metadata:
+    name: gp3
+    annotations:
+      storageclass.kubernetes.io/is-default-class: "true"
+      argocd.argoproj.io/sync-wave: "-10"
+  provisioner: {{ if eq .Values.cnoe_ref_impl.auto_mode "true"}}ebs.csi.eks.amazonaws.com{{ else }}ebs.csi.aws.com{{ end }}
+  volumeBindingMode: WaitForFirstConsumer
+  parameters:
+    type: gp3
+    encrypted: "true"
