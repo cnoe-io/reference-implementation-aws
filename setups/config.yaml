@@ -1,6 +1,6 @@
 # This is the GITHUB URL where Kubernetes manifests are stored.
 # If you forked this repo, you will need to update this.
-repo_url: "https://github.com/cnoe-io/reference-implementation-aws"
+repo_url: "https://github.com/educational-idp-MR/reference-implementation-aws"
 # Tags to apply to AWS resources
 tags: 
   env: "dev"
@@ -11,9 +11,9 @@ cluster_name: "cnoe-ref-impl"
 # Set this to false if you want to manage DNS somewhere else. e.g. manually.
 enable_dns_management: true
 # If using external DNS, specify the Route53 hosted zone ID. Required if enable_dns_management is set to true
-hosted_zone_id: Z0REPLACEME
+hosted_zone_id: Z0616976M5JW04WV40MC
 # if external DNS is not used, this value must be provided.
-domain_name: sudbomain.domain.root
+# domain_name: sudbomain.domain.root
 
 # If set to true, we will store secrets to AWS Secrets Manager, then sync it to the cluster using External Secrets Operator.
 enable_external_secret: true
