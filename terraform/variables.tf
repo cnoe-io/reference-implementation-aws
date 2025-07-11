@@ -16,7 +16,7 @@ variable "tags" {
 variable "region" {
   description = "Region"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "cluster_name" {

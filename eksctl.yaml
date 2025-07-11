@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 metadata:
   name: cnoe-ref-impl
-  region: us-west-2
+  region: us-east-1
   version: "1.28"
 managedNodeGroups:
   - name: managed-ng-1
