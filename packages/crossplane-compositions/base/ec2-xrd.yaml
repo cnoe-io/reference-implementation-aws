@@ -1,0 +1,68 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xec2instances.aws.cnoe.io
+spec:
+  group: aws.cnoe.io
+  names:
+    kind: XEC2Instance
+    plural: xec2instances
+  claimNames:
+    kind: EC2Instance
+    plural: ec2instances
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                instanceName:
+                  type: string
+                  description: "Name for the EC2 instance"
+                instanceType:
+                  type: string
+                  description: "AWS EC2 instance type, e.g., t2.micro, t3.small, etc."
+                  default: "t2.micro"
+                ami:
+                  type: string
+                  description: "Amazon Machine Image ID to use for the instance"
+                  default: "ami-0c55b159cbfafe1f0"  # Amazon Linux 2 AMI (adjust as needed)
+                subnet:
+                  type: string
+                  description: "VPC Subnet ID where the instance will be launched"
+                securityGroup:
+                  type: string
+                  description: "Security Group ID for the instance"
+                  default: ""
+                keyName:
+                  type: string
+                  description: "SSH key pair name for accessing the instance"
+                  default: ""
+                tags:
+                  type: object
+                  description: "Tags to apply to the EC2 instance"
+                  additionalProperties:
+                    type: string
+              required:
+                - instanceName
+                - subnet
+            status:
+              type: object
+              properties:
+                instanceId:
+                  type: string
+                  description: "ID of the created EC2 instance"
+                publicIp:
+                  type: string
+                  description: "Public IP address of the instance (if available)"
+                privateIp:
+                  type: string
+                  description: "Private IP address of the instance"
+                state:
+                  type: string
+                  description: "Current state of the EC2 instance"

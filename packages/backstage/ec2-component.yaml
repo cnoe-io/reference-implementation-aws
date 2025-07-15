@@ -1,0 +1,42 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: aws-ec2-instance
+  description: Componente para crear instancias EC2 en AWS
+  annotations:
+    backstage.io/kubernetes-label-selector: 'aws.cnoe.io/service=ec2'
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - aws
+    - ec2
+    - compute
+    - cloud
+spec:
+  type: service
+  lifecycle: experimental
+  owner: cnoe-team
+  system: aws-resources
+  dependsOn: []
+  providesApis:
+    - aws-ec2-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: aws-ec2-api
+  description: API para gestionar instancias EC2 en AWS
+spec:
+  type: kubernetes
+  lifecycle: experimental
+  owner: cnoe-team
+  definition:
+    $text: |
+      apiVersion: aws.cnoe.io/v1alpha1
+      kind: EC2Instance
+      metadata:
+        name: example
+      spec:
+        instanceName: string
+        instanceType: string
+        ami: string
+        subnet: string

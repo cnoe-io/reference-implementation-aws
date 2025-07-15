@@ -1,0 +1,58 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xec2instances.aws.cnoe.io
+  labels:
+    provider: aws
+    service: ec2
+spec:
+  compositeTypeRef:
+    apiVersion: aws.cnoe.io/v1alpha1
+    kind: XEC2Instance
+  resources:
+    - name: ec2instance
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Instance
+        spec:
+          forProvider:
+            region: us-west-2
+            instanceType: t2.micro
+            tags:
+              Name: default-instance
+            associate_public_ip_address: true
+          providerConfigRef:
+            name: provider-aws-config
+      patches:
+        - fromFieldPath: spec.instanceName
+          toFieldPath: metadata.name
+        - fromFieldPath: spec.instanceName
+          toFieldPath: spec.forProvider.tags.Name
+        - fromFieldPath: spec.instanceType
+          toFieldPath: spec.forProvider.instanceType
+        - fromFieldPath: spec.ami
+          toFieldPath: spec.forProvider.ami
+        - fromFieldPath: spec.subnet
+          toFieldPath: spec.forProvider.subnetId
+        - fromFieldPath: spec.securityGroup
+          toFieldPath: spec.forProvider.vpcSecurityGroupIds[0]
+          policy:
+            fromFieldPath: Required
+        - fromFieldPath: spec.keyName
+          toFieldPath: spec.forProvider.keyName
+          policy:
+            fromFieldPath: Required
+        - fromFieldPath: spec.tags
+          toFieldPath: spec.forProvider.tags
+          policy:
+            mergeOptions:
+              keepMapValues: true
+      connectionDetails:
+        - fromConnectionSecretKey: id
+          name: instanceId
+        - fromConnectionSecretKey: public_ip
+          name: publicIp
+        - fromConnectionSecretKey: private_ip
+          name: privateIp
+        - fromConnectionSecretKey: state
+          name: state

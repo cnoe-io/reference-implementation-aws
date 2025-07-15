@@ -1,0 +1,20 @@
+apiVersion: aws.cnoe.io/v1alpha1
+kind: EC2Instance
+metadata:
+  name: ejemplo-instancia
+  namespace: default
+spec:
+  instanceName: ejemplo-instancia-ec2
+  instanceType: t2.micro
+  ami: ami-0c55b159cbfafe1f0  # Amazon Linux 2 AMI (ajusta según tu región)
+  subnet: subnet-12345678  # Reemplazar con el ID de subnet real
+  securityGroup: sg-12345678  # Reemplazar con el ID de security group real
+  keyName: mi-clave-ssh  # Reemplazar con el nombre de tu clave SSH
+  tags:
+    Environment: desarrollo
+    Project: cnoe-aws
+  compositionRef:
+    name: xec2instances.aws.cnoe.io
+  writeConnectionSecretToRef:
+    name: ec2-connection-details
+    namespace: default

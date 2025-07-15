@@ -1,0 +1,94 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: aws-ec2-instance-template
+  title: Crear Instancia EC2 en AWS
+  description: Crea una instancia EC2 en AWS usando Crossplane
+  tags:
+    - aws
+    - ec2
+    - recommended
+    - cnoe
+spec:
+  owner: cnoe-team
+  type: service
+  parameters:
+    - title: Información de la Instancia EC2
+      required:
+        - instanceName
+        - instanceType
+        - subnet
+      properties:
+        instanceName:
+          title: Nombre de la Instancia
+          type: string
+          description: Nombre para identificar la instancia EC2
+          ui:autofocus: true
+        instanceType:
+          title: Tipo de Instancia
+          type: string
+          description: Tipo de instancia EC2 (capacidad de CPU y memoria)
+          default: t2.micro
+          enum:
+            - t2.micro
+            - t2.small
+            - t3.micro
+            - t3.small
+        ami:
+          title: Amazon Machine Image (AMI)
+          type: string
+          description: ID de la imagen a utilizar (si se deja vacío, se usará la AMI por defecto)
+        subnet:
+          title: ID de Subnet
+          type: string
+          description: ID de la subnet VPC donde se desplegará la instancia
+        securityGroup:
+          title: Grupo de Seguridad
+          type: string
+          description: ID del grupo de seguridad (opcional)
+        keyName:
+          title: Par de Claves SSH
+          type: string
+          description: Nombre del par de claves para acceso SSH (opcional)
+    - title: Etiquetas
+      properties:
+        environment:
+          title: Entorno
+          type: string
+          default: desarrollo
+          enum:
+            - desarrollo
+            - pruebas
+            - produccion
+        project:
+          title: Proyecto
+          type: string
+          description: Nombre del proyecto asociado
+  steps:
+    - id: createEC2Claim
+      name: Crear Claim de Instancia EC2
+      action: fetch:template
+      input:
+        url: ./templates/ec2-instance-claim
+        values:
+          instanceName: ${{ parameters.instanceName }}
+          instanceType: ${{ parameters.instanceType }}
+          ami: ${{ parameters.ami }}
+          subnet: ${{ parameters.subnet }}
+          securityGroup: ${{ parameters.securityGroup }}
+          keyName: ${{ parameters.keyName }}
+          environment: ${{ parameters.environment }}
+          project: ${{ parameters.project }}
+    - id: publishEC2
+      name: Publicar Instancia EC2
+      action: kubernetes:apply
+      input:
+        manifests:
+          - ${{ steps.createEC2Claim.output.ec2claim }}
+  output:
+    links:
+      - title: Monitorear Instancia EC2
+        url: ${{ steps.createEC2Claim.output.links.monitorUrl }}
+      - title: Ver en Backstage
+        icon: backstage
+        entityRef: ${{ steps.createEC2Claim.output.entityRef }}

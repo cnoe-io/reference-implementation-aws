@@ -1,3 +1,5 @@
 namespace: crossplane-system
 resources:
   - https://github.com/awslabs/crossplane-on-eks/compositions/upbound-aws-provider/s3
+  - ec2-xrd.yaml
+  - ec2-composition.yaml
