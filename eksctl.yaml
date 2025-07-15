@@ -3,13 +3,13 @@ kind: ClusterConfig
 metadata:
   name: cnoe-ref-impl
   region: us-east-1
-  version: "1.28"
+  version: "1.29"
 managedNodeGroups:
   - name: managed-ng-1
-    instanceType: m5.large
-    minSize: 3
+    instanceType: t3.medium
+    minSize: 2
     maxSize: 6
-    desiredCapacity: 4
+    desiredCapacity: 3
     volumeSize: 100
     ssh:
       allow: false
@@ -22,6 +22,6 @@ iam:
   withOIDC: true
 addons:
 - name: aws-ebs-csi-driver
-  version: "v1.28.0-eksbuild.1"
+  version: "v1.29.0-eksbuild.1"
   attachPolicyARNs:
   - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
