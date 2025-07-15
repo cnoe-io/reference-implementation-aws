@@ -97,6 +97,16 @@ data:
 
     scaffolder:
       # see https://backstage.io/docs/features/software-templates/configuration for software template options
+      defaultAuthor:
+        name: CNOE Team
+        email: cnoe@example.com
+      defaultCommitMessage: 'Creando recursos AWS a través de CNOE'
+      # Registro de los templates personalizados
+      registry:
+        - type: file
+          target: /opt/app-root/src/packages/backend/templates/ec2-template.yaml
+          rules:
+            - allow: [Template]
 
     catalog:
       import:
@@ -108,6 +118,16 @@ data:
         # Examples from a public GitHub repository.
         - type: url
           target: https://github.com/awslabs/backstage-templates-on-eks/blob/main/catalog-info.yaml
+        # Registrar nuestro componente de EC2
+        - type: file
+          target: /opt/app-root/src/packages/backstage/ec2-component.yaml
+          rules:
+            - allow: [Component, API]
+        # Registrar nuestro template de EC2
+        - type: file
+          target: /opt/app-root/src/packages/backstage/templates/ec2-template.yaml
+          rules:
+            - allow: [Template]
         ## Uncomment these lines to add an example org
         # - type: url
         #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
