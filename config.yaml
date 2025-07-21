@@ -4,7 +4,7 @@
 # Details of your repository fork
 repo:
   url: "https://github.com/csantanapr-cnoe-demos/reference-implementation-aws" # This is the GITHUB URL of the fork in Github Org that you have created.
-  revision: "review-ref-impl-v2" # Branch or Tag which should be used for Argo CD Apps
+  revision: "main" # Branch or Tag which should be used for Argo CD Apps
   basepath: "packages" # Directory in which configuration of addons is stored
 
 # The name of the EKS cluster you are installing the reference implementation on.
@@ -16,10 +16,10 @@ auto_mode: "true"
 region: "us-west-2"
 
 # Base Domain name used for exposing services. It should be a subdomain or main domain of the Route53 hosted zone.
-domain: cnoe.demo.cloud-native-start.com
+domain: <REPLACEME with Domain name>
 
 # Route53 hosted zone ID for configuring external-dns
-route53_hosted_zone_id: Z025451618NEA27QQVGSY
+route53_hosted_zone_id: <REPLACEME with Route53 Hoted Zone ID>
 
 # Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
 # When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name>

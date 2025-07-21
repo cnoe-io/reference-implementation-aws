@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e -o pipefail
 
-set -x
-
 export REPO_ROOT=$(git rev-parse --show-toplevel)
 PHASE="install"
 source ${REPO_ROOT}/scripts/utils.sh
