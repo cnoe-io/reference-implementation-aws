@@ -177,15 +177,15 @@ backstage:
               target: '{{ .metadata.annotations.addons_repo_url }}/blob/{{ .metadata.annotations.addons_repo_revision }}/templates/backstage/catalog-info.yaml'
       extraEnvVars:
       - name: BACKSTAGE_FRONTEND_URL
-        value: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
       - name: BACKSTAGE_DOMAIN
         value: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
       - name: KEYCLOAK_NAME_METADATA
-        value: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe/.well-known/openid-configuration'
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe/.well-known/openid-configuration'
       - name: ARGO_WORKFLOWS_URL
-        value: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
       - name: ARGO_CD_URL
-        value: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
   additionalResources:
   - manifestPath: "manifests"
     type: "manifests"
