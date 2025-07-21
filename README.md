@@ -11,10 +11,10 @@ This project contains a [CNOE](https://cnoe.io) reference implementation for AWS
 
 ## Addons
 
-All the addons are helm charts with static values configured in `packages/<addon-name>/values.yaml` and dynamic values based on Argo CD cluster secret label/annotations values in `packages/addons/values.yaml`. 
+All the addons are helm charts with static values configured in `packages/<addon-name>/values.yaml` and dynamic values based on Argo CD cluster secret label/annotations values in `packages/addons/values.yaml`.
 
 | Name | Namespace | Purpose | Chart Version | Chart |
-| ---------- | ---------- | ---------- | ---------- | ---------- | 
+| ---------- | ---------- | ---------- | ---------- | ---------- |
 | Argo CD | argocd | Installation and management of addon Argo CD application | 8.0.14 | [Link](https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd) |
 | Argo Workflows | argo | Workflow tool for continuous integration tasks  | 0.45.18 | [Link](https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows )|
 | Backstage | backstage | Self-Service Web UI (Developer Portal) for developers | 0.1.0 | [Link](packages/backstage/chart) |
@@ -26,7 +26,7 @@ All the addons are helm charts with static values configured in `packages/<addon
 | Keycloak | keycloak | Identity provider for User Authentication | 24.7.3 | [Link](https://github.com/bitnami/charts/tree/main/bitnami/keycloak) |
 
 Check out more details about the [installation flow](docs/installation_flow.md).
- 
+
 ## Installation Flow Diagram
 This diagram illustrates the high-level installation flow for the CNOE AWS Reference Implementation. It shows how the local environment interacts with AWS resources to deploy and configure the platform on an EKS cluster.
 
@@ -46,13 +46,13 @@ flowchart TD
         aws_secrets["AWS Secrets Manager
         - cnoe-ref-impl/config
         - cnoe-ref-impl/github-app"]
-        
+
         subgraph "EKS Cluster"
             eks_argocd["Argo CD"]
             eso["External Secret Operator"]
             appset["addons-appset
             (ApplicationSet)"]
-            
+
             subgraph "Addons"
                 backstage["Backstage"]
                 keycloak["Keycloak"]
@@ -68,26 +68,26 @@ flowchart TD
     config --> create_secrets
     secrets --> create_secrets
     create_secrets --> aws_secrets
-    
+
     config --> install
     install --> helm
-    
+
     helm -- "Installs" --> eks_argocd
     helm -- "Installs" --> eso
     helm -- "Creates" --> appset
-    
+
     aws_secrets -- "Provides configuration" --> eso
-    
+
     appset -- "Creates Argo CD Addon ApplicationSets" --> Addons
-    
+
     eks_argocd -- "Manages" --> Addons
     eso -- "Provides secrets to" --> Addons
-    
+
     classDef aws fill:#FF9900,stroke:#232F3E,color:white;
     classDef k8s fill:#326CE5,stroke:#254AA5,color:white;
     classDef tools fill:#4CAF50,stroke:#388E3C,color:white;
     classDef config fill:#9C27B0,stroke:#7B1FA2,color:white;
-    
+
     class aws_secrets,EKS aws;
     class eks_argocd,eso,appset,backstage,keycloak,crossplane,cert_manager,external_dns,ingress,argo_workflows k8s;
     class helm,install,create_secrets tools;
@@ -115,13 +115,13 @@ flowchart TD
         aws_secrets["AWS Secrets Manager
         - cnoe-ref-impl/config
         - cnoe-ref-impl/github-app"]
-        
+
         subgraph "EKS Cluster"
             eks_argocd["Argo CD"]
             eso["External Secret Operator"]
             appset["addons-appset
             (ApplicationSet)"]
-            
+
             subgraph "Addons"
                 backstage["Backstage"]
                 keycloak["Keycloak"]
@@ -137,29 +137,29 @@ flowchart TD
     config --> create_secrets
     secrets --> create_secrets
     create_secrets --> aws_secrets
-    
+
     config --> install
     install --> idpbuilder
-    
+
     idpbuilder --> local_argocd
     idpbuilder --> local_gitea
-    
+
     local_argocd -- "Installs" --> eks_argocd
     local_argocd -- "Installs" --> eso
     local_argocd -- "Creates" --> appset
-    
+
     aws_secrets -- "Provides configuration" --> eso
-    
+
     appset -- "Creates Argo CD Addon ApplicationSets" --> Addons
-    
+
     eks_argocd -- "Manages" --> Addons
     eso -- "Provides secrets to" --> Addons
-    
+
     classDef aws fill:#FF9900,stroke:#232F3E,color:white;
     classDef k8s fill:#326CE5,stroke:#254AA5,color:white;
     classDef tools fill:#4CAF50,stroke:#388E3C,color:white;
     classDef config fill:#9C27B0,stroke:#7B1FA2,color:white;
-    
+
     class aws_secrets,EKS aws;
     class eks_argocd,eso,appset,backstage,keycloak,crossplane,cert_manager,external_dns,ingress,argo_workflows k8s;
     class idpbuilder,local_argocd,local_gitea,install,create_secrets tools;
@@ -176,7 +176,7 @@ flowchart TD
 The reference implementation can be installed on new EKS cluster which can be created with following tools:
 
 + **eksctl**: Follow the [instructions](cluster/eksctl)
-+ **terraform**: Follow the [instructions](cluster/terraform/)  
++ **terraform**: Follow the [instructions](cluster/terraform/)
 
 This will create all the pre-requisite AWS Resources required for the reference implementation. Which includes:
 
@@ -190,11 +190,11 @@ This will create all the pre-requisite AWS Resources required for the reference 
 | External DNS | external-dns | external-dns | [Permissions](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/aws/#iam-policy) |
 | AWS Load Balancer Controller<br>(When not using Auto Mode) | kube-system | aws-load-balancer-controller | [Permissions](https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/iam_policy.json) |
 | AWS EBS CSI Controller<br>(When not using Auto Mode) | kube-system | ebs-csi-controller-sa | [Permissions](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEBSCSIDriverPolicy.html) |
-  
+
 
 > [!NOTE]
 > **Using Existing EKS Cluster**
-> 
+>
 > The reference implementation can be installed on existing EKS Cluster only if above pre-requisites are completed.
 
 ### Step 2. 🏢 Create GitHub Organization
@@ -203,11 +203,11 @@ Backstage and Argo CD in this reference implementation are integrated with GitHu
 
 ### Step 3. 🍴 Fork the Repository
 
-Once the organization is created, fork this repository to the new GitHub Organization by following instructions in [GitHub documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo). 
+Once the organization is created, fork this repository to the new GitHub Organization by following instructions in [GitHub documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
 
 ### Step 4. 💻 Create GitHub Apps
 
-There are two ways to create GitHub App. You can use the Backstage CLI as per instructions in [Backstage documentation](https://backstage.io/docs/integrations/github/github-apps/#using-the-cli-public-github-only), or create it manually per these instructions in [GitHub documentation](https://backstage.io/docs/integrations/github/github-apps).
+There are two ways to create GitHub App. You can use the Backstage CLI `npx @backstage/cli create-github-app <github-org>` as per instructions in [Backstage documentation](https://backstage.io/docs/integrations/github/github-apps/#using-the-cli-public-github-only), or create it manually per these instructions in [GitHub documentation](https://backstage.io/docs/integrations/github/github-apps).
 
 Create following apps and store it in corresponding file path.
 
@@ -327,7 +327,7 @@ kubectl get secrets -n argocd argocd-initial-admin-secret -oyaml | yq '.data.pas
 # OR
 
 idpbuilder get secrets -p argocd -o yaml
-``` 
+```
 
 ### Step 7. 🌐 Accessing the Platform
 
@@ -343,13 +343,13 @@ All the addons are configured with Keycloak SSO USER1 and the user password for 
 
 ```bash
 kubectl get secrets -n keycloak keycloak-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
-``` 
+```
 Once, all the Argo CD apps on EKS cluster are reporting healthy status, try out [examples](docs/examples/) to create new application through Backstage.
 For troubleshooting, refer to the [troubleshooting guide](docs/troubleshooting.md).
 
 ## Cleanup
 > [!WARNING]
-> Before proceeding with the cleanup, ensure any Kubernetes resource created outside of the installation process such as Argo CD Apps, deployments, volume etc. are deleted. 
+> Before proceeding with the cleanup, ensure any Kubernetes resource created outside of the installation process such as Argo CD Apps, deployments, volume etc. are deleted.
 
 Run following command to remove all the addons created by this installation:
 

@@ -1,0 +1,9 @@
+url: https://github.com/<github-org>
+appId: "123abc"
+# get it from https://github.com/organizations/<Organization-name>/settings/installations/<ID>
+installationId:  "123abc"
+privateKey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+  -----END RSA PRIVATE KEY-----
+

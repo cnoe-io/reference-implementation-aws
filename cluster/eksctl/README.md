@@ -14,7 +14,7 @@ Set the following environment variables before creating the cluster:
 ```bash
 export REPO_ROOT=$(git rev-parse --show-toplevel)
 export CLUSTER_NAME="cnoe-ref-impl"
-export REGION="us-west-2"
+export AWS_REGION="us-west-2"
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
 
@@ -24,10 +24,14 @@ Create the permissions boundary policy for Crossplane:
 
 ```bash
 TEMPFILE=$(mktemp)
+
 cat $REPO_ROOT/cluster/iam-policies/crossplane-permissions-boundry.json | envsubst > "$TEMPFILE"
 
 # Create the permissions boundary policy
-cat $REPO_ROOT/cluster/iam-policies/crossplane-permissions-boundry.json | envsubst | \                                           
+echo "Creating IAM policy crossplane-permissions-boundary with policy-document:"
+
+cat "$TEMPFILE"
+
 aws iam create-policy \
   --policy-name crossplane-permissions-boundary \
   --policy-document file:///"$TEMPFILE"
@@ -36,9 +40,11 @@ aws iam create-policy \
 export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
   --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary \
   --query 'Policy.Arn' --output text)
+
+echo "CROSSPLANE_BOUNDARY_POLICY_ARN=$CROSSPLANE_BOUNDARY_POLICY_ARN"
 ```
 
-## Create Cluster 
+## Create Cluster
 
 ## Without Auto Mode
 ```bash

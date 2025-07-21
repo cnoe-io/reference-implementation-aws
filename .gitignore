@@ -1,4 +1,4 @@
-private
+private/*.yaml
 .DS_Store
 .idea
 .build
