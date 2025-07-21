@@ -102,9 +102,6 @@ backstage:
         pullRequestBranchName: backstage-integration
       rules:
         - allow: [Component, System, API, Resource, Location, Template]
-      locations:
-        - type: url
-          target: https://github.com/cnoe-io/reference-implementation-aws/blob/ref-impl-v2/templates/backstage/catalog-info.yaml
     kubernetes:
       serviceLocatorMethod:
         type: multiTenant

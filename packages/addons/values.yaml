@@ -162,8 +162,8 @@ backstage:
   chartName: backstage
   namespace: backstage
   releaseName: backstage
-  type: chart
-  path: packages/backstage/chart
+  defaultVersion: "2.6.0"
+  chartRepository: "https://backstage.github.io/charts"
   valuesObject:
     ingress:
       host: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
@@ -177,7 +177,7 @@ backstage:
       - ARGO_WORKFLOWS_URL: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
       - ARGO_CD_URL: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
     backstage:
-      config:
+      appConfig:
         catalog:
           locations:
             - type: url
