@@ -171,11 +171,16 @@ backstage:
         cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
     backstage: 
       extraEnvVars:
-      - BACKSTAGE_FRONTEND_URL: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
-      - BACKSTAGE_DOMAIN: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
-      - KEYCLOAK_NAME_METADATA: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe/.well-known/openid-configuration'
-      - ARGO_WORKFLOWS_URL: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
-      - ARGO_CD_URL: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
+      - name: BACKSTAGE_FRONTEND_URL
+        value: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      - name: BACKSTAGE_DOMAIN
+        value: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      - name: KEYCLOAK_NAME_METADATA
+        value: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe/.well-known/openid-configuration'
+      - name: ARGO_WORKFLOWS_URL
+        value: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
+      - name: ARGO_CD_URL
+        value: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
     backstage:
       appConfig:
         catalog:

@@ -2,9 +2,9 @@
 # Source: "https://github.com/cnoe/reference-implementation-aws"
 
 # Details of your repository fork
-repo:
-  url: "https://github.com/csantanapr-cnoe-demos/reference-implementation-aws" # This is the GITHUB URL of the fork in Github Org that you have created.
-  revision: "main" # Branch or Tag which should be used for Argo CD Apps
+repo: 
+  url: "https://github.com/cnoe-punkwalker/reference-implementation-aws" # This is the GITHUB URL of the fork in Github Org that you have created.
+  revision: "ref-impl-v2" # Branch or Tag which should be used for Argo CD Apps
   basepath: "packages" # Directory in which configuration of addons is stored
 
 # The name of the EKS cluster you are installing the reference implementation on.
@@ -16,13 +16,13 @@ auto_mode: "true"
 region: "us-west-2"
 
 # Base Domain name used for exposing services. It should be a subdomain or main domain of the Route53 hosted zone.
-domain: <REPLACEME with Domain name>
+domain: idp.advaitt.people.aws.dev
 
 # Route53 hosted zone ID for configuring external-dns
-route53_hosted_zone_id: <REPLACEME with Route53 Hoted Zone ID>
+route53_hosted_zone_id: Z07667581KDLOA4RSCVFD
 
 # Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
-# When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name>
+# When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name> 
 # When disabled, the exposed addons will be accessible at https://<addon-name>.<domain_name>
 # !!! Note: This is a string value as it is passed on to the Argo CD cluster secret as label
 path_routing: "true"
@@ -32,3 +32,4 @@ tags:
   githubRepo: "github.com/cnoe-io/reference-implementation-aws"
   env: "dev"
   project: "cnoe"
+  
