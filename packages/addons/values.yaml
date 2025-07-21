@@ -169,7 +169,12 @@ backstage:
       host: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
       annotations: 
         cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
-    backstage: 
+    backstage:
+      appConfig:
+        catalog:
+          locations:
+            - type: url
+              target: '{{ .metadata.annotations.addons_repo_url }}/blob/{{ .metadata.annotations.addons_repo_revision }}/templates/backstage/catalog-info.yaml'
       extraEnvVars:
       - name: BACKSTAGE_FRONTEND_URL
         value: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
@@ -181,12 +186,6 @@ backstage:
         value: '{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
       - name: ARGO_CD_URL
         value: '{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
-    backstage:
-      appConfig:
-        catalog:
-          locations:
-            - type: url
-              target: '{{ .metadata.annotations.addons_repo_url }}/blob/{{ .metadata.annotations.addons_repo_revision }}/templates/backstage/catalog-info.yaml'
   additionalResources:
   - manifestPath: "manifests"
     type: "manifests"
