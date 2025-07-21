@@ -35,17 +35,17 @@ wait_for_apps(){
   while [ $(kubectl get applications.argoproj.io -n argocd  --no-headers --kubeconfig $KUBECONFIG_FILE 2>/dev/null | wc -l) -lt 2 ]; do
     CURRENT_TIME=$(date +%s)
     ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
-    
+
     if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
       echo -e "${YELLOW}⚠️ Timeout reached while waiting for applications to be created by the AppSet chart...${NC}"
       break
     fi
-    
+
     echo -e "${YELLOW}⏳ Still waiting for ${BOLD}argocd apps from Appset chart${NC} ${YELLOW}to be created on hub cluster... (${ELAPSED_TIME}s elapsed)${NC}"
     sleep 30
   done
 
-  echo -e "${YELLOW}⏳ Waiting for all Argo CD apps on the hub Cluster to be Healthy...${NC}"
+  echo -e "${YELLOW}⏳ Waiting for all Argo CD apps on the hub Cluster to be Healthy... might take up to 30 minutes${NC}"
   kubectl wait --for=jsonpath=.status.health.status=Healthy -n argocd --all applications --kubeconfig $KUBECONFIG_FILE --timeout=-30m
   echo -e "${BOLD}${GREEN}✅ All Argo CD apps are now healthy!${NC}"
 }
