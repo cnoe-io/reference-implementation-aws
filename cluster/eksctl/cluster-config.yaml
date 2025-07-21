@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 metadata:
   name: ${CLUSTER_NAME}
-  region: ${REGION}
+  region: ${AWS_REGION}
   version: "1.33"
   tags:
     githubRepo: "github.com/cnoe-io/reference-implementation-aws"

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e -o pipefail
 
+set -x
+
 export REPO_ROOT=$(git rev-parse --show-toplevel)
 PHASE="install"
 source ${REPO_ROOT}/scripts/utils.sh
@@ -30,7 +32,7 @@ global:
   domain: $([[ "${PATH_ROUTING}" == "true" ]] && echo "${DOMAIN_NAME}" || echo "argocd.${DOMAIN_NAME}")
 server:
   ingress:
-    annotations: 
+    annotations:
       cert-manager.io/cluster-issuer: $([[ "${PATH_ROUTING}" == "false" ]] && echo '"letsencrypt-prod"' || echo "")
     path: /$([[ "${PATH_ROUTING}" == "true" ]] && echo "argocd" || echo "")
 configs:
@@ -52,12 +54,13 @@ EOF
 
 echo -e "${BOLD}${GREEN}🔄 Installing Argo CD...${NC}"
 helm repo add argo "https://argoproj.github.io/argo-helm"
+helm repo update
 helm upgrade --install argocd argo/argo-cd \
   --namespace argocd --version $ARGOCD_CHART_VERSION \
   --create-namespace \
   --values "$ARGOCD_STATIC_VALUES_FILE" \
   --values "$ARGOCD_DYNAMIC_VALUES_FILE" \
-  --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+  --kubeconfig $KUBECONFIG_FILE
 
 echo -e "${YELLOW}⏳ Waiting for Argo CD to be healthy...${NC}"
 kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s --kubeconfig $KUBECONFIG_FILE
@@ -65,25 +68,27 @@ kubectl wait --for=condition=available deployment/argocd-server -n argocd --time
 
 echo -e "${BOLD}${GREEN}🔄 Installing External Secrets...${NC}"
 helm repo add external-secrets "https://charts.external-secrets.io"
+helm repo update
 helm upgrade --install external-secrets external-secrets/external-secrets \
   --namespace external-secrets --version $EXTERNAL_SECRETS_CHART_VERSION \
   --create-namespace \
   --values "$EXTERNAL_SECRETS_STATIC_VALUES_FILE" \
-  --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+  --kubeconfig $KUBECONFIG_FILE
 
 echo -e "${YELLOW}⏳ Waiting for External Secrets to be healthy...${NC}"
 kubectl wait --for=condition=available deployment/external-secrets -n external-secrets --timeout=300s --kubeconfig $KUBECONFIG_FILE
 
 
 echo -e "${BOLD}${GREEN}🔄 Applying custom manifests...${NC}"
-kubectl apply -f "$ARGOCD_CUSTOM_MANIFESTS_PATH" --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
-kubectl apply -f "$EXTERNAL_SECRETS_CUSTOM_MANIFESTS_PATH" --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+sleep 60
+kubectl apply -f "$ARGOCD_CUSTOM_MANIFESTS_PATH" --kubeconfig $KUBECONFIG_FILE
+kubectl apply -f "$EXTERNAL_SECRETS_CUSTOM_MANIFESTS_PATH" --kubeconfig $KUBECONFIG_FILE
 
 echo -e "${BOLD}${GREEN}🔄 Installing Addons AppSet Argo CD application...${NC}"
 helm upgrade --install addons-appset ${REPO_ROOT}/packages/appset-chart \
   --namespace argocd \
   --values "$ADDONS_APPSET_STATIC_VALUES_FILE" \
-  --kubeconfig $KUBECONFIG_FILE > /dev/null 2>&1
+  --kubeconfig $KUBECONFIG_FILE
 
 # Wait for Argo CD applications to sync
 wait_for_apps

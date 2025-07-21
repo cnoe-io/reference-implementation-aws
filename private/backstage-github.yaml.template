@@ -1,0 +1,9 @@
+appId: 1234
+webhookUrl: https://...
+clientId: ABC..
+clientSecret: 1234abc
+webhookSecret: 123abc
+privateKey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+  -----END RSA PRIVATE KEY-----
