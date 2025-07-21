@@ -17,7 +17,7 @@ All the addons are helm charts with static values configured in `packages/<addon
 | ---------- | ---------- | ---------- | ---------- | ---------- |
 | Argo CD | argocd | Installation and management of addon Argo CD application | 8.0.14 | [Link](https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd) |
 | Argo Workflows | argo | Workflow tool for continuous integration tasks  | 0.45.18 | [Link](https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows )|
-| Backstage | backstage | Self-Service Web UI (Developer Portal) for developers | 0.1.0 | [Link](packages/backstage/chart) |
+| Backstage | backstage | Self-Service Web UI (Developer Portal) for developers | 2.6.0 | [Link](https://github.com/backstage/charts/tree/main/charts/backstage) |
 | Cert Manager | cert-manager | Certificate managed for addons and developer applications using Lets Enctrypt | 1.17.2 | [Link](https://cert-manager.io/docs/installation/helm/) |
 | Crossplane | crossplane-system | IaC controller for provisiong infrastructure  | 1.20.0 | [Link](https://github.com/crossplane/crossplane/tree/main/cluster/charts/crossplane) |
 | External DNS | external-dns | Domain management using Route 53 | 1.16.1 | [Link](https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns) |
