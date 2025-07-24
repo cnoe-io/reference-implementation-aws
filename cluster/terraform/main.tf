@@ -55,7 +55,17 @@ module "eks" {
 
   enable_irsa = true
 
-  eks_managed_node_groups = {
+  # EKS Auto Mode configuration
+  # When enabled, EKS automatically manages compute resources and core addons
+  # This eliminates the need for managed node groups and manual addon management
+  cluster_compute_config = var.auto_mode ? {
+    enabled    = true
+    node_pools = ["general-purpose", "system"]
+  } : null
+
+  # Only create managed node groups when not using Auto Mode
+  # Auto Mode handles compute resources automatically
+  eks_managed_node_groups = var.auto_mode ? {} : {
     initial = {
       instance_types = ["m5.large"]
       
@@ -71,13 +81,19 @@ module "eks" {
     }
   }
 
-  cluster_addons = {
+  # Conditional cluster addons based on Auto Mode
+  # Auto Mode automatically manages: CoreDNS, kube-proxy, VPC CNI, EBS CSI driver, AWS Load Balancer Controller, eks-pod-identity-agent
+  cluster_addons = var.auto_mode ? {
+    # Auto Mode manages all addons automatically - no explicit addon configuration needed
+  } : {
+    # Standard mode requires all addons to be explicitly managed
     coredns = {}
     eks-pod-identity-agent = {}
     kube-proxy = {}
     vpc-cni = {}
     aws-ebs-csi-driver = {}
   }
+  
   tags = local.tags
 }
 
@@ -96,7 +112,10 @@ resource "aws_iam_policy" "crossplane_boundary" {
 ################################################################################
 # Pod Identity
 ################################################################################
+
+# AWS Load Balancer Controller - Only needed when not using Auto Mode
 module "aws_load_balancer_controller_pod_identity" {
+  count   = var.auto_mode ? 0 : 1
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "~> 1.0"
 
@@ -112,6 +131,8 @@ module "aws_load_balancer_controller_pod_identity" {
 
   tags = local.tags
 }
+
+# External DNS - Required for both Auto Mode and standard mode
 module "external_dns_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "~> 1.0"
@@ -128,7 +149,10 @@ module "external_dns_pod_identity" {
   }
   tags = local.tags
 }
+
+# EBS CSI Driver - Only needed when not using Auto Mode
 module "ebs_csi_driver_pod_identity" {
+  count   = var.auto_mode ? 0 : 1
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "~> 1.0"
 
@@ -143,6 +167,8 @@ module "ebs_csi_driver_pod_identity" {
   }
   tags = local.tags
 }
+
+# Crossplane - Required for both Auto Mode and standard mode
 module "crossplane_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "~> 1.0"
@@ -165,6 +191,7 @@ module "crossplane_pod_identity" {
   tags = local.tags
 }
 
+# External Secrets - Required for both Auto Mode and standard mode
 module "external_secrets_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "~> 1.0"

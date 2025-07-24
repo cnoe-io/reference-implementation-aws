@@ -12,7 +12,7 @@ Run the following command and follow the instructions:
 
 ```bash
 export REPO_ROOT=$(git rev-parse --show-toplevel)
-$REPO_ROOT/scripts/create-cluster-eksctl.sh
+$REPO_ROOT/scripts/create-cluster.sh
 ```
 
 ## AWS Resources Created

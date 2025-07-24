@@ -90,6 +90,27 @@ echo -e "${CYAN}🔶 AWS region:${NC} ${AWS_REGION}"
 echo -e "${CYAN}🔶 Kubernetes cluster:${NC} ${BOLD}$CLUSTER_NAME${NC}"
 
 if [ $PHASE = "create-cluster" ]; then
+  # Ask user for deployment tool
+  echo -e "\n${BOLD}${YELLOW}❓ Which tool would you like to use for cluster creation?${NC}"
+  echo -e "${CYAN}1) eksctl (YAML-based configuration)${NC}"
+  echo -e "${CYAN}2) terraform (Infrastructure as Code)${NC}"
+  read -p "Enter your choice (1 or 2): " tool_choice
+
+  case $tool_choice in
+      1)
+          export DEPLOYMENT_TOOL="eksctl"
+          echo -e "${GREEN}✅ Selected: eksctl${NC}"
+          ;;
+      2)
+          export DEPLOYMENT_TOOL="terraform"
+          echo -e "${GREEN}✅ Selected: terraform${NC}"
+          ;;
+      *)
+          echo -e "${RED}❌ Invalid choice. Please select 1 or 2.${NC}"
+          exit 1
+          ;;
+  esac
+
   # Ask user for cluster type
   echo -e "\n${BOLD}${YELLOW}❓ Which type of EKS cluster would you like to create?${NC}"
   echo -e "${CYAN}1) Auto Mode cluster (Recommended for new users)${NC}"
@@ -99,11 +120,13 @@ if [ $PHASE = "create-cluster" ]; then
   case $cluster_choice in
       1)
           export CLUSTER_TYPE="auto"
+          export AUTO_MODE="true"
           export EKSCTL_CONFIG_FILE_PATH="${REPO_ROOT}/cluster/eksctl/cluster-config-auto.yaml"
           echo -e "${GREEN}✅ Selected: Auto Mode cluster${NC}"
           ;;
       2)
           export CLUSTER_TYPE="standard"
+          export AUTO_MODE="false"
           export EKSCTL_CONFIG_FILE_PATH="${REPO_ROOT}/cluster/eksctl/cluster-config.yaml"
           echo -e "${GREEN}✅ Selected: Non-Auto Mode cluster${NC}"
           ;;

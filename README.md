@@ -145,6 +145,15 @@ Create the following apps and store them in the corresponding file path.
 | Backstage | Used for automatically importing Backstage configuration such as Organization information, templates and creating new repositories for developer applications. | For All Repositories<br>- Read access to members, metadata, and organization administration<br>- Read and write access to administration and code | **`private/backstage-github.yaml`** | ![backstage-github-app](docs/images/backstage-github-app.png) |
 | Argo CD | Used for deploying resources to cluster specified by Argo CD applications.| For All Repositories<br>- Read access to checks, code, members, and metadata| **`private/argocd-github.yaml`** | ![argocd-github-app](docs/images/argocd-github-app.png) |
 
+The template files for both these Github Apps are available in `private` directory. Copy these template files to above mentioned file path by running following command:
+
+```
+cp private/argocd-github.yaml.template private/argocd-github.yaml
+cp private/backstage-github.yaml.template private/backstage-github.yaml
+```
+
+After this, update the values in these files by getting them from files created by `backstage-cli` _(if used)_ or get the values from Github page of App Overview.
+
 Argo CD requires `url` and `installationId` of the GitHub app. The `url` is the GitHub URL of the organization. The `installationId` can be captured by navigating to the app installation page with URL `https://github.com/organizations/<Organization-name>/settings/installations/<ID>`. You can find more information [on this page](https://stackoverflow.com/questions/74462420/where-can-we-find-github-apps-installation-id).
 
 > [!WARNING]

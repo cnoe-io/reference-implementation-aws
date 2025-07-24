@@ -10,3 +10,9 @@ variable "region" {
   default     = "us-west-2"
 }
 
+variable "auto_mode" {
+  description = "Enable EKS Auto Mode. When enabled, EKS automatically manages compute resources and many addons."
+  type        = bool
+  default     = false
+}
+

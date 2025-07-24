@@ -28,6 +28,11 @@ output "oidc_provider_arn" {
   value       = module.eks.oidc_provider_arn
 }
 
+output "auto_mode_enabled" {
+  description = "Whether EKS Auto Mode is enabled"
+  value       = var.auto_mode
+}
+
 output "configure_kubectl" {
   description = "Configure kubectl: make sure you're logged in with the correct AWS profile and run the following command to update your kubeconfig"
   value       = "aws eks --region ${var.region} update-kubeconfig --name ${module.eks.cluster_name}"
