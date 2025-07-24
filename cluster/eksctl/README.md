@@ -7,53 +7,12 @@ This directory contains the configuration to create an EKS cluster with pod iden
 - AWS CLI configured with appropriate permissions
 - eksctl installed
 
-## Environment Variables
-
-Set the following environment variables before creating the cluster:
+## Create Cluster
+Run following command and follow instructions:
 
 ```bash
 export REPO_ROOT=$(git rev-parse --show-toplevel)
-export CLUSTER_NAME="cnoe-ref-impl"
-export AWS_REGION="us-west-2"
-export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-```
-
-## Create Crossplane Permissions Boundary Policy
-
-Create the permissions boundary policy for Crossplane:
-
-```bash
-TEMPFILE=$(mktemp)
-
-cat $REPO_ROOT/cluster/iam-policies/crossplane-permissions-boundry.json | envsubst > "$TEMPFILE"
-
-# Create the permissions boundary policy
-echo "Creating IAM policy crossplane-permissions-boundary with policy-document:"
-
-cat "$TEMPFILE"
-
-aws iam create-policy \
-  --policy-name crossplane-permissions-boundary \
-  --policy-document file:///"$TEMPFILE"
-
-# Capture the policy ARN
-export CROSSPLANE_BOUNDARY_POLICY_ARN=$(aws iam get-policy \
-  --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary \
-  --query 'Policy.Arn' --output text)
-
-echo "CROSSPLANE_BOUNDARY_POLICY_ARN=$CROSSPLANE_BOUNDARY_POLICY_ARN"
-```
-
-## Create Cluster
-
-## Without Auto Mode
-```bash
-cat $REPO_ROOT/cluster/eksctl/cluster-config.yaml | envsubst | eksctl create cluster -f -
-```
-
-## With Auto Mode
-```bash
-cat $REPO_ROOT/cluster/eksctl/cluster-config-auto.yaml | envsubst | eksctl create cluster -f -
+$REPO_ROOT/scripts/create-cluster-eksctl.sh
 ```
 
 ## AWS Resources Created
@@ -68,13 +27,13 @@ The cluster creation will provision the following AWS resources:
 - EKS cluster security groups
 - OIDC identity provider
 
-### Managed Node Group
+### Managed Node Group _(For Non-Auto mode cluster)_
 - Managed node group with 3-6 m5.large instances
 - Desired capacity: 4 nodes
 - 100GB EBS volumes per node
 - Node IAM role with required policies
 
-### EKS Addons
+### EKS Addons _(For Non-Auto mode cluster)_
 - eks-pod-identity-agent
 - aws-ebs-csi-driver with EBS CSI controller policies
 - vpc-cni (default)

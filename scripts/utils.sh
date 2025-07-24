@@ -76,6 +76,7 @@ export DOMAIN_NAME=$(yq '.domain' "$CONFIG_FILE")
 export PATH_ROUTING=$(yq '.path_routing' "$CONFIG_FILE")
 export AUTO_MODE=$(yq '.auto_mode' "$CONFIG_FILE")
 export APPSET_ADDON_NAME=$([[ "${PATH_ROUTING}" == "true" ]] && echo "addons-appset-pr" || echo "addons-appset")
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 # Header
 echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}"
@@ -83,10 +84,41 @@ echo -e "${BOLD}${CYAN}📦       CNOE AWS Reference Implementation    📦${NC}
 echo -e "${BOLD}${ORANGE}✨ ========================================== ✨${NC}\n"
 
 echo -e "${BOLD}${PURPLE}\n🎯 Targets:${NC}"
-echo -e "${CYAN}🔶 AWS account number:${NC} $(aws sts get-caller-identity --query "Account" --output text)"
+echo -e "${CYAN}🔶 AWS account number:${NC} ${AWS_ACCOUNT_ID}"
 echo -e "${CYAN}🔶 AWS profile (if set):${NC} ${AWS_PROFILE:-None}"
 echo -e "${CYAN}🔶 AWS region:${NC} ${AWS_REGION}"
 echo -e "${CYAN}🔶 Kubernetes cluster:${NC} ${BOLD}$CLUSTER_NAME${NC}"
+
+if [ $PHASE = "create-cluster" ]; then
+  # Ask user for cluster type
+  echo -e "\n${BOLD}${YELLOW}❓ Which type of EKS cluster would you like to create?${NC}"
+  echo -e "${CYAN}1) Auto Mode cluster (Recommended for new users)${NC}"
+  echo -e "${CYAN}2) Non-Auto Mode cluster (Managed Node Groups)${NC}"
+  read -p "Enter your choice (1 or 2): " cluster_choice
+
+  case $cluster_choice in
+      1)
+          export CLUSTER_TYPE="auto"
+          export EKSCTL_CONFIG_FILE_PATH="${REPO_ROOT}/cluster/eksctl/cluster-config-auto.yaml"
+          echo -e "${GREEN}✅ Selected: Auto Mode cluster${NC}"
+          ;;
+      2)
+          export CLUSTER_TYPE="standard"
+          export EKSCTL_CONFIG_FILE_PATH="${REPO_ROOT}/cluster/eksctl/cluster-config.yaml"
+          echo -e "${GREEN}✅ Selected: Non-Auto Mode cluster${NC}"
+          ;;
+      *)
+          echo -e "${RED}❌ Invalid choice. Please select 1 or 2.${NC}"
+          exit 1
+          ;;
+  esac
+  echo -e "\n${BOLD}${GREEN}❓ Are you sure you want to create the EKS cluster?${NC}"
+  read -p '(yes/no): ' response
+  if [[ ! "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
+      echo -e "${YELLOW}⚠️ Cluster creation cancelled.${NC}"
+      exit 0
+  fi
+fi
 
 if [ $PHASE = "install" ]; then
   echo -e "${CYAN}📋 Configuration Details:${NC}"

@@ -38,10 +38,6 @@ The CNOE AWS Reference Implementation uses a GitOps approach to deploy and manag
 ## Addons Dependencies
    Following is the order for addons reaching healthy state when using Path Routing.
    ```mermaid
-      ---
-      title: Dependency Between Addons
-      ---
-
       flowchart LR
          ESO["ESO"] --> ArgoCD["ArgoCD"]
          ArgoCD --> AWSLB["AWS Load Balancer Controller"] & ExternalDNS["External DNS"] & CertManager["Cert Manager"] & Crossplane["Crossplane"] & CrossplaneComp["Crossplane Compositions"] & Keycloak["Keycloak"]
