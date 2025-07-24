@@ -56,7 +56,7 @@ for cli in "${clis[@]}"; do
   if command -v "$cli" >/dev/null 2>&1 ; then
     continue
   else
-    echo -e "${RED}$cli is not installed. Please install it to continue.${NC}"
+    echo -e "${RED}❌ $cli command is not installed. Please install it to continue.${NC}"
     exit 4
   fi
 done
