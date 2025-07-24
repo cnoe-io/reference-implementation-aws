@@ -8,7 +8,7 @@ This directory contains the configuration to create an EKS cluster with pod iden
 - eksctl installed
 
 ## Create Cluster
-Run following command and follow instructions:
+Run the following command and follow the instructions:
 
 ```bash
 export REPO_ROOT=$(git rev-parse --show-toplevel)
@@ -27,13 +27,13 @@ The cluster creation will provision the following AWS resources:
 - EKS cluster security groups
 - OIDC identity provider
 
-### Managed Node Group _(For Non-Auto mode cluster)_
+### Managed Node Group _(For Non-Auto Mode cluster)_
 - Managed node group with 3-6 m5.large instances
 - Desired capacity: 4 nodes
 - 100GB EBS volumes per node
 - Node IAM role with required policies
 
-### EKS Addons _(For Non-Auto mode cluster)_
+### EKS Addons _(For Non-Auto Mode cluster)_
 - eks-pod-identity-agent
 - aws-ebs-csi-driver with EBS CSI controller policies
 - vpc-cni (default)
@@ -66,7 +66,7 @@ eksctl delete cluster --name $CLUSTER_NAME --region $AWS_REGION
 aws iam delete-policy --policy-arn $CROSSPLANE_BOUNDARY_POLICY_ARN
 ```
 
-This will automatically clean up:
+This will automatically clean up the following:
 - EKS cluster
 - Managed node groups
 - Pod identity associations
