@@ -4,7 +4,7 @@
 # Details of your repository fork
 repo: 
   url: "https://github.com/cnoe-punkwalker/reference-implementation-aws" # This is the GITHUB URL of the fork in Github Org that you have created.
-  revision: "ref-impl-v2" # Branch or Tag which should be used for Argo CD Apps
+  revision: "HEAD" # Branch or Tag which should be used for Argo CD Apps
   basepath: "packages" # Directory in which configuration of addons is stored
 
 # The name of the EKS cluster you are installing the reference implementation on.
@@ -16,10 +16,10 @@ auto_mode: "true"
 region: "us-west-2"
 
 # Base Domain name used for exposing services. It should be a subdomain or main domain of the Route53 hosted zone.
-domain: idp.advaitt.people.aws.dev
+domain: <REPLACE_ME_example.com>
 
 # Route53 hosted zone ID for configuring external-dns
-route53_hosted_zone_id: Z07667581KDLOA4RSCVFD
+route53_hosted_zone_id: <REPLACE_ME_ZXYZZ1234ABCDEF5GHIJKL>
 
 # Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
 # When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name> 
