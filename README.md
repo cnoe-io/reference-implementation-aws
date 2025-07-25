@@ -3,7 +3,7 @@
 This project contains an Internal Developer Platform (IDP) reference implementation for AWS. This project can bring up an IDP on EKS with all the tools configured and ready to use in production. It will install addons on an EKS cluster as Argo CD apps using GitOps Bridge App of ApplicationSets pattern. Check out the [Getting Started](#getting-started) guide for installing this solution on an EKS cluster.
 
 > [!NOTE]
-> Applications deployed in this repository is a starting point to get environment into production.
+> Applications deployed in this repository are a starting point to get environment into production.
 
 ## Architecture Overview
 
