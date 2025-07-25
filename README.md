@@ -1,313 +1,282 @@
+# CNOE AWS Reference Implementation
 
-> [!CAUTION]
-> The current version of the AWS reference implementation is no longer maintained. A new version is currently work in progress. Find more information about the new version in issue [#49](https://github.com/cnoe-io/reference-implementation-aws/issues/49).
+This project contains a [CNOE](https://cnoe.io) reference implementation for AWS. This project can bring up an Internal Developer Platform on EKS with all the tools configured and ready to use. It will install addons on an EKS cluster as Argo CD apps using GitOps Bridge App of ApplicationSets pattern. Check out the [Getting Started](#getting-started) guide for installing this solution on an EKS cluster.
+
+> [!NOTE]
+> Applications deployed in this repository are not meant or configured for production.
+
+## Architecture Overview
 
 ![overview](docs/images/overview.png)
 
-> **_NOTE:_**  Applications deployed in this repository are not meant or configured for production.
+## Addons
 
+All the addons are helm charts with static values configured in `packages/<addon-name>/values.yaml` and dynamic values based on Argo CD cluster secret label/annotations values in `packages/addons/values.yaml`.
 
-# Installation
+| Name | Namespace | Purpose | Chart Version | Chart |
+| ---------- | ---------- | ---------- | ---------- | ---------- |
+| Argo CD | argocd | Installation and management of addon Argo CD application | 8.0.14 | [Link](https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd) |
+| Argo Workflows | argo | Workflow tool for continuous integration tasks  | 0.45.18 | [Link](https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows )|
+| Backstage | backstage | Self-Service Web UI (Developer Portal) for developers | 2.6.0 | [Link](https://github.com/backstage/charts/tree/main/charts/backstage) |
+| Cert Manager | cert-manager | Certificate manager for addons and developer applications using Let's Encrypt | 1.17.2 | [Link](https://cert-manager.io/docs/installation/helm/) |
+| Crossplane | crossplane-system | IaC controller for provisioning infrastructure  | 1.20.0 | [Link](https://github.com/crossplane/crossplane/tree/main/cluster/charts/crossplane) |
+| External DNS | external-dns | Domain management using Route 53 | 1.16.1 | [Link](https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns) |
+| External Secrets | external-secrets | Secret Management using AWS Secret Manager and AWS Systems Manager Parameter Store  | Version | [Link](https://github.com/external-secrets/external-secrets/tree/main/deploy/charts/external-secrets) |
+| Ingress NGINX | ingress-nginx | Ingress controller for L7 network traffic routing  | 4.7.0 | [Link](https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx) |
+| Keycloak | keycloak | Identity provider for User Authentication | 24.7.3 | [Link](https://github.com/bitnami/charts/tree/main/bitnami/keycloak) |
 
-- Installation script must be used with a EKS cluster because we use IRSA to talk to AWS services.
-- Components are installed as ArgoCD Applications.
-- Files under the `/packages` directory are meant to be usable without any modifications. This means certain configuration options like domain name must be passed outside of this directory. e.g. use ArgoCD's Helm parameters.
+Check out more details about the [installation flow](docs/installation_flow.md).
 
-## Basic installation flow
-
-The installation process follows the following pattern. 
-
-1. Create a GitHub App for Backstage integration.
-2. Install ArgoCD and configure it to be able to monitor your GitHub Organization.
-3. Run Terraform. Terraform is responsible for:
-    - Managing AWS resources necessary for the Kubernetes operators to function. Mostly IAM Roles.
-    - Install components as ArgoCD applications. Pass IAM role information where necessary.
-    - Apply Kubernetes manifests such as secrets and ingress where information cannot easily be passed to ArgoCD.
-    - Run all the above in an order because installation order matters for many of these components. For example, Keycloak must be installed and ready before Backstage can be installed and configured.
+## Installation Flow Diagram
+This diagram illustrates the high-level installation flow for the CNOE AWS Reference Implementation. It shows how the local environment interacts with AWS resources to deploy and configure the platform on an EKS cluster.
 
 ```mermaid
----
-title: Installation Process
----
-erDiagram
-  "Local Machine" ||--o{ "ArgoCD" : "1. installs"
-  "Local Machine" ||--o{ "Terraform" : "2. invokes"
-  "Terraform" ||--o{ "AWS Resources" : "3. creates"
-  "Terraform" ||--o{ "ArgoCD" : "4. create ArgoCD Apps"
-  "ArgoCD" ||--o{ "This Repo" : "pulls manifests"
-  "ArgoCD" ||--o{ "Components" : "installs to the cluster"
+flowchart TD
+    subgraph "Local Environment"
+        config["config.yaml"]
+        secrets["GitHub App Credentials
+        (private/*.yaml)"]
+        create_secrets["create-config-secrets.sh"]
+        install["install.sh"]
+        helm["helm"]
+    end
+
+    subgraph "AWS"
+        aws_secrets["AWS Secrets Manager
+        - cnoe-ref-impl/config
+        - cnoe-ref-impl/github-app"]
+
+        subgraph "EKS Cluster"
+            eks_argocd["Argo CD"]
+            eso["External Secret Operator"]
+            appset["addons-appset
+            (ApplicationSet)"]
+
+            subgraph "Addons"
+                backstage["Backstage"]
+                keycloak["Keycloak"]
+                crossplane["Crossplane"]
+                cert_manager["Cert Manager"]
+                external_dns["External DNS"]
+                ingress["Ingress NGINX"]
+                argo_workflows["Argo Workflows"]
+            end
+        end
+    end
+
+    config --> create_secrets
+    secrets --> create_secrets
+    create_secrets --> aws_secrets
+
+    config --> install
+    install --> helm
+
+    helm -- "Installs" --> eks_argocd
+    helm -- "Installs" --> eso
+    helm -- "Creates" --> appset
+
+    aws_secrets -- "Provides configuration" --> eso
+
+    appset -- "Creates Argo CD Addon ApplicationSets" --> Addons
+
+    eks_argocd -- "Manages" --> Addons
+    eso -- "Provides secrets to" --> Addons
+
+    classDef aws fill:#FF9900,stroke:#232F3E,color:white;
+    classDef k8s fill:#326CE5,stroke:#254AA5,color:white;
+    classDef tools fill:#4CAF50,stroke:#388E3C,color:white;
+    classDef config fill:#9C27B0,stroke:#7B1FA2,color:white;
+
+    class aws_secrets,EKS aws;
+    class eks_argocd,eso,appset,backstage,keycloak,crossplane,cert_manager,external_dns,ingress,argo_workflows k8s;
+    class helm,install,create_secrets tools;
+    class config,secrets config;
 ```
 
-This installation pattern where some Kubernetes manifests are handled in Terraform while others are handled in GitOps manner may not be suitable for many organizations. If you can be certain about parameters such as domain name and certificate handling, it is better to utilize GitOps approach where these information are committed to a repository. The reason it is handled this way is to allow for customization for different organizations without forking this repository and committing organization specific information into the repository. 
+## Getting Started
 
-## Secret handling
+### Step 1. ☸️ Create EKS Cluster
 
-Currently handled outside of repository and set via bash script. Secrets such as GitHub token and TLS private keys are stored in the `${REPO_ROOT}/private` directory.
+The reference implementation can be installed on a new EKS cluster which can be created with the following tools:
 
-We may be able to use sealed secrets with full GitOps approach in the future.
++ **eksctl**: Follow the [instructions](cluster/eksctl)
++ **terraform**: Follow the [instructions](cluster/terraform/)
 
-## Requirements
+This will create all the prerequisite AWS Resources required for the reference implementation, which includes:
 
-- Github **Organization** (free to create)
-- An existing EKS cluster version (1.27+)
-- AWS CLI (2.13+)
-- eksctl (0.167.0+)
-- Kubectl CLI (1.27+)
-- jq
-- git
-- yq
-- curl
-- kustomize
-- node + npm (if you choose to create GitHub App via CLI)
++ EKS cluster with Auto Mode or Without Auto Mode (Managed Node Group with 4 nodes)
++ Pod Identity Associations for following Addons:
 
-## Create GitHub Apps for your GitHub Organization
+| Name | Namespace | Service Account Name | Permissions |
+| ----- | --------- | -------------------- | ---------- |
+| Crossplane | crossplane-system | provider-aws | Admin Permissions but with [permission boundary](cluster/iam-policies/crossplane-permissions-boundry.json) |
+| External Secrets | external-secrets | external-secrets | [Permissions](https://external-secrets.io/latest/provider/aws-secrets-manager/#iam-policy) |
+| External DNS | external-dns | external-dns | [Permissions](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/aws/#iam-policy) |
+| AWS Load Balancer Controller<br>(When not using Auto Mode) | kube-system | aws-load-balancer-controller | [Permissions](https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/iam_policy.json) |
+| AWS EBS CSI Controller<br>(When not using Auto Mode) | kube-system | ebs-csi-controller-sa | [Permissions](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEBSCSIDriverPolicy.html) |
 
-GitHub app is used to enable integration between Backstage and GitHub.
-This allows you for integration actions such as automatically importing Backstage configuration such as Organization information and templates.
 
-We strongly encourage you to create a **dedicated GitHub organization**. If you don't have an organization for this purpose, please follow [this link](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/creating-a-new-organization-from-scratch) to create one.
+> [!NOTE]
+> **Using Existing EKS Cluster**
+>
+> The reference implementation can be installed on an existing EKS Cluster only if the above prerequisites are completed.
 
-There are two ways to create GitHub integration with Backstage. You can use the Backstage CLI, or create it manually. See [this page](https://backstage.io/docs/integrations/github/github-apps) for more information on creating one manually. Once the app is created, place it under the private directory with the name `github-integration.yaml`. 
+### Step 2. 🏢 Create GitHub Organization
 
-To create one with the CLI, follow the steps below. If you are using cli to create GitHub App, please make sure to select third option in the permissions prompt, if your GitHub App access needs publishing access to create GitHub repositories for your backstage templates.
+Backstage and Argo CD in this reference implementation are integrated with GitHub. Both Backstage and ArgoCD use Github Apps for authenticating with Github.
+
+Therefore, a GitHub Organization should be created in order to create GitHub Apps for these integrations. Follow the instructions in [GitHub documentation](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/creating-a-new-organization-from-scratch) to create new organization or visit [here](https://github.com/account/organizations/new).
+
+> [!NOTE]
+> It is recommended to use a Github Organization instead of a personal github ID as Backstage has certain [limitations](https://backstage.io/docs/integrations/github/github-apps/#caveats) for using personal account Github Apps for authenticating to Github. Also, the Github Organization is ***FREE***.
+
+### Step 3. 🍴 Fork the Repository
+
+Once the organization is created, fork this repository to the new GitHub Organization by following instructions in [GitHub documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
+
+### Step 4. 💻 Create GitHub Apps
+
+There are two ways to create a GitHub App. You can use the Backstage CLI `npx @backstage/cli create-github-app <github-org>` as per instructions in the [Backstage documentation](https://backstage.io/docs/integrations/github/github-apps/#using-the-cli-public-github-only), or create it manually per these instructions in the [GitHub documentation](https://backstage.io/docs/integrations/github/github-apps).
+
+Create the following apps and store them in the corresponding file path.
+
+| App Name | Purpose | Required Permissions | File Path | Expected Content |
+| -------- | ------- | -------------------- | --------- | ---------------- |
+| Backstage | Used for automatically importing Backstage configuration such as Organization information, templates and creating new repositories for developer applications. | For All Repositories<br>- Read access to members, metadata, and organization administration<br>- Read and write access to administration and code | **`private/backstage-github.yaml`** | ![backstage-github-app](docs/images/backstage-github-app.png) |
+| Argo CD | Used for deploying resources to cluster specified by Argo CD applications.| For All Repositories<br>- Read access to checks, code, members, and metadata| **`private/argocd-github.yaml`** | ![argocd-github-app](docs/images/argocd-github-app.png) |
+
+The template files for both these Github Apps are available in `private` directory. Copy these template files to above mentioned file path by running following command:
+
+```
+cp private/argocd-github.yaml.template private/argocd-github.yaml
+cp private/backstage-github.yaml.template private/backstage-github.yaml
+```
+
+After this, update the values in these files by getting them from files created by `backstage-cli` _(if used)_ or get the values from Github page of App Overview.
+
+Argo CD requires `url` and `installationId` of the GitHub app. The `url` is the GitHub URL of the organization. The `installationId` can be captured by navigating to the app installation page with URL `https://github.com/organizations/<Organization-name>/settings/installations/<ID>`. You can find more information [on this page](https://stackoverflow.com/questions/74462420/where-can-we-find-github-apps-installation-id).
+
+> [!WARNING]
+> **If the app is created using the Backstage CLI, it creates files in the current working directory. These files contain credentials. Handle them with care. It is recommended to remove these files after copying the content over to files in the `private` directory**
+
+> [!NOTE]
+> The rest of the installation process assumes the GitHub apps credentials are available in `private/backstage-github.yaml` and `private/argocd-github.yaml`
+
+### Step 5. ⚙️ Prepare Environment for Installation
+
+#### 📦 Install Binaries
+
+The installation requires the following binaries in the local environment:
+
++ [**AWS CLI**](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
++ [**kubectl**](https://kubernetes.io/docs/tasks/tools/)
++ [**yq**](https://mikefarah.gitbook.io/yq/v3.x)
++ [**helm**](https://helm.sh/docs/intro/install/)
+
+#### 🔐 Configure AWS Credentials
+Configure the AWS CLI with credentials of an IAM role which has access to the EKS cluster. Follow the instructions in the [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html#getting-started-quickstart-new) to configure the AWS CLI.
+
+If the installation steps are being executed on an EC2 instance, ensure that the EC2 IAM instance role has permissions to access the EKS cluster or the AWS CLI is configured as mentioned above.
+
+#### ⚙️ Configure Reference Implementation
+
+The reference implementation uses **`config.yaml`** file in the repository root directory to configure the installation values. The **`config.yaml`** should be updated with appropriate values before proceeding. Refer to the following table and update all the values appropriately. All the values are required.
+
+| Parameter | Description | Type |
+|-----------|-------------|------|
+| `repo.url` | GitHub URL of the fork in the Github Org | string |
+| `repo.revision` | Branch or tag which should be used for Argo CD Apps | string |
+| `repo.basepath` | Directory in which the configuration of addons is stored | string |
+| `cluster_name` | Name of the EKS cluster for reference implementation <br> **(The name should satisfy criteria of a valid [kubernetes resource name](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/))** | string |
+| `auto_mode` | Set to "true" if EKS cluster is Auto Mode, otherwise "false" | string |
+| `region` | AWS Region of the EKS cluster and config secret | string |
+| `domain` | Base Domain name for exposing services<br>**(This should be base domain or sub domain of the Route53 Hosted Zone)** | string |
+| `route53_hosted_zone_id` | Route53 hosted zone ID for configuring external-dns | string |
+| `path_routing` | Enable path routing ("true") vs domain-based routing ("false") | string |
+| `tags` | Arbitrary key-value pairs for AWS resource tagging | object |
+
+> [!TIP]
+> If these values are updated after installation, ensure to run the command in the next step to update the values in AWS Secret Manager. Otherwise, the updated values will not reflect in the live installation.
+
+#### 🔒 Create Secrets in AWS Secret Manager
+
+The values required for the installation are stored in AWS Secret Manager in two secrets:
+
+1. **cnoe-ref-impl/config:** Stores values from **`config.yaml`** in JSON
+2. **cnoe-ref-impl/github-app:** Stores GitHub App credentials with file name as key and content of the file as value from **private** directory.
+
+Run the command below to create new secrets or update the existing secrets if they already exist.
 
 ```bash
-npx '@backstage/cli' create-github-app ${GITHUB_ORG_NAME}
-# If prompted, select all for permissions or select permissions listed in this page https://backstage.io/docs/integrations/github/github-apps#app-permissions
-# In the browser window, allow access to all repositories then install the app.
-
-? Select permissions [required] (these can be changed later but then require approvals in all installations) (Press <space> to select, <a> to toggle all, <i> to invert selection,
-and <enter> to proceed)
- ◉ Read access to content (required by Software Catalog to ingest data from repositories)
- ◉ Read access to members (required by Software Catalog to ingest GitHub teams)
-❯◯ Read and Write to content and actions (required by Software Templates to create new repositories)
-
-# move it to a "private" location. 
-mkdir -p private
-GITHUB_APP_FILE=$(ls github-app-* | head -n1)
-mv ${GITHUB_APP_FILE} private/github-integration.yaml
+./scripts/create-config-secrets.sh
 ```
 
-**The file created above contains credentials. Handle it with care.**
+> [!WARNING]
+> **DO NOT** move to next steps without completing all the instructions in this step
 
-The rest of the installation process assumes the GitHub app credentials are available at `private/github-integration.yaml`
+### Step 6. 🚀 Installation
+> [!NOTE]
+> Before moving forward, ensure that the kubectl context is set to the EKS cluster and the configured AWS IAM role has access to the cluster.
 
-If you want to delete the GitHUb application, follow [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app). 
-   
-## Create a GitHub token
+#### ▶️ Start the Installation Process
 
-A GitHub token is needed by ArgoCD to get information about repositories under your Organization. 
+All the addons are installed as Argo CD apps. At the start of the installation, Argo CD and External Secret Operator are installed on the EKS cluster as a helm chart. Once Argo CD on EKS is up, other addons are installed through it and finally the Argo CD on EKS also manages itself and External Secret Operator. Check out more details about the [installation flow](docs/installation_flow.md). Run the following command to start the installation.
+   ```bash
+   scripts/install.sh
+   ```
 
-The following permissions are needed: 
-  - Repository access for all repositories
-  - Read-only access to: Administration, Contents, and Metadata.
-Get your GitHub personal access token from: https://github.com/settings/tokens?type=beta
+#### 📊 Monitor Installation Process
 
-Once you have your token, save it under the private directory with the name `github-token`. For example:
+The installation script will continue to run until all the Argo CD apps for addons are healthy. To monitor the process, use the instructions below to access the instance of Argo CD running on EKS.
+
+Check if the kubectl context is set to the EKS cluster and it can access the EKS cluster. Then, start the kubernetes port-forward session for the Argo CD service and access the Argo CD UI in a browser. In the Argo CD UI, monitor the health of all Argo CD Apps
+
+  ```bash
+  kubectl port-forward -n argocd svc/argocd-server 8080:80
+  ```
+
+Depending upon the configuration, Argo CD will be accessible at http://localhost:8080 or http://localhost:8080/argocd.
+
+The credentials for Argo CD can be retrieved with the following command:
 
 ```bash
-# From the root of this repository.
-$ mkdir -p private
-$ vim private/github-token # paste your token
-# example output
-$ cat private/github-token
-github_pat_ABCDEDFEINDK....
+kubectl get secrets -n argocd argocd-initial-admin-secret -oyaml | yq '.data.password' | base64 -d && echo
 ```
 
-## Install
+### Step 7. 🌐 Accessing the Platform
 
-Follow the following steps to get started.
+The addons with Web UI are exposed using the base domain configured in [Step 5](#️-configure-reference-implementation). The URLs can be retrieved by running the following command:
+```
+scripts/get-urls.sh
+```
+The URL depends on the setting for `path_routing`. Refer to following table for URLs:
 
-1. Create GitHub apps and GitHub token as described above.
-2. Create a new EKS cluster. We do not include EKS cluster in the installation module because EKS cluster requirements vary between organizations and the focus of this is integration of different projects. If you prefer, you can create a new basic cluster with the included [`eksctl.yaml`](./eksctl.yaml) file:
-    ```eksctl create cluster -f eksctl.yaml```
-    You can get eksctl from [this link](https://eksctl.io/).
-3. If you don't have a public registered Route53 zone, [register a Route53 domain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html) (be sure to use Route53 as the DNS service for the domain). We **strongly encourage creating a dedicated sub domain** for this. If you'd rather manage DNS yourself, you can set `enable_dns_management` in the config file.
-4. Get the host zone id and put it in the config file. 
-    ```bash
-    aws route53 list-hosted-zones-by-name --dns-name <YOUR_DOMAIN_NAME> --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
-    # in the setups/config file, update the zone id.
-    hosted_zone_id:: ZO020111111
-    ```
-5. Update the [`setups/config`](setups/config.yaml) file with your own values.
-6. Run `setups/install.sh` and follow the prompts. See the section below about monitoring installation progress.
-7. Once installation completes, navigate to `backstage.<DOMAIN_NAME>` and log in as `user1`. Password is available as a secret. You may need to wait for DNS propagation to complete to be able to login. May take ~10 minutes.
-    ```bash
-    kubectl get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
-    ```
+| App Name | URL (w/ Path Routing) | URL (w/o Path Routing) |
+| --------- | --------- | --------- |
+| Backstage | https://[domain] | https://backstage.[domain] |
+| Argo CD | https://[domain]/argocd | https://argocd.[domain] |
+| Argo Workflows | https://[domain]/argo-workflows | https://argo-workflows.[domain] |
 
-
-### Monitoring installation progress
-
-Components are installed as ArgoCD Applications. You can monitor installation progress by going to ArgoCD UI. 
+All the addons are configured with Keycloak SSO USER1 and the user password for it can be retrieved using the following command:
 
 ```bash
-# Get the admin password 
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
-kubectl port-forward svc/argocd-server -n argocd 8081:80
+kubectl get secret -n keycloak keycloak-config -o jsonpath='{.data.USER1_PASSWORD}' | base64 -d && echo
 ```
+Once all the Argo CD apps on the EKS cluster are reporting healthy status, try out the [examples](docs/examples/) to create a new application through Backstage.
+For troubleshooting, refer to the [troubleshooting guide](docs/troubleshooting.md).
 
-Go to [`http://localhost:8081`](http://localhost:8081) and login with the username `admin` and password obtained above. In the UI you can look at resources created, their logs, and events.
+## Cleanup
+> [!WARNING]
+> Before proceeding with the cleanup, ensure any Kubernetes resources created outside of the installation process such as Argo CD Apps, deployments, volumes etc. are deleted.
 
-
-### If you installed it without automatic DNS configuration.
-
-If you set `enable_dns_management: false`, you are responsible for updating DNS records, thus external-dns is not installed. You have to set the following DNS records:
-- `backstage.<DOMAIN_NAME>`
-- `keycloak.<DOMAIN_NAME>`
-- `argo.<DOMAIN_NAME>`
-- `argocd.<DOMAIN_NAME>`
-
-Point these records to the value returned by the following command. 
-
-```bash
-k get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-```
-
-### If you installed it without Cert Manager.
-
-If you set `MANAGED_CERT=false`, you are responsible for managing TLS certs, thus cert-manager is not installed. You must [create TLS secrets accordingly](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).
-
-Run the following command to find where to create secrets.
-
-```bash
-output=$(kubectl get ingress --all-namespaces -o json | jq -r '.items[] | "\(.metadata.namespace) \(.spec.rules[].host) \(.spec.tls[].secretName)"')
-echo -e "Namespace \t Hostname \t TLS Secret Name"
-echo -e "$output"
-```
-
-Secret format should be something like:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: backstage.<DOMAIN>
-  namespace: backstage
-data:
-  tls.crt: <base64 encoded cert>
-  tls.key: <base64 encoded key>
-type: kubernetes.io/tls
+Run the following command to remove all the addons created by this installation:
 
 ```
-
-## What was created?
-
-The following components are installed if you chose the full installation option.
-
-| Name | Version |
-|---|---|
-| argo-workflows | v3.4.8 |
-| argocd | v2.7.6 |
-| aws-load-balancer-controller | v2.5.3 |
-| backstage | v1.16.0 |
-| cert-manager | v1.12.2 |
-| crossplane | v1.12.2 |
-| external-dns | v0.13.5 |
-| ingress-nginx | v1.8.0 |
-| keycloak | v22.0.0 |
-| external-secrets | v0.9.2 |
-
-### Things created outside of the cluster
-
-If full installation is done, you should have these DNS entries available. They all point to the Network Load Balancer.
-
-- `backstage.<DOMAIN_NAME>` 
-- `argo.<DOMAIN_NAME>`
-- `keycloak.<DOMAIN_NAME>`
-
-You can confirm these by querying at a register.
-
-```bash
-dig A `backstage.<DOMAIN_NAME>` @1.1.1.1
-
-kubectl get svc -n ingress-nginx
+scripts/uninstall.sh
 ```
 
-A Network Load Balancer is also created. This is managed by the AWS Load Balancer Controller and points to ingress-nginx pod. This pod is responsible for routing requests to correct places. As a result, HTTPS endpoints are created with valid certificates.
+This script will only remove resources other than CRDs from the EKS cluster so that the same cluster can be used for re-installation which is useful during development. To remove CRDs, use the following command:
 
-```bash
-openssl s_client -showcerts -servername id.<DOMAIN_NAME> -connect id.<DOMAIN_NAME>:443 <<< "Q"
-curl https://backstage.<DOMAIN_NAME>
 ```
-
-## How to access the Backstage instance?
-
-When you open a browser window and go to `https://backstage.<DOMAIN_NAME>`, you should be prompted to login.
-Two users are created during the installation process: `user1` and `user2`. Their passwords are available in the keycloak namespace.
-
-```bash
-k get secrets -n keycloak keycloak-user-config -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+scripts/cleanup-crds.sh
 ```
-
-## Uninstall
-1. Run `setups/uninstall.sh` and follow the prompts.
-2. Remove GitHub app from your Organization by following [these steps](https://docs.github.com/en/apps/maintaining-github-apps/deleting-a-github-app).
-3. Remove token from your GitHub Organization by following [these steps](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/reviewing-and-revoking-personal-access-tokens-in-your-organization).
-4. Remove the created GitHub Organization.
-
-<details>
-    <summary>Uninstall details</summary>
-
-### Resources deleted
-
-Currently resources created by applications are not deleted. For example, if you have Spark Jobs running, they are not deleted and may block deletion of the spark-operator app. 
-
-</details>
-
-## What can you do in Backstage? 
-See [this doc](./demo.md) for demos!
-
-## Possible issues
-
-### Cert-manager
-- by default it uses http-01 challenge. If you'd prefer using dns-01, you can update the ingress files. TODO AUTOMATE THIS
-- You may get events like `Get "http://<DOMAIN>/.well-known/acme-challenge/09yldI6tVRvtWVPyMfwCwsYdOCEGGVWhmb1PWzXwhXI": dial tcp: lookup <DOMAIN> on 10.100.0.10:53: no such host`. This is due to DNS propagation delay. It may take ~10 minutes.
-
-## Troubleshooting
-
-See [the troubleshooting doc](TROUBLESHOOTING.md) for more information.
-
-## Creation Order notes
-<details>
-    <summary>Click to expand</summary>
-
-## Things created outside of the cluster with Keycloak SSO enabled.
-
-- Route53 records. Route53 hosted zones are not created. You must also register it if you want to be able to access through public DNS. These are managed by the external DNS controller.
-
-- AWS Network Load Balancer. This is just the entrance to the Kubernetes cluster. This points to the default installation of Ingress Nginx and is managed by AWS Load Balancer Controller.
-
-- TLS Certificates issued by Let's Encrypt. These are managed by cert-manager based on values in Ingress. They use the production issuer which means we must be very careful with how many and often we request certificates from them. The uninstall scripts backup certificates to the `private` directory to avoid re-issuing certificates.
-
-These resources are controlled by Kubernetes controllers and thus should be deleted using controllers.
-
-### Keycloak SSO with DNS and TLS certificates
-
-If using keycloak SSO with fully automated DNS and certificate management, it must be:
-
-1. aws-load-balancer-controller
-2. ingress-nginx
-3. cert-manager
-4. external-dns
-5.  keycloak
-6. The rest of stuff
-
-
-### Keycloak SSO with manual DNS and TLS Certificates
-
-If using keycloak SSO but manage DNS records and certificates manually. 
-
-1. aws-load-balancer-controller
-2. ingress-nginx
-3. The rest of stuff minus cert-manager and external-dns
-
-In this case, you can issue your own certs and provide them as TLS secrets as specified in the `spec.tls[0].secretName` field of Ingress objects.
-You can also let NLB or ALB terminate TLS instead using the LB controller. This is not covered currently, but possible.
-
-### No SSO
-
-If no SSO, no particular installation order. Eventual consistency works.
-
-</details>

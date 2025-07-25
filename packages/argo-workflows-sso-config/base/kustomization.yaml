@@ -1,3 +1,0 @@
-namespace: argo
-resources:
-  - sa-admin.yaml

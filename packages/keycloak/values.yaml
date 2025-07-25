@@ -1,0 +1,32 @@
+adminRealm: "cnoe"
+production: true
+usePasswordFiles: false
+proxyHeaders: "forwarded"
+
+global:
+  defaultStorageClass: gp3
+
+auth:
+  adminUser: cnoe-admin
+  adminPassword: cnoe-admin
+  existingSecret: keycloak-config
+  passwordSecretKey: KEYCLOAK_ADMIN_PASSWORD
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hostnameStrict: true
+  servicePort: http
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+  tls: false
+
+postgresql:
+  enabled: true
+  auth:
+    username: keycloak
+    database: keycloak
+    existingSecret: "keycloak-config"
+    secretKeys:
+      userPasswordKey: POSTGRES_PASSWORD
+  architecture: standalone

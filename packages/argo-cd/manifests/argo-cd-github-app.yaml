@@ -1,0 +1,53 @@
+# Github App Secret for ArgoCD
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: github-app-org
+  namespace: argocd
+spec:
+  refreshInterval: "15m"
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  target:
+    name: github-app-org
+    template:
+      metadata:
+        labels:
+          argocd.argoproj.io/secret-type: repo-creds
+      data:
+        type: git
+        url: '{{ .repoURL }}'
+        githubAppID: "{{ .appId }}"
+        githubAppInstallationID: "{{ .installationId }}"
+        githubAppPrivateKey: "{{ .privateKey }}"
+  data:
+  - secretKey: appId
+    remoteRef:
+      conversionStrategy: Default # TODO: Remove when figured out how to avoid Diffs for CR defaults
+      decodingStrategy: None
+      key: cnoe-ref-impl/github-app
+      metadataPolicy: None
+      property: argocd-github.appId
+  - secretKey: installationId
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: cnoe-ref-impl/github-app
+      metadataPolicy: None
+      property: argocd-github.installationId
+  - secretKey: privateKey
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: cnoe-ref-impl/github-app
+      metadataPolicy: None
+      property: argocd-github.privateKey
+  - secretKey: repoURL
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: cnoe-ref-impl/github-app
+      metadataPolicy: None
+      property: argocd-github.url

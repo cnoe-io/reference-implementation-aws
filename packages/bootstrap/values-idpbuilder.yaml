@@ -1,0 +1,14 @@
+# Used for bootstraping hub cluster with Addon Appset chart
+# Only used when using idpbuilder for installation
+addons-appset: # for non-path routing
+  enabled: true
+  chartName: bootstrap
+  namespace: argocd
+  releaseName: bootstrap
+  type: chart
+  path: appset-chart
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane-bootstrap']

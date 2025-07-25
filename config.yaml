@@ -1,0 +1,35 @@
+### Config for CNOE AWS Reference Implementation ###
+# Source: "https://github.com/cnoe/reference-implementation-aws"
+
+# Details of your repository fork
+repo: 
+  url: "https://github.com/cnoe-punkwalker/reference-implementation-aws" # This is the GITHUB URL of the fork in Github Org that you have created.
+  revision: "HEAD" # Branch or Tag which should be used for Argo CD Apps
+  basepath: "packages" # Directory in which configuration of addons is stored
+
+# The name of the EKS cluster you are installing the reference implementation on.
+cluster_name: "cnoe-ref-impl"
+# Set this to "true" if EKS cluster is Auto Mode othewise "false"
+# !!! Note: This is a string value as it is passed on to the Argo CD cluster secret as label
+auto_mode: "true"
+# AWS Region of the EKS cluster and cnoe-reference-implementation-aws config secret
+region: "us-west-2"
+
+# Base Domain name used for exposing services. It should be a subdomain or main domain of the Route53 hosted zone.
+domain: <REPLACE_ME_example.com>
+
+# Route53 hosted zone ID for configuring external-dns
+route53_hosted_zone_id: <REPLACE_ME_ZXYZZ1234ABCDEF5GHIJKL>
+
+# Set this to "true" if you want to enable path routing othewise "false" for domain based routing.
+# When enabled, the exposed addons will be accessible at https://<domain_name>/<addon-name> 
+# When disabled, the exposed addons will be accessible at https://<addon-name>.<domain_name>
+# !!! Note: This is a string value as it is passed on to the Argo CD cluster secret as label
+path_routing: "true"
+
+# Tags for AWS resources
+tags:
+  githubRepo: "github.com/cnoe-io/reference-implementation-aws"
+  env: "dev"
+  project: "cnoe"
+  

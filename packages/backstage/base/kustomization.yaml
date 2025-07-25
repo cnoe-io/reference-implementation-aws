@@ -1,3 +1,0 @@
-resources:
-  - install-postgresql.yaml
-  - install-backstage.yaml

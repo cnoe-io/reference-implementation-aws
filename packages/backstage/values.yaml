@@ -1,0 +1,132 @@
+# Ref: https://github.com/backstage/charts/tree/main/charts/backstage
+ingress:
+  enabled: true
+  className: "nginx"
+  extraHosts: []
+  path: "/"
+  tls:
+    enabled: true
+    secretName: "backstage-server-tls"
+backstage:
+  replicas: 1
+  image:
+    registry: ghcr.io
+    repository: cnoe-io/backstage-app
+    tag: 135c0cb26f3e004a27a11edb6a4779035aff9805
+    pullPolicy: IfNotPresent
+  command: ["node", "packages/backend"]
+  extraEnvVarsSecrets:
+    - backstage-env-vars
+  extraVolumeMounts:
+    - name: backstage-config
+      mountPath: "/app/config"
+      readOnly: true
+  extraVolumes:
+    - name: backstage-config
+      projected:
+        sources:
+          - secret:
+              name: integrations
+              items:
+                - key: github-integration.yaml
+                  path: github-integration.yaml
+          - secret:
+              name: k8s-config
+              items:
+                - key: k8s-config.yaml
+                  path: k8s-config.yaml
+  appConfig:
+    app:
+      title: CNOE Backstage
+      baseUrl: ${BACKSTAGE_FRONTEND_URL}
+    organization:
+      name: CNOE
+    backend:
+      baseUrl: ${BACKSTAGE_FRONTEND_URL}
+      csp:
+        connect-src: ['self', 'http:', 'https:']
+      cors:
+        origin: ${BACKSTAGE_FRONTEND_URL}
+        methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+        credentials: true
+      database:
+        client: pg
+        connection:
+          host: ${POSTGRES_HOST}
+          port: ${POSTGRES_PORT}
+          user: ${POSTGRES_USER}
+          password: ${POSTGRES_PASSWORD}
+      cache:
+        store: memory
+    integrations:
+      github:
+        - host: github.com
+          apps:
+            - $include: /app/config/github-integration.yaml
+    proxy:
+      '/argo-workflows/api':
+        target: ${ARGO_WORKFLOWS_URL}
+        changeOrigin: true
+        secure: true
+        headers:
+          Authorization:
+            $env: ARGO_WORKFLOWS_AUTH_TOKEN
+      '/argocd/api':
+        target: ${ARGO_CD_URL}
+        changeOrigin: true
+        headers:
+          Cookie:
+            $env: ARGOCD_AUTH_TOKEN
+    techdocs:
+      builder: 'local'
+      generator:
+        runIn: 'docker'
+      publisher:
+        type: 'local'
+    auth:
+      environment: development
+      session:
+        secret: "MW2sV-sIPngEl26vAzatV-6VqfsgAx4bPIz7PuE_2Lk="
+      providers:
+        keycloak-oidc:
+          development:
+            metadataUrl: ${KEYCLOAK_NAME_METADATA}
+            clientId: backstage
+            clientSecret: ${BACKSTAGE_CLIENT_SECRET}
+            additionalScopes: 'openid profile email groups'
+            prompt: auto
+    scaffolder:
+    catalog:
+      import:
+        entityFilename: catalog-info.yaml
+        pullRequestBranchName: backstage-integration
+      rules:
+        - allow: [Component, System, API, Resource, Location, Template]
+    kubernetes:
+      serviceLocatorMethod:
+        type: multiTenant
+      clusterLocatorMethods:
+        - $include: /app/config/k8s-config.yaml
+    argocd:
+      username: admin
+      password: ${ARGOCD_ADMIN_PASSWORD}
+      appLocatorMethods:
+        - type: 'config'
+          instances:
+            - name: in-cluster
+              url: ${ARGO_CD_URL}
+              username: admin
+              password: ${ARGOCD_ADMIN_PASSWORD}
+    argoWorkflows:
+      baseUrl: ${ARGO_WORKFLOWS_URL}
+postgresql:
+  enabled: true
+  auth:
+    username: "backstage"
+    existingSecret: "backstage-env-vars"
+    secretKeys:
+      adminPasswordKey: POSTGRES_PASSWORD
+      userPasswordKey: POSTGRES_PASSWORD
+  architecture: standalone
+serviceAccount:
+  create: true

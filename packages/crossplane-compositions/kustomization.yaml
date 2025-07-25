@@ -1,0 +1,7 @@
+namespace: crossplane-system
+resources:
+  - s3
+
+commonAnnotations:
+  argocd.argoproj.io/compare-options: ServerSideDiff=true
+  

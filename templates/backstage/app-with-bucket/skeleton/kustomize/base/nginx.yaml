@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${{ values.name }}
+  labels:
+    app: ${{ values.name }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ${{ values.name }}
+  template:
+    metadata:
+      labels:
+        app: ${{ values.name }}
+    spec:
+      containers:
+      - name: ${{ values.name }}
+        image: nginx:stable
+        command: ["/bin/bash"]
+        args: ["/startup.sh"]
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-content
+          mountPath: /usr/share/nginx/html
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: nginx.conf
+        - name: startup-script
+          mountPath: /startup.sh
+          subPath: startup.sh
+        envFrom:
+        - secretRef:
+            name: ${{ values.secretName }}
+      volumes:
+      - name: html-content
+        configMap:
+          name: ${{ values.name }}-custom
+      - name: nginx-config
+        configMap:
+          name: ${{ values.name }}-nginx-conf
+      - name: startup-script
+        configMap:
+          name: ${{ values.name }}-custom
+          defaultMode: 0755
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${{ values.name }}
+  labels:
+    app: ${{ values.name }}
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: ${{ values.name }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${{ values.name }}
+  annotations:
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - ${{ values.name }}.advaitt.people.aws.dev
+      secretName: ${{ values.name }}-prod-tls
+  rules:
+  - host: ${{ values.name }}.advaitt.people.aws.dev
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: ${{ values.name }}
+              port:
+                number: 80

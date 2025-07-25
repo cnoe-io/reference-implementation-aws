@@ -1,0 +1,430 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: keycloak-config
+  namespace: keycloak
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: keycloak-config
+  namespace: keycloak
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: keycloak-config
+  namespace: keycloak
+subjects:
+  - kind: ServiceAccount
+    name: keycloak-config
+    namespace: keycloak
+roleRef:
+  kind: Role
+  name: keycloak-config
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: keycloak-config
+  namespace: argocd
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: keycloak-config
+  namespace: argocd
+subjects:
+  - kind: ServiceAccount
+    name: keycloak-config
+    namespace: keycloak
+roleRef:
+  kind: Role
+  name: keycloak-config
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config-job
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "40"
+data:
+  client-scope-groups-payload.json: |
+    {
+        "name": "groups",
+        "description": "groups a user belongs to",
+        "attributes": {
+            "consent.screen.text": "Access to groups a user belongs to.",
+            "display.on.consent.screen": "true",
+            "include.in.token.scope": "true",
+            "gui.order": ""
+        },
+        "type": "default",
+        "protocol": "openid-connect"
+    }
+  group-admin-payload.json: |
+    {"name":"admin"}
+  group-base-user-payload.json: |
+    {"name":"base-user"}
+  group-mapper-payload.json: |
+    {
+        "protocol": "openid-connect",
+        "protocolMapper": "oidc-group-membership-mapper",
+        "name": "groups",
+        "config": {
+          "claim.name": "groups",
+          "full.path": "false",
+          "id.token.claim": "true",
+          "access.token.claim": "true",
+          "userinfo.token.claim": "true"
+        }
+    }
+  user1-payload.json: |
+    {
+        "username": "user1",
+        "email": "",
+        "firstName": "user",
+        "lastName": "one",
+        "requiredActions": [],
+        "emailVerified": false,
+        "groups": [
+          "/admin"
+        ],
+        "enabled": true,
+        "credentials":
+        [
+          {
+            "type": "password",
+            "value": "${USER1_PASSWORD}",
+            "temporary": false
+          }
+        ]
+    }
+  user2-payload.json: |
+    {
+        "username": "user2",
+        "email": "",
+        "firstName": "user",
+        "lastName": "two",
+        "requiredActions": [],
+        "emailVerified": false,
+        "groups": [
+          "/base-user"
+        ],
+        "enabled": true,
+        "credentials":  [
+          {
+            "type": "password",
+            "value": "${USER1_PASSWORD}",
+            "temporary": false
+          }
+        ]
+    }
+  argocd-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "argocd",
+      "name": "ArgoCD Client",
+      "description": "Used for ArgoCD SSO",
+      "publicClient": true,
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "https://${ARGO_CD_URL}",
+      "baseUrl": "/applications",
+      "redirectUris": [
+        "https://${ARGO_CD_URL}/auth/callback",
+        "https://${ARGO_CD_URL}/pkce/verify",
+        "http://localhost:8085/auth/callback"
+      ],
+      "adminUrl": "https://${ARGO_CD_URL}",
+      "webOrigins": [
+        "https://${ARGO_CD_URL}"
+      ]
+    }
+  backstage-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "backstage",
+      "name": "Backstage Client",
+      "description": "Used for Backstage SSO",
+      "publicClient": false,
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "",
+      "baseUrl": "",
+      "redirectUris": [
+        "https://${BACKSTAGE_URL}/api/auth/keycloak-oidc/handler/frame"
+      ],
+      "webOrigins": [
+        "https://${BACKSTAGE_URL}"
+      ]
+    }
+  argo-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "argo-workflows",
+      "name": "Argo Workflows Client",
+      "description": "Used for Argo Workflows SSO",
+      "publicClient": false,
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "",
+      "baseUrl": "",
+      "redirectUris": [
+        "https://${ARGO_WORKFLOW_URL}/oauth2/callback"
+      ],
+      "webOrigins": [
+        "https://${ARGO_WORKFLOW_URL}"
+      ]
+    }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-config
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"
+spec:
+  template:
+    metadata:
+      generateName: keycloak-config
+    spec:
+      serviceAccountName: keycloak-config
+      restartPolicy: Never
+      volumes:
+        - name: config-payloads
+          configMap:
+            name: keycloak-config-job
+      containers:
+        - name: keycloak-config
+          image: docker.io/library/ubuntu:22.04
+          volumeMounts:
+            - name: config-payloads
+              readOnly: true
+              mountPath: "/var/config/"
+          envFrom:
+            - secretRef:
+                name: keycloak-config
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              #! /bin/bash
+              set -ex -o pipefail
+              apt -qq update && apt -qq install curl jq gettext-base -y
+              
+              # Define helper functions
+              keycloak_post() {
+                local endpoint=$1
+                local payload=$2
+                local resource_name=$3
+
+                envsubst < ${payload} > /tmp/payload-env.json
+                
+                HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -H "Content-Type: application/json" \
+                  -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+                  -X POST --data @/tmp/payload-env.json \
+                  ${KEYCLOAK_URL}${endpoint})
+                
+                if [ "$HTTP_STATUS" -eq 409 ]; then
+                  echo "${resource_name} already exists, continuing..."
+                elif [ "$HTTP_STATUS" -ne 201 ] && [ "$HTTP_STATUS" -ne 200 ]; then
+                  echo "Error creating ${resource_name}: HTTP status $HTTP_STATUS"
+                  cat /tmp/response.txt
+                fi
+              }
+              
+              keycloak_put() {
+                local endpoint=$1
+                local resource_name=$2
+                
+                HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -H "Content-Type: application/json" \
+                  -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+                  -X PUT ${KEYCLOAK_URL}${endpoint})
+                
+                if [ "$HTTP_STATUS" -ne 204 ] && [ "$HTTP_STATUS" -ne 200 ]; then
+                  echo "Error updating ${resource_name}: HTTP status $HTTP_STATUS"
+                  cat /tmp/response.txt
+                fi
+              }
+              
+              keycloak_get() {
+                local endpoint=$1
+                local jq_filter=$2
+                
+                curl -sS -H "Content-Type: application/json" \
+                  -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+                  -X GET ${KEYCLOAK_URL}${endpoint} | jq -e -r "${jq_filter}"
+              }
+              
+              # Get Keycloak token for initial Admin user
+              # ADMIN_PASSWORD=$(cat /var/secrets/KEYCLOAK_ADMIN_PASSWORD)
+              # USER1_PASSWORD=$(cat /var/secrets/USER1_PASSWORD)
+              HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+                --data-urlencode "username=cnoe-admin" \
+                --data-urlencode "password=${KEYCLOAK_ADMIN_PASSWORD}" \
+                --data-urlencode "grant_type=password" \
+                --data-urlencode "client_id=admin-cli" \
+                ${KEYCLOAK_URL}/realms/cnoe/protocol/openid-connect/token)
+              if [ "$HTTP_STATUS" -ne 200 ]; then
+                echo "Error getting Keycloak token: HTTP status $HTTP_STATUS"
+                cat /tmp/response.txt
+                exit 1
+              fi
+              KEYCLOAK_TOKEN=$(cat /tmp/response.txt | jq -e -r '.access_token')
+              
+              HTTP_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/response.txt -H "Authorization: bearer ${KEYCLOAK_TOKEN}" "${KEYCLOAK_URL}/admin/realms/cnoe")
+              if [ "$HTTP_STATUS" -ne 200 ]; then
+                echo "Error validating Keycloak token: HTTP status $HTTP_STATUS"
+                cat /tmp/response.txt
+                exit 1
+              fi
+
+              # Download kubectl
+              curl -sS -LO "https://dl.k8s.io/release/v1.28.3//bin/linux/amd64/kubectl"
+              chmod +x kubectl
+              
+              echo "creating client scopes"
+              keycloak_post "/admin/realms/cnoe/client-scopes" "/var/config/client-scope-groups-payload.json" "Client scope"
+              
+              echo "creating admin group"
+              keycloak_post "/admin/realms/cnoe/groups" "/var/config/group-admin-payload.json" "Admin group"
+
+              echo "creating base-user group"
+              keycloak_post "/admin/realms/cnoe/groups" "/var/config/group-base-user-payload.json" "Base-user group"
+
+              echo "adding group claim to tokens"
+              CLIENT_SCOPE_GROUPS_ID=$(keycloak_get "/admin/realms/cnoe/client-scopes" '.[] | select(.name == "groups") | .id')
+              
+              keycloak_post "/admin/realms/cnoe/client-scopes/${CLIENT_SCOPE_GROUPS_ID}/protocol-mappers/models" \
+                "/var/config/group-mapper-payload.json" "Protocol mapper"
+
+              # Create users function
+              create_user() {
+                local user_num=$1
+                local payload_file=$2
+                
+                echo "creating user${user_num}"
+                jq --arg pwd "$USER1_PASSWORD" '.credentials[0].value = $pwd' ${payload_file} > user${user_num}-payload-with-password.json
+                keycloak_post "/admin/realms/cnoe/users" "user${user_num}-payload-with-password.json" "User${user_num}"
+              }
+              
+              create_user "1" "/var/config/user1-payload.json"
+              create_user "2" "/var/config/user2-payload.json"
+
+              USER1ID=$(keycloak_get "/admin/realms/cnoe/users?lastName=one" ".[0].id")
+              USER2ID=$(keycloak_get "/admin/realms/cnoe/users?lastName=two" ".[0].id")
+
+              echo "USER1 ID: ${USER1ID}"
+              echo "USER2 ID: ${USER2ID}"
+              
+              # Create client function
+              create_client() {
+                local client_name=$1
+                local payload_file=$2
+                
+                echo "creating ${client_name} client"
+                keycloak_post "/admin/realms/cnoe/clients" "${payload_file}" "${client_name} client"
+              }
+              
+              create_client "ArgoCD" "/var/config/argocd-client-payload.json"
+              
+              # Add client scope function
+              add_client_scope() {
+                local client_id_name=$1
+                local client_name=$2
+                
+                CLIENT_ID=$(keycloak_get "/admin/realms/cnoe/clients" ".[] | select(.clientId == \"${client_id_name}\") | .id")
+                CLIENT_SCOPE_GROUPS_ID=$(keycloak_get "/admin/realms/cnoe/client-scopes" '.[] | select(.name == "groups") | .id')
+                keycloak_put "/admin/realms/cnoe/clients/${CLIENT_ID}/default-client-scopes/${CLIENT_SCOPE_GROUPS_ID}" "${client_name} client scope"
+              }
+              
+              add_client_scope "argocd" "ArgoCD"
+              
+              create_client "Backstage" "/var/config/backstage-client-payload.json"
+              
+              add_client_scope "backstage" "Backstage"
+              
+              # Get client secret function
+              get_client_secret() {
+                local client_id_name=$1
+                local var_name=$2
+                
+                CLIENT_ID=$(keycloak_get "/admin/realms/cnoe/clients" ".[] | select(.clientId == \"${client_id_name}\") | .id")
+                local secret=$(keycloak_get "/admin/realms/cnoe/clients/${CLIENT_ID}" ".secret")
+                eval "${var_name}=${secret}"
+              }
+              
+              get_client_secret "backstage" "BACKSTAGE_CLIENT_SECRET"
+              
+              create_client "Argo Workflows" "/var/config/argo-client-payload.json"
+              
+              add_client_scope "argo-workflows" "Argo Workflows"
+              get_client_secret "argo-workflows" "ARGO_WORKFLOWS_CLIENT_SECRET"
+
+              echo "Creating ArgoCD session token for backstage"
+              ARGOCD_PASSWORD=$(./kubectl -n argocd get secret argocd-initial-admin-secret -o go-template='{{.data.password | base64decode }}')
+              
+              ARGOCD_SESSION_TOKEN=$(curl -k -sS http://argocd-server.argocd.svc.cluster.local:443/argocd/api/v1/session -H 'Content-Type: application/json' -d "{\"username\":\"admin\",\"password\":\"${ARGOCD_PASSWORD}\"}" | jq -r .token)
+
+              echo "Creating keycloak-clients secret"
+              
+              echo \
+              "apiVersion: v1
+              kind: Secret
+              metadata:
+                name: keycloak-clients
+                namespace: keycloak
+              type: Opaque
+              stringData:
+                ARGO_WORKFLOWS_CLIENT_SECRET: ${ARGO_WORKFLOWS_CLIENT_SECRET}
+                ARGOCD_SESSION_TOKEN: ${ARGOCD_SESSION_TOKEN}
+                BACKSTAGE_CLIENT_SECRET: ${BACKSTAGE_CLIENT_SECRET}
+                ARGOCD_ADMIN_PASSWORD: ${ARGOCD_PASSWORD}
+              " > /tmp/secret.yaml
+              
+              ./kubectl apply -f /tmp/secret.yaml
+              echo "Configuration Done!!"
+              
+

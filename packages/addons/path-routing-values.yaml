@@ -1,0 +1,47 @@
+# This file contains overriding values for addons based on "path_routing" label on cluster secret  
+argocd:
+  enabled: true
+  additionalResources:
+  - path: true # This duplciation is required as helm values for slices are not merged
+    manifestPath: "manifests"
+    type: "manifests"
+  - path: true
+    manifestPath: "path-routing"
+    type: "manifests"
+
+cert-manager:
+  enabled: true
+  additionalResources:
+  - path: true
+    manifestPath: "path-routing"
+    type: "manifests"
+
+keycloak:
+  enabled: true
+  additionalResources:
+  - path: true
+    manifestPath: "manifests"
+    type: "manifests"
+  - path: true
+    manifestPath: "path-routing"
+    type: "manifests"
+
+backstage:
+  enabled: true
+  additionalResources:
+  - path: true
+    manifestPath: "manifests"
+    type: "manifests"
+  - path: true
+    manifestPath: "path-routing"
+    type: "manifests"
+
+argo-workflows:
+  enabled: true
+  additionalResources:
+  - path: true
+    manifestPath: "manifests"
+    type: "manifests"
+  - path: true
+    manifestPath: "path-routing"
+    type: "manifests"

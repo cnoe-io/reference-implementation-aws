@@ -1,0 +1,38 @@
+# This installs ArgoCD and ESO on hub cluster
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap-appset
+  namespace: argocd
+  labels:
+    env: dev
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  sources:
+    - repoURL: cnoe://
+      targetRevision: HEAD
+      path: "appset-chart"
+      helm:
+        valueFiles:
+          - $values/addons/values.yaml
+          - $values/bootstrap/values-idpbuilder.yaml
+    - repoURL: cnoe://
+      targetRevision: HEAD
+      ref: values
+  syncPolicy:
+    automated:
+      selfHeal: true
+      allowEmpty: true
+      prune: true
+    retry:
+      limit: -1 
+      backoff:
+        duration: 5s 
+        factor: 2 
+        maxDuration: 10m
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true 

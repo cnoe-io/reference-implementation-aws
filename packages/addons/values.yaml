@@ -1,0 +1,274 @@
+argocd:
+  enabled: true
+  chartName: argo-cd
+  namespace: argocd
+  releaseName: argocd
+  defaultVersion: "8.0.14"
+  chartRepository: "https://argoproj.github.io/argo-helm"
+  valuesObject:
+    cnoe_ref_impl: # Specific values for reference CNOE implementation to control extraObjects.
+      auto_mode: '{{ if eq .metadata.labels.auto_mode "true" }}true{{ else }}false{{ end }}'
+    global:
+      domain: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argocd.{{ .metadata.annotations.domain }}{{ end }}'
+    server:
+      ingress:
+        annotations: 
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
+        path: '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+    configs:
+      cm:
+        oidc.config: |
+          name: Keycloak
+          issuer: https://{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe
+          clientID: argocd
+          enablePKCEAuthentication: true
+          requestedScopes:
+            - openid
+            - profile
+            - email
+            - groups
+      params:
+        'server.basehref': '/{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+        'server.rootpath': '{{ if eq .metadata.labels.path_routing "true" }}argocd{{ end }}'
+  additionalResources:
+  - manifestPath: "manifests"
+    type: "manifests"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane-bootstrap', 'control-plane']
+
+aws-load-balancer-controller:
+  enabled: true
+  # enableAckPodIdentity: true
+  namespace: kube-system
+  defaultVersion: "1.13.2"
+  chartRepository: "https://aws.github.io/eks-charts"
+  valuesObject:
+    serviceAccount:
+      name:  "aws-load-balancer-controller"
+    # vpcId: '{{.metadata.annotations.aws_vpc_id}}'
+    clusterName: '{{ .metadata.labels.clusterName }}'
+  ignoreDifferences:
+    - kind: Secret
+      name: aws-load-balancer-tls
+      jsonPointers: [/data]
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jqPathExpressions: ['.webhooks[].clientConfig.caBundle']
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions: ['.webhooks[].clientConfig.caBundle']
+  selector:
+    matchExpressions:
+      - key: auto_mode
+        operator: In
+        values: ['false']
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+ingress-nginx:
+  enabled: true
+  chartName: ingress-nginx
+  namespace: ingress-nginx
+  releaseName: ingress-nginx
+  defaultVersion: "4.7.0"
+  chartRepository: "https://kubernetes.github.io/ingress-nginx"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+external-dns:
+  enabled: true
+  releaseName: external-dns
+  namespace: external-dns
+  chartName: external-dns
+  chartRepository: https://kubernetes-sigs.github.io/external-dns
+  defaultVersion: "1.16.1"
+  valuesObject:
+    zoneIdFilters:
+      - '{{ .metadata.annotations.route53_hosted_zone_id }}'
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+external-secrets:
+  enabled: true
+  enableAckPodIdentity: false
+  namespace: external-secrets
+  chartName: external-secrets
+  defaultVersion: "0.17.0"
+  chartRepository: "https://charts.external-secrets.io"
+  additionalResources:
+  - manifestPath: "manifests"
+    type: "manifests"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane-bootstrap', 'control-plane']
+
+cert-manager:
+  enabled: true
+  chartName: cert-manager
+  namespace: cert-manager
+  releaseName: cert-manager
+  defaultVersion: "1.17.2"
+  chartRepository: "https://charts.jetstack.io"
+  valuesObject:
+    global:
+      domainName: '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ end }}'
+      pathRouting: '{{ if eq .metadata.labels.path_routing "true" }}true{{ else }}false{{ end }}'
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+        
+keycloak:
+  enabled: true
+  chartName: keycloak
+  namespace: keycloak
+  releaseName: keycloak
+  defaultVersion: "24.7.3"
+  chartRepository: "https://charts.bitnami.com/bitnami"
+  valuesObject:
+    httpRelativePath: '/{{ if eq .metadata.labels.path_routing "true" }}keycloak/{{ end }}'
+    ingress:
+      hostname: '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      annotations: 
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
+      extraTls:
+      - hosts:
+        - '{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+        secretName: keycloak-server-tls
+  additionalResources:
+  - manifestPath: "manifests"
+    type: "manifests"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+backstage:
+  enabled: true
+  chartName: backstage
+  namespace: backstage
+  releaseName: backstage
+  defaultVersion: "2.6.0"
+  chartRepository: "https://backstage.github.io/charts"
+  valuesObject:
+    ingress:
+      host: '{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      annotations: 
+        cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
+    backstage:
+      appConfig:
+        catalog:
+          locations:
+            - type: url
+              target: '{{ .metadata.annotations.addons_repo_url }}/blob/{{ .metadata.annotations.addons_repo_revision }}/templates/backstage/catalog-info.yaml'
+      extraEnvVars:
+      - name: BACKSTAGE_FRONTEND_URL
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}backstage.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}{{ end }}'
+      - name: KEYCLOAK_NAME_METADATA
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}keycloak.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/keycloak{{ end }}/realms/cnoe/.well-known/openid-configuration'
+      - name: ARGO_WORKFLOWS_URL
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}argo-workflows.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argo-workflows{{ end }}'
+      - name: ARGO_CD_URL
+        value: 'https://{{ if eq .metadata.labels.path_routing "false" }}argocd.{{ .metadata.annotations.domain }}{{ else }}{{ .metadata.annotations.domain }}/argocd{{ end }}'
+  additionalResources:
+  - manifestPath: "manifests"
+    type: "manifests"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+argo-workflows:
+  enabled: true
+  chartName: argo-workflows
+  namespace: argo
+  releaseName: argo-workflows
+  defaultVersion: "0.45.18"
+  chartRepository: "https://argoproj.github.io/argo-helm"
+  valuesObject:
+    server:
+      baseHref: '/{{ if eq .metadata.labels.path_routing "true" }}argo-workflows/{{ end }}'
+      sso:
+        issuer: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/keycloak{{ else }}https://keycloak.{{ .metadata.annotations.domain }}{{ end }}/realms/cnoe'
+        redirectUrl: '{{ if eq .metadata.labels.path_routing "true" }}https://{{ .metadata.annotations.domain }}/argo-workflows{{ else }}https://argo-workflows.{{ .metadata.annotations.domain }}{{ end }}/oauth2/callback'
+      ingress:
+        annotations: 
+          cert-manager.io/cluster-issuer: '{{ if eq .metadata.labels.path_routing "false" }}letsencrypt-prod{{ end }}'
+          nginx.ingress.kubernetes.io/rewrite-target: '{{ if eq .metadata.labels.path_routing "true" }}/$2{{ end }}'
+        hosts:
+        - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+        paths: 
+        -  '/{{ if eq .metadata.labels.path_routing "true" }}argo-workflows(/|$)(.*){{ end }}'
+        tls:
+        - hosts:
+          - '{{ if eq .metadata.labels.path_routing "true" }}{{ .metadata.annotations.domain }}{{ else }}argo-workflows.{{ .metadata.annotations.domain }}{{ end }}'
+          secretName: argo-workflows-server-tls
+  additionalResources:
+  - manifestPath: "manifests"
+    type: "manifests"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+crossplane:
+  enabled: true
+  chartName: crossplane
+  namespace: crossplane-system
+  releaseName: crossplane
+  defaultVersion: "1.20.0"
+  chartRepository: "https://charts.crossplane.io/stable"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+crossplane-upbound-providers:
+  enabled: true
+  chartName: crossplane-aws-upbound
+  namespace: crossplane-system
+  releaseName: crossplane-upbound-providers
+  defaultVersion: "3.0.0"
+  chartRepository: "https://gitops-bridge-dev.github.io/gitops-bridge-helm-charts"
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+crossplane-compositions:
+  enabled: true
+  namespace: crossplane-system
+  type: manifest
+  path: packages/crossplane-compositions
+  selector:
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: ['control-plane']
+
+syncPolicy:
+  automated:
+    selfHeal: true
+    allowEmpty: true
+    prune: false
+
+syncPolicyAppSet:
+  preserveResourcesOnDeletion: false # Set to false so that cleanup script removes all the deployed resources
