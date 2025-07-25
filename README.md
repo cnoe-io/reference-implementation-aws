@@ -154,8 +154,44 @@ Argo CD requires `url` and `installationId` of the GitHub app. The `url` is the 
 > [!NOTE]
 > The rest of the installation process assumes the GitHub apps credentials are available in `private/backstage-github.yaml` and `private/argocd-github.yaml`
 
+#### Step 5. ⚙️ Configure Reference Implementation
 
-### Step 5. ☸️ Create EKS Cluster
+The reference implementation uses [config.yaml](config.yaml) file in the repository root directory to configure the installation values. The **`config.yaml`** should be updated with appropriate values before proceeding. Refer to the following table and update all the values appropriately. All the values are required.
+
+| Parameter | Description | Type |
+|-----------|-------------|------|
+| `cluster_name` | Name of the EKS cluster for reference implementation <br> **(The name should satisfy criteria of a valid [kubernetes resource name](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/))** | string |
+| `auto_mode` | Set to "true" if EKS cluster is Auto Mode, otherwise "false" | string |
+| `repo.url` | GitHub URL of the fork in the Github Org | string |
+| `repo.revision` | Branch or tag which should be used for Argo CD Apps | string |
+| `repo.basepath` | Directory in which the configuration of addons is stored | string |
+| `region` | AWS Region of the EKS cluster and config secret | string |
+| `domain` | Base Domain name for exposing services<br>**(This should be base domain or sub domain of the Route53 Hosted Zone)** | string |
+| `route53_hosted_zone_id` | Route53 hosted zone ID for configuring external-dns | string |
+| `path_routing` | Enable path routing ("true") vs domain-based routing ("false") | string |
+| `tags` | Arbitrary key-value pairs for AWS resource tagging | object |
+
+> [!TIP]
+> If these values are updated after installation, ensure to run the command in the next step to update the values in AWS Secret Manager. Otherwise, the updated values will not reflect in the live installation.
+
+
+#### Step 6. 🔒 Create Secrets in AWS Secret Manager
+
+The values required for the installation are stored in AWS Secret Manager in two secrets:
+
+1. **cnoe-ref-impl/config:** Stores values from **`config.yaml`** in JSON
+2. **cnoe-ref-impl/github-app:** Stores GitHub App credentials with file name as key and content of the file as value from **private** directory.
+
+Run the command below to create new secrets or update the existing secrets if they already exist.
+
+```bash
+./scripts/create-config-secrets.sh
+```
+
+> [!WARNING]
+> **DO NOT** move to next steps without completing all the instructions in this step
+
+### Step 7. ☸️ Create EKS Cluster
 
 The reference implementation can be installed on a new EKS cluster which can be created like this:
 
@@ -186,43 +222,6 @@ This will create all the prerequisite AWS Resources required for the reference i
 > **Using Existing EKS Cluster**
 >
 > The reference implementation can be installed on an existing EKS Cluster only if the above prerequisites are completed.
-
-#### Step 6. ⚙️ Configure Reference Implementation
-
-The reference implementation uses [config.yaml](config.yaml) file in the repository root directory to configure the installation values. The **`config.yaml`** should be updated with appropriate values before proceeding. Refer to the following table and update all the values appropriately. All the values are required.
-
-| Parameter | Description | Type |
-|-----------|-------------|------|
-| `cluster_name` | Name of the EKS cluster for reference implementation <br> **(The name should satisfy criteria of a valid [kubernetes resource name](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/))** | string |
-| `auto_mode` | Set to "true" if EKS cluster is Auto Mode, otherwise "false" | string |
-| `repo.url` | GitHub URL of the fork in the Github Org | string |
-| `repo.revision` | Branch or tag which should be used for Argo CD Apps | string |
-| `repo.basepath` | Directory in which the configuration of addons is stored | string |
-| `region` | AWS Region of the EKS cluster and config secret | string |
-| `domain` | Base Domain name for exposing services<br>**(This should be base domain or sub domain of the Route53 Hosted Zone)** | string |
-| `route53_hosted_zone_id` | Route53 hosted zone ID for configuring external-dns | string |
-| `path_routing` | Enable path routing ("true") vs domain-based routing ("false") | string |
-| `tags` | Arbitrary key-value pairs for AWS resource tagging | object |
-
-> [!TIP]
-> If these values are updated after installation, ensure to run the command in the next step to update the values in AWS Secret Manager. Otherwise, the updated values will not reflect in the live installation.
-
-#### Step 7. 🔒 Create Secrets in AWS Secret Manager
-
-The values required for the installation are stored in AWS Secret Manager in two secrets:
-
-1. **cnoe-ref-impl/config:** Stores values from **`config.yaml`** in JSON
-2. **cnoe-ref-impl/github-app:** Stores GitHub App credentials with file name as key and content of the file as value from **private** directory.
-
-Run the command below to create new secrets or update the existing secrets if they already exist.
-
-```bash
-./scripts/create-config-secrets.sh
-```
-
-> [!WARNING]
-> **DO NOT** move to next steps without completing all the instructions in this step
-
 
 
 ### Step 8. 🚀 Deployment
