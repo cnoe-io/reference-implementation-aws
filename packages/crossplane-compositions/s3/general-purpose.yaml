@@ -41,6 +41,8 @@ spec:
             - type: string
               string:
                 fmt: "bucket-%s"
+                type: Format
+          type: FromCompositeFieldPath
   resources:
     - name: s3-bucket
       connectionDetails:
@@ -70,6 +72,12 @@ spec:
             - type: string
               string:
                 fmt: "arn:aws:s3:::%s"
+                type: Format
+      readinessChecks:	
+        - matchCondition:	
+            status: 'True'	
+            type: Ready	
+          type: MatchCondition
     - name: s3-blockpublicaccess
       base:
         apiVersion: s3.aws.upbound.io/v1beta1
@@ -86,8 +94,15 @@ spec:
       patches:
         - fromFieldPath: spec.resourceConfig.region
           toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
         - fromFieldPath: spec.resourceConfig.providerConfigName
           toFieldPath: spec.providerConfigRef.name
+          type: FromCompositeFieldPath
+      readinessChecks:	
+        - matchCondition:	
+            status: 'True'	
+            type: Ready	
+          type: MatchCondition
     - name: s3-serversideencryption
       base:
         apiVersion: s3.aws.upbound.io/v1beta1
@@ -103,5 +118,12 @@ spec:
       patches:
         - fromFieldPath: spec.resourceConfig.providerConfigName
           toFieldPath: spec.providerConfigRef.name
+          type: FromCompositeFieldPath
         - fromFieldPath: spec.resourceConfig.region
           toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+      readinessChecks:	
+        - matchCondition:	
+            status: 'True'	
+            type: Ready	
+          type: MatchCondition
