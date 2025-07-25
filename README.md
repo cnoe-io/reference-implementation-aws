@@ -20,7 +20,7 @@ All the addons are helm charts with static values configured in `packages/<addon
 | Backstage | backstage | Self-Service Web UI (Developer Portal) for developers | 2.6.0 | [Link](https://github.com/backstage/charts/tree/main/charts/backstage) |
 | Cert Manager | cert-manager | Certificate manager for addons and developer applications using Let's Encrypt | 1.17.2 | [Link](https://cert-manager.io/docs/installation/helm/) |
 | Crossplane | crossplane-system | IaC controller for provisioning infrastructure  | 1.20.0 | [Link](https://github.com/crossplane/crossplane/tree/main/cluster/charts/crossplane) |
-| ACK | ack-system | IaC controller for provisioning infrastructure  | TBD | Comming soon check [#54](https://github.com/cnoe-io/reference-implementation-aws/issues/54) |
+| ACK | ack-system | IaC controller for provisioning infrastructure  | TBD | Coming soon check [#54](https://github.com/cnoe-io/reference-implementation-aws/issues/54) |
 | External DNS | external-dns | Domain management using Route 53 | 1.16.1 | [Link](https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns) |
 | External Secrets | external-secrets | Secret Management using AWS Secret Manager and AWS Systems Manager Parameter Store  | Version | [Link](https://github.com/external-secrets/external-secrets/tree/main/deploy/charts/external-secrets) |
 | Ingress NGINX | ingress-nginx | Ingress controller for L7 network traffic routing  | 4.7.0 | [Link](https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx) |
