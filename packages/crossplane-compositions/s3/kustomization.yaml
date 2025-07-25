@@ -1,0 +1,3 @@
+resources:
+  - definition.yaml
+  - general-purpose.yaml

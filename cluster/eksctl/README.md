@@ -60,10 +60,13 @@ To delete the cluster and all associated resources:
 
 ```bash
 # Delete the EKS cluster
+export $CLUSTER_NAME="cnoe-ref-impl"
+export AWS_REGION="us-west-2"
 eksctl delete cluster --name $CLUSTER_NAME --region $AWS_REGION
 
 # Delete the permissions boundary policy
-aws iam delete-policy --policy-arn $CROSSPLANE_BOUNDARY_POLICY_ARN
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+aws iam delete-policy --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/crossplane-permissions-boundary
 ```
 
 This will automatically clean up the following:
