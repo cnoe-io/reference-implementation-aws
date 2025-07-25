@@ -272,7 +272,7 @@ kubectl port-forward -n argocd svc/argocd-server 8080:80
 
 Depending upon the configuration, Argo CD will be accessible at http://localhost:8080 or http://localhost:8080/argocd.
 
-All the addons are configured with Keycloak SSO USER1 and the user password for it can be retrieved using the following command:
+All the addons are configured with Keycloak SSO `user1` and the user password for it can be retrieved using the following command:
 
 ```bash
 kubectl get secret -n keycloak keycloak-config -o jsonpath='{.data.USER1_PASSWORD}' | base64 -d && echo
