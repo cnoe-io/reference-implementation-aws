@@ -2,6 +2,8 @@
 title: "Using IDPBuilder (Optional)"
 sidebar_position: 3
 ---
+> [!WARNING]
+> This installation method is currently experimental and might not support all installation options as the primary method but is a good method to test deploying a new target cluster from a kind cluster for testing purposes!
 
 # Installation using IDPBuilder
 
