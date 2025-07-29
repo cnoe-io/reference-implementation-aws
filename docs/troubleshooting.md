@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 
 # Troubleshooting
 The installation process would take 30-35 minutes depending upon path_routing configuration. If the installation is not complete within this time, cancel the `install.sh` script execution and follow instruction in this document to troubleshoot the issues.]
