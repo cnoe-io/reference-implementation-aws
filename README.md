@@ -277,6 +277,7 @@ All the addons are configured with Keycloak SSO `user1` and the user password fo
 ```bash
 kubectl get secret -n keycloak keycloak-config -o jsonpath='{.data.USER1_PASSWORD}' | base64 -d && echo
 ```
+
 Once all the Argo CD apps on the EKS cluster are reporting healthy status, try out the [examples](examples/) to create a new application through Backstage.
 For troubleshooting, refer to the [troubleshooting guide](docs/troubleshooting.md).
 
