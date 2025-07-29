@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Installation Flow
 
 This document describes the installation flow for the CNOE AWS Reference Implementation.
