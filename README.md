@@ -112,8 +112,8 @@ This will create all the prerequisite AWS Resources required for the reference i
 | Crossplane | crossplane-system | provider-aws | Admin Permissions but with [permission boundary](cluster/iam-policies/crossplane-permissions-boundry.json) |
 | External Secrets | external-secrets | external-secrets | [Permissions](https://external-secrets.io/latest/provider/aws-secrets-manager/#iam-policy) |
 | External DNS | external-dns | external-dns | [Permissions](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/aws/#iam-policy) |
-| AWS Load Balancer Controller<br>(When not using Auto Mode) | kube-system | aws-load-balancer-controller | [Permissions](https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/iam_policy.json) |
-| AWS EBS CSI Controller<br>(When not using Auto Mode) | kube-system | ebs-csi-controller-sa | [Permissions](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEBSCSIDriverPolicy.html) |
+| AWS Load Balancer Controller (When not using Auto Mode) | kube-system | aws-load-balancer-controller | [Permissions](https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/iam_policy.json) |
+| AWS EBS CSI Controller (When not using Auto Mode) | kube-system | ebs-csi-controller-sa | [Permissions](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEBSCSIDriverPolicy.html) |
 
 
 > [!NOTE]
@@ -142,8 +142,8 @@ Create the following apps and store them in the corresponding file path.
 
 | App Name | Purpose | Required Permissions | File Path | Expected Content |
 | -------- | ------- | -------------------- | --------- | ---------------- |
-| Backstage | Used for automatically importing Backstage configuration such as Organization information, templates and creating new repositories for developer applications. | For All Repositories<br>- Read access to members, metadata, and organization administration<br>- Read and write access to administration and code | **`private/backstage-github.yaml`** | ![backstage-github-app](docs/images/backstage-github-app.png) |
-| Argo CD | Used for deploying resources to cluster specified by Argo CD applications.| For All Repositories<br>- Read access to checks, code, members, and metadata| **`private/argocd-github.yaml`** | ![argocd-github-app](docs/images/argocd-github-app.png) |
+| Backstage | Used for automatically importing Backstage configuration such as Organization information, templates and creating new repositories for developer applications. | For All Repositories - Read access to members, metadata, and organization administration - Read and write access to administration and code | **`private/backstage-github.yaml`** | ![backstage-github-app](docs/images/backstage-github-app.png) |
+| Argo CD | Used for deploying resources to cluster specified by Argo CD applications.| For All Repositories - Read access to checks, code, members, and metadata| **`private/argocd-github.yaml`** | ![argocd-github-app](docs/images/argocd-github-app.png) |
 
 The template files for both these Github Apps are available in `private` directory. Copy these template files to above mentioned file path by running following command:
 
@@ -187,10 +187,10 @@ The reference implementation uses **`config.yaml`** file in the repository root 
 | `repo.url` | GitHub URL of the fork in the Github Org | string |
 | `repo.revision` | Branch or tag which should be used for Argo CD Apps | string |
 | `repo.basepath` | Directory in which the configuration of addons is stored | string |
-| `cluster_name` | Name of the EKS cluster for reference implementation <br> **(The name should satisfy criteria of a valid [kubernetes resource name](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/))** | string |
+| `cluster_name` | Name of the EKS cluster for reference implementation   **(The name should satisfy criteria of a valid [kubernetes resource name](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/))** | string |
 | `auto_mode` | Set to "true" if EKS cluster is Auto Mode, otherwise "false" | string |
 | `region` | AWS Region of the EKS cluster and config secret | string |
-| `domain` | Base Domain name for exposing services<br>**(This should be base domain or sub domain of the Route53 Hosted Zone)** | string |
+| `domain` | Base Domain name for exposing services **(This should be base domain or sub domain of the Route53 Hosted Zone)** | string |
 | `route53_hosted_zone_id` | Route53 hosted zone ID for configuring external-dns | string |
 | `path_routing` | Enable path routing ("true") vs domain-based routing ("false") | string |
 | `tags` | Arbitrary key-value pairs for AWS resource tagging | object |
@@ -253,16 +253,16 @@ The URL depends on the setting for `path_routing`. Refer to following table for 
 
 | App Name | URL (w/ Path Routing) | URL (w/o Path Routing) |
 | --------- | --------- | --------- |
-| Backstage | https://[domain] | https://backstage.[domain] |
-| Argo CD | https://[domain]/argocd | https://argocd.[domain] |
-| Argo Workflows | https://[domain]/argo-workflows | https://argo-workflows.[domain] |
+| Backstage | `https://[domain]` | `https://backstage.[domain]` |
+| Argo CD | `https://[domain]/argocd` | `https://argocd.[domain]` |
+| Argo Workflows | `https://[domain]/argo-workflows` | `https://argo-workflows.[domain]` |
 
 All the addons are configured with Keycloak SSO USER1 and the user password for it can be retrieved using the following command:
 
 ```bash
 kubectl get secret -n keycloak keycloak-config -o jsonpath='{.data.USER1_PASSWORD}' | base64 -d && echo
 ```
-Once all the Argo CD apps on the EKS cluster are reporting healthy status, try out the [examples](docs/examples/) to create a new application through Backstage.
+Once all the Argo CD apps on the EKS cluster are reporting healthy status, try out the [examples](examples/) to create a new application through Backstage.
 For troubleshooting, refer to the [troubleshooting guide](docs/troubleshooting.md).
 
 ## Cleanup
