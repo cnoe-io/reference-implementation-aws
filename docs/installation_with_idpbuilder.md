@@ -1,3 +1,8 @@
+---
+title: "Using IDPBuilder (Optional)"
+sidebar_position: 3
+---
+
 # Installation using IDPBuilder
 
 ## Installation Flow Diagram
