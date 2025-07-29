@@ -1,4 +1,4 @@
-# IDPBuilder installation
+# Installation using IDPBuilder
 
 ## Installation Flow Diagram
 This diagram illustrates the high-level installation flow for the CNOE AWS Reference Implementation using **`idpbuilder`**. It shows how the **`idpbuilder`** and local environment interact with AWS resources to deploy and configure the platform on an EKS cluster.
